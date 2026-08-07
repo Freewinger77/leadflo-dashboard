@@ -121,15 +121,7 @@ Live verified through a UK proxy: login → scrape Implant `asif test` → write
 
 Interactive reference: **`/docs.html`** (also `/docs`).
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/health` | Liveness |
-| GET | `/api/status` | Leadflo ping + stats |
-| GET | `/api/leads` | Tracked implant leads |
-| GET | `/api/events` | Activity log |
-| POST | `/api/poll` | Run one scrape now |
-| POST | `/api/webhooks/ai-response` | AI note write-back |
-| POST | `/api/leads/:id/notes` | Manual note (dashboard) |
+See the endpoint table above, plus interactive docs at **`/docs.html`**.
 
 ## Production
 
