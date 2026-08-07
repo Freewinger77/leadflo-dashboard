@@ -85,11 +85,15 @@ Open `http://localhost:8788`.
 |--------|------|-------------|
 | GET | `/api/health` | Liveness |
 | GET | `/api/status` | Leadflo ping + stats |
-| GET | `/api/leads` | Tracked implant leads |
+| GET | `/api/leads` | Tracked leads (all types) |
+| GET | `/api/leads/:id` | Lead detail + local events |
+| GET | `/api/leads/:id/timeline` | Live Leadflo notes (new vs old) |
+| GET | `/api/analytics` | Leads/day + type mix + KPIs |
 | GET | `/api/events` | Activity log |
 | POST | `/api/poll` | Run one scrape immediately |
 | POST | `/api/webhooks/ai-response` | Apply AI note |
 | POST | `/api/leads/:id/notes` | Manual note (dashboard) |
+| POST | `/api/leads/:id/webhook` | Resend outbound webhook |
 
 ## Leadflo API surface used
 

@@ -43,15 +43,18 @@ describe("implant tracking flow", () => {
     }
   });
 
-  it("scrapes only implant leads and marks new ones", async () => {
+  it("tracks all lead types but webhooks only implants", async () => {
     const poll = await request(app).post("/api/poll").expect(200);
-    assert.equal(poll.body.discovered, 2);
-    assert.equal(poll.body.newLeads, 2);
+    // mock fixtures across scrape stages: 3 Implant + Whitening + Aligners
+    assert.equal(poll.body.discovered, 5);
+    assert.equal(poll.body.newLeads, 5);
 
     const leads = await request(app).get("/api/leads").expect(200);
-    assert.equal(leads.body.leads.length, 2);
-    assert.ok(leads.body.leads.every((l: { treatmentType: string }) => l.treatmentType === "Implant"));
+    assert.equal(leads.body.leads.length, 5);
     assert.ok(leads.body.leads.some((l: { fullName: string }) => l.fullName === "asif test"));
+    assert.ok(
+      leads.body.leads.some((l: { treatmentType: string }) => l.treatmentType === "Whitening"),
+    );
   });
 
   it("writes notes only for test-named leads by default", async () => {
@@ -82,7 +85,26 @@ describe("implant tracking flow", () => {
 
   it("second poll does not re-webhook existing leads", async () => {
     const second = await request(app).post("/api/poll").expect(200);
-    assert.equal(second.body.discovered, 2);
+    assert.equal(second.body.discovered, 5);
     assert.equal(second.body.newLeads, 0);
+  });
+
+  it("exposes analytics and lead timeline notes", async () => {
+    const analytics = await request(app).get("/api/analytics?days=30").expect(200);
+    assert.ok(Array.isArray(analytics.body.leadsPerDay));
+    assert.ok(Array.isArray(analytics.body.byType));
+    assert.ok(analytics.body.totals.discovered >= 5);
+
+    const timeline = await request(app)
+      .get("/api/leads/mock-asif-test/timeline")
+      .expect(200);
+    assert.ok(timeline.body.notes.length >= 1);
+    assert.ok(timeline.body.newNotes.length >= 1);
+
+    const again = await request(app)
+      .get("/api/leads/mock-asif-test/timeline")
+      .expect(200);
+    assert.equal(again.body.newNotes.length, 0);
+    assert.ok(again.body.oldNotes.length >= 1);
   });
 });

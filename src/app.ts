@@ -43,6 +43,8 @@ export function createApp(deps: AppDeps): Express {
       pollIntervalMs: config.pollIntervalMs,
       notesOnlyTestNames: config.notesOnlyTestNames,
       webhookConfigured: Boolean(config.webhookUrl),
+      practiceName: config.practiceName,
+      publicBaseUrl: config.publicBaseUrl || null,
     });
   });
 
@@ -54,12 +56,16 @@ export function createApp(deps: AppDeps): Express {
       stats: store.stats(),
       latestPoll: store.latestPollRun(),
       lastPollerError: poller.lastError,
+      practiceName: config.practiceName,
       config: {
         stages: config.scrapeStages,
         trackedTypes: config.trackedTreatmentTypes,
         pollIntervalMs: config.pollIntervalMs,
         notesOnlyTestNames: config.notesOnlyTestNames,
         webhookConfigured: Boolean(config.webhookUrl),
+        webhookUrl: config.webhookUrl ? "[set]" : "",
+        inboundSecretConfigured: Boolean(config.inboundWebhookSecret),
+        practiceName: config.practiceName,
       },
     });
   });
@@ -70,8 +76,13 @@ export function createApp(deps: AppDeps): Express {
   });
 
   app.get("/api/analytics", (_req, res) => {
-    const days = Number(_req.query.days ?? 14);
-    res.json(store.analytics(Number.isFinite(days) ? days : 14));
+    const days = Number(_req.query.days ?? 30);
+    res.json(
+      store.analytics(
+        Number.isFinite(days) ? days : 30,
+        config.trackedTreatmentTypes,
+      ),
+    );
   });
 
   app.get("/api/leads/:patientId", (req, res) => {
@@ -80,7 +91,11 @@ export function createApp(deps: AppDeps): Express {
       res.status(404).json({ error: "Lead not found" });
       return;
     }
-    res.json({ lead: serializeLead(row) });
+    res.json({
+      lead: serializeLead(row),
+      events: store.listEventsForLead(row.patient_id, 80),
+      leadfloUrl: `${config.leadflo.appOrigin}/`,
+    });
   });
 
   /** Live Leadflo timeline + notes (new vs previously seen). */
@@ -132,6 +147,7 @@ export function createApp(deps: AppDeps): Express {
         newNotes,
         oldNotes,
         activity,
+        localEvents: store.listEventsForLead(patientId, 80),
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -147,6 +163,85 @@ export function createApp(deps: AppDeps): Express {
   app.post("/api/poll", async (_req, res) => {
     const result = await poller.tick();
     res.json(result);
+  });
+
+  /** Re-dispatch outbound webhook for a tracked lead */
+  app.post("/api/leads/:patientId/webhook", async (req, res) => {
+    const row = store.getLead(req.params.patientId);
+    if (!row) {
+      res.status(404).json({ error: "Lead not found" });
+      return;
+    }
+    const { sendLeadWebhook } = await import("./services/webhook.js");
+    const lead = {
+      patientId: row.patient_id,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      fullName: row.full_name,
+      phone: row.phone,
+      email: row.email,
+      treatmentType: row.treatment_type,
+      source: row.source,
+      stage: row.stage,
+      dueDate: row.due_date,
+      labels: JSON.parse(row.labels_json || "[]") as string[],
+      isTestName: row.is_test_name === 1,
+      scrapedAt: row.last_seen_at,
+    };
+    const base =
+      config.publicBaseUrl ||
+      `${req.protocol}://${req.get("host")}`;
+    try {
+      const result = await sendLeadWebhook(lead, base);
+      if (result.skipped) {
+        store.setStatus(row.patient_id, "webhook_sent", {
+          webhook_sent_at: new Date().toISOString(),
+          last_error: null,
+        });
+        store.logEvent(
+          "webhook.skipped",
+          `No WEBHOOK_URL; marked ${row.full_name} as tracked`,
+          row.patient_id,
+        );
+        res.json({ ok: true, skipped: true, message: "WEBHOOK_URL not configured" });
+        return;
+      }
+      if (!result.ok) {
+        store.setStatus(row.patient_id, "webhook_failed", {
+          last_error: `HTTP ${result.status}: ${result.body}`,
+        });
+        store.logEvent(
+          "webhook.failed",
+          `Resend failed for ${row.full_name}: ${result.status}`,
+          row.patient_id,
+          result,
+        );
+        res.status(502).json({
+          ok: false,
+          status: result.status,
+          body: result.body,
+        });
+        return;
+      }
+      store.setStatus(row.patient_id, "webhook_sent", {
+        webhook_sent_at: new Date().toISOString(),
+        last_error: null,
+      });
+      store.logEvent(
+        "webhook.sent",
+        `Resent ${row.full_name} to webhook`,
+        row.patient_id,
+        result,
+      );
+      res.json({
+        ok: true,
+        status: result.status,
+        body: result.body,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      res.status(500).json({ ok: false, message });
+    }
   });
 
   /** Inbound: AI / n8n / agent posts the note to write back into Leadflo */

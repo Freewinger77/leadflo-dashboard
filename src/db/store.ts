@@ -162,6 +162,14 @@ export class Store {
       .all(limit) as EventRow[];
   }
 
+  listEventsForLead(patientId: string, limit = 100): EventRow[] {
+    return this.db
+      .prepare(
+        `SELECT * FROM events WHERE patient_id = ? ORDER BY id DESC LIMIT ?`,
+      )
+      .all(patientId, limit) as EventRow[];
+  }
+
   /** Upsert scrape snapshot. Returns true if this patient is brand new. */
   upsertScrapedLead(lead: NormalizedLead): { isNew: boolean; row: TrackedLeadRow } {
     const existing = this.getLead(lead.patientId);
@@ -419,13 +427,24 @@ export class Store {
     return out.sort((a, b) => b.datetime.localeCompare(a.datetime));
   }
 
-  analytics(days = 14): {
-    leadsPerDay: Array<{ date: string; count: number }>;
-    byType: Array<{ type: string; count: number }>;
+  analytics(
+    days = 30,
+    trackedTypes: string[] = ["implant"],
+  ): {
+    days: number;
+    leadsPerDay: Array<{ date: string; count: number; tracked: number }>;
+    byType: Array<{ type: string; count: number; tracked: boolean }>;
     byStage: Array<{ stage: string; count: number }>;
     bySource: Array<{ source: string; count: number }>;
+    totals: {
+      discovered: number;
+      tracked: number;
+      notesWritten: number;
+      medianTimeToNoteMs: number | null;
+    };
   } {
     const safeDays = Math.max(1, Math.min(90, Math.floor(days)));
+    const tracked = trackedTypes.map((t) => t.toLowerCase());
     const start = new Date();
     start.setUTCHours(0, 0, 0, 0);
     start.setUTCDate(start.getUTCDate() - (safeDays - 1));
@@ -433,21 +452,28 @@ export class Store {
 
     const dayRows = this.db
       .prepare(
-        `SELECT substr(first_seen_at, 1, 10) AS day, COUNT(*) AS c
+        `SELECT substr(first_seen_at, 1, 10) AS day,
+                COUNT(*) AS c,
+                SUM(CASE WHEN lower(treatment_type) IN (${tracked.map(() => "?").join(",") || "''"}) THEN 1 ELSE 0 END) AS tracked
          FROM leads
          WHERE datetime(first_seen_at) >= datetime(?)
          GROUP BY day
          ORDER BY day ASC`,
       )
-      .all(startIso) as Array<{ day: string; c: number }>;
+      .all(...tracked, startIso) as Array<{ day: string; c: number; tracked: number }>;
 
-    const counts = new Map(dayRows.map((r) => [r.day, r.c]));
-    const leadsPerDay: Array<{ date: string; count: number }> = [];
+    const counts = new Map(dayRows.map((r) => [r.day, r]));
+    const leadsPerDay: Array<{ date: string; count: number; tracked: number }> = [];
     for (let i = 0; i < safeDays; i++) {
       const d = new Date(start);
       d.setUTCDate(start.getUTCDate() + i);
       const key = d.toISOString().slice(0, 10);
-      leadsPerDay.push({ date: key, count: counts.get(key) ?? 0 });
+      const row = counts.get(key);
+      leadsPerDay.push({
+        date: key,
+        count: row?.c ?? 0,
+        tracked: row?.tracked ?? 0,
+      });
     }
 
     const byType = (
@@ -457,7 +483,13 @@ export class Store {
            FROM leads GROUP BY type ORDER BY c DESC, type ASC`,
         )
         .all() as Array<{ type: string; c: number }>
-    ).map((r) => ({ type: r.type, count: r.c }));
+    ).map((r) => ({
+      type: r.type,
+      count: r.c,
+      tracked: tracked.some(
+        (t) => r.type.toLowerCase() === t || r.type.toLowerCase().includes(t),
+      ),
+    }));
 
     const byStage = (
       this.db
@@ -477,7 +509,52 @@ export class Store {
         .all() as Array<{ source: string; c: number }>
     ).map((r) => ({ source: r.source, count: r.c }));
 
-    return { leadsPerDay, byType, byStage, bySource };
+    const discovered = (
+      this.db.prepare(`SELECT COUNT(*) AS c FROM leads`).get() as { c: number }
+    ).c;
+    const trackedCount = (
+      this.db
+        .prepare(
+          `SELECT COUNT(*) AS c FROM leads WHERE lower(treatment_type) IN (${tracked.map(() => "?").join(",") || "''"})`,
+        )
+        .get(...tracked) as { c: number }
+    ).c;
+    const notesWritten = (
+      this.db
+        .prepare(`SELECT COUNT(*) AS c FROM leads WHERE note_written_at IS NOT NULL`)
+        .get() as { c: number }
+    ).c;
+
+    const durations = (
+      this.db
+        .prepare(
+          `SELECT (julianday(note_written_at) - julianday(first_seen_at)) * 86400000 AS ms
+           FROM leads
+           WHERE note_written_at IS NOT NULL AND first_seen_at IS NOT NULL`,
+        )
+        .all() as Array<{ ms: number }>
+    )
+      .map((r) => r.ms)
+      .filter((ms) => Number.isFinite(ms) && ms >= 0)
+      .sort((a, b) => a - b);
+
+    let medianTimeToNoteMs: number | null = null;
+    if (durations.length) {
+      const mid = Math.floor(durations.length / 2);
+      medianTimeToNoteMs =
+        durations.length % 2 === 0
+          ? Math.round((durations[mid - 1]! + durations[mid]!) / 2)
+          : Math.round(durations[mid]!);
+    }
+
+    return {
+      days: safeDays,
+      leadsPerDay,
+      byType,
+      byStage,
+      bySource,
+      totals: { discovered, tracked: trackedCount, notesWritten, medianTimeToNoteMs },
+    };
   }
 
   close(): void {

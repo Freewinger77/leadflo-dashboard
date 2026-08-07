@@ -45,6 +45,8 @@ export const config = {
   notesOnlyTestNames: bool(process.env.NOTES_ONLY_TEST_NAMES, true),
   inboundWebhookSecret: process.env.INBOUND_WEBHOOK_SECRET ?? "",
   databasePath: path.resolve(process.env.DATABASE_PATH ?? "./data/leadflo.db"),
+  practiceName: process.env.PRACTICE_NAME ?? "Dental Asthetica",
+  publicBaseUrl: (process.env.PUBLIC_BASE_URL ?? "").replace(/\/$/, ""),
 };
 
 export function assertLiveConfig(): void {
