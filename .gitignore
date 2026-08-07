@@ -9,3 +9,6 @@ coverage/
 .turbo/
 *.log
 .vite/
+
+.azure/
+agent-credentials.json
