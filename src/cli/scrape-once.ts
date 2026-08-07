@@ -10,5 +10,17 @@ const client = createLeadfloClient();
 const poller = new Poller({ store, client });
 
 const result = await poller.tick();
-console.log(JSON.stringify({ mode: config.leadflo.mode, ...result }, null, 2));
+console.log(
+  JSON.stringify(
+    {
+      mode: config.leadflo.mode,
+      ...result,
+      error: poller.lastError,
+      latestPoll: store.latestPollRun(),
+    },
+    null,
+    2,
+  ),
+);
 store.close();
+if (poller.lastError) process.exitCode = 1;

@@ -73,7 +73,7 @@ export async function sendLeadWebhook(
       .digest("hex");
   }
 
-  const res = await fetch(config.webhookUrl, {
+  const res = await globalThis.fetch(config.webhookUrl, {
     method: "POST",
     headers,
     body,

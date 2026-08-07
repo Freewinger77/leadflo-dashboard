@@ -1,10 +1,13 @@
 import { randomUUID } from "node:crypto";
+import { ProxyAgent, fetch as undiciFetch, type RequestInit as UndiciRequestInit } from "undici";
 import { config } from "../config.js";
 import type {
   LeadfloAction,
   LeadfloClient,
   LeadfloPatient,
 } from "./types.js";
+
+type FetchFn = (input: string, init?: UndiciRequestInit) => Promise<Response>;
 
 interface CookieJar {
   [name: string]: string;
@@ -30,13 +33,24 @@ export class LiveLeadfloClient implements LeadfloClient {
   private cookies: CookieJar = {};
   private loggedIn = false;
   private lastLoginAt = 0;
+  private readonly fetchImpl: FetchFn;
 
   constructor(
     private readonly email = config.leadflo.email,
     private readonly password = config.leadflo.password,
     private readonly apiBase = config.leadflo.apiBase,
     private readonly appOrigin = config.leadflo.appOrigin,
-  ) {}
+    httpProxy = config.leadflo.httpProxy,
+  ) {
+    if (httpProxy) {
+      const agent = new ProxyAgent(httpProxy);
+      this.fetchImpl = (input, init) =>
+        undiciFetch(input, { ...init, dispatcher: agent }) as unknown as Promise<Response>;
+    } else {
+      this.fetchImpl = (input, init) =>
+        undiciFetch(input, init) as unknown as Promise<Response>;
+    }
+  }
 
   private cookieHeader(): string {
     return Object.entries(this.cookies)
@@ -84,12 +98,12 @@ export class LiveLeadfloClient implements LeadfloClient {
     if (xsrf) headers["X-XSRF-TOKEN"] = xsrf;
     if (body !== undefined) headers["Content-Type"] = "application/json";
 
-    const res = await fetch(`${this.apiBase}${path}`, {
+    const res = (await this.fetchImpl(`${this.apiBase}${path}`, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
       redirect: "manual",
-    });
+    })) as unknown as Response;
     this.mergeCookies(res);
     const rawText = await res.text();
     let data: T = undefined as T;
@@ -145,12 +159,11 @@ export class LiveLeadfloClient implements LeadfloClient {
 
   async getDueActions(stages: string[]): Promise<LeadfloAction[]> {
     await this.ensureSession();
+    // Match axios default array serialization used by the Leadflo SPA: stages[]=a&stages[]=b
     const params = new URLSearchParams();
     for (const stage of stages) params.append("stages[]", stage);
-    // Laravel also accepts stages as repeated or comma — send both styles for safety
-    params.set("stages", stages.join(","));
 
-    const res = await this.request<unknown>("GET", `/actions/due?${params}`);
+    const res = await this.request<unknown>("GET", `/actions/due?${params.toString()}`);
     if (res.status < 200 || res.status >= 300) {
       throw new Error(
         `getDueActions failed (${res.status}): ${res.rawText.slice(0, 300)}`,

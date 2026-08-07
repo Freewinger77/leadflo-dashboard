@@ -26,6 +26,8 @@ export const config = {
     ),
     appOrigin: process.env.LEADFLO_APP_ORIGIN ?? "https://app.leadflo.com",
     mode: (process.env.LEADFLO_MODE ?? "live").toLowerCase() as "live" | "mock",
+    /** Optional HTTP(S) proxy to bypass datacenter WAF blocks */
+    httpProxy: process.env.LEADFLO_HTTP_PROXY ?? process.env.HTTPS_PROXY ?? "",
   },
   trackedTreatmentTypes: list(process.env.TRACKED_TREATMENT_TYPES, ["Implant"]).map((t) =>
     t.toLowerCase(),
