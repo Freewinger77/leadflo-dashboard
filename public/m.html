@@ -1,0 +1,3286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LEADFLO.WASUP</title>
+<style>
+/* Inter — the only text face the source Figma file uses (Regular 400, Medium 500, Semi Bold 600, Bold 700, plus italics).
+   Served from Google Fonts as a variable font; matches the file's family name exactly. */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/d7c2557c-d21a-4a93-8e09-a3f22a323107.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/edad0fee-4eec-4ed1-9cc2-b128e29d9493.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/a834d93c-8a18-4624-b53e-2ac11d8514aa.woff2") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/d020bb38-c835-4555-9723-98fd26718197.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/6bd9d279-d5fa-434f-9801-c78ef18b951e.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/4f975b8f-ea74-45e8-9362-b27eab40cf6f.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/9ad8d431-1cb6-41a5-8cc8-686ff610acc4.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/b7833b12-03ed-47c3-8516-7aaea2ba6ead.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/68c44241-921a-4519-8a85-7ae2c0636719.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/331825a6-e378-4de5-9777-80432017f029.woff2") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/0775ec13-de89-4aba-a888-ab23b3fa574b.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/13a41def-b068-43f1-9b14-f322d09542f9.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/e83f29cc-16ca-4e5a-bf37-bf44356fe770.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/c3eb1efc-209c-44d8-800b-cb44a0234fef.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+/* "Figma Hand" appears twice in the source file, only inside two scratch/demo frames that are not part
+   of the product surface. It is a Figma-internal face with no public distribution; it is NOT declared here. */
+
+/* Generated from Figma Variables. First mode = :root default.
+   FLOAT tokens are unitless — multiply by 1px in calc() where a length is needed. */
+
+:root {
+  --10: 0; /* @kind spacing */
+  --12-2: 12; /* @kind spacing */
+  --12-3: 0; /* @kind spacing */
+  --12: 12; /* @kind spacing */
+  --14: 0; /* @kind spacing */
+  --16-2: 16; /* @kind spacing */
+  --16-3: 16; /* @kind spacing */
+  --16-4: 16; /* @kind spacing */
+  --16: 16; /* @kind spacing */
+  --18: 0; /* @kind spacing */
+  --20-2: 20; /* @kind spacing */
+  --20-3: 20; /* @kind spacing */
+  --20-4: 20; /* @kind spacing */
+  --20: 20; /* @kind spacing */
+  --24-2: 24; /* @kind spacing */
+  --24-3: 24; /* @kind spacing */
+  --24-4: 24; /* @kind spacing */
+  --24: 24; /* @kind spacing */
+  --28-2: 28; /* @kind spacing */
+  --28-3: 28; /* @kind spacing */
+  --28: 28; /* @kind spacing */
+  --32: 32; /* @kind spacing */
+  --4-2: 4; /* @kind spacing */
+  --40-2: 40; /* @kind spacing */
+  --40: 40; /* @kind spacing */
+  --48: 48; /* @kind spacing */
+  --4: 4; /* @kind spacing */
+  --8-2: 8; /* @kind spacing */
+  --8-3: 0; /* @kind spacing */
+  --80-2: 80; /* @kind spacing */
+  --80: 80; /* @kind spacing */
+  --8: 8; /* @kind spacing */
+  --background-1: rgb(255,255,255); /* @kind color */
+  --background-2: rgb(249,249,250); /* @kind color */
+  --background-3: rgba(255,255,255,0.8); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --font-family: "Inter"; /* @kind font */
+  --font: "Inter"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --primary: var(--black-100); /* @kind color */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --regular-2: 400; /* @kind font */
+  --regular: 400; /* @kind font */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --semi-bold: 600; /* @kind font */
+  --semibold: 600; /* @kind font */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="expanded-4"] {
+  --12-2: 16; /* @kind spacing */
+  --12: 16; /* @kind spacing */
+  --16-2: 20; /* @kind spacing */
+  --16-3: 20; /* @kind spacing */
+  --16-4: 20; /* @kind spacing */
+  --16: 20; /* @kind spacing */
+  --20-2: 24; /* @kind spacing */
+  --20-3: 24; /* @kind spacing */
+  --20-4: 24; /* @kind spacing */
+  --20: 24; /* @kind spacing */
+  --24-2: 28; /* @kind spacing */
+  --24-3: 28; /* @kind spacing */
+  --24-4: 28; /* @kind spacing */
+  --24: 28; /* @kind spacing */
+  --28-2: 32; /* @kind spacing */
+  --28-3: 32; /* @kind spacing */
+  --28: 32; /* @kind spacing */
+  --32: 36; /* @kind spacing */
+  --4-2: 8; /* @kind spacing */
+  --40-2: 44; /* @kind spacing */
+  --40: 44; /* @kind spacing */
+  --48: 52; /* @kind spacing */
+  --4: 8; /* @kind spacing */
+  --8-2: 12; /* @kind spacing */
+  --80-2: 84; /* @kind spacing */
+  --80: 84; /* @kind spacing */
+  --8: 12; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 20; /* @kind font */
+  --size-20: 24; /* @kind font */
+  --size-28: 32; /* @kind font */
+}
+
+:root[data-mode="expanded-8"] {
+  --12-2: 20; /* @kind spacing */
+  --12: 20; /* @kind spacing */
+  --16-2: 24; /* @kind spacing */
+  --16-3: 24; /* @kind spacing */
+  --16-4: 24; /* @kind spacing */
+  --16: 24; /* @kind spacing */
+  --20-2: 28; /* @kind spacing */
+  --20-3: 28; /* @kind spacing */
+  --20-4: 28; /* @kind spacing */
+  --20: 28; /* @kind spacing */
+  --24-2: 32; /* @kind spacing */
+  --24-3: 32; /* @kind spacing */
+  --24-4: 32; /* @kind spacing */
+  --24: 32; /* @kind spacing */
+  --28-2: 36; /* @kind spacing */
+  --28-3: 36; /* @kind spacing */
+  --28: 36; /* @kind spacing */
+  --32: 40; /* @kind spacing */
+  --4-2: 12; /* @kind spacing */
+  --40-2: 48; /* @kind spacing */
+  --40: 48; /* @kind spacing */
+  --48: 56; /* @kind spacing */
+  --4: 12; /* @kind spacing */
+  --8-2: 16; /* @kind spacing */
+  --80-2: 88; /* @kind spacing */
+  --80: 88; /* @kind spacing */
+  --8: 16; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 12; /* @kind font */
+  --size-20: 16; /* @kind font */
+  --size-28: 24; /* @kind font */
+}
+
+:root[data-mode="condensed-4"] {
+  --12-2: 8; /* @kind spacing */
+  --12: 8; /* @kind spacing */
+  --16-2: 12; /* @kind spacing */
+  --16-3: 12; /* @kind spacing */
+  --16-4: 12; /* @kind spacing */
+  --16: 12; /* @kind spacing */
+  --20-2: 16; /* @kind spacing */
+  --20-3: 16; /* @kind spacing */
+  --20-4: 16; /* @kind spacing */
+  --20: 16; /* @kind spacing */
+  --24-2: 20; /* @kind spacing */
+  --24-3: 20; /* @kind spacing */
+  --24-4: 20; /* @kind spacing */
+  --24: 20; /* @kind spacing */
+  --28-2: 24; /* @kind spacing */
+  --28-3: 24; /* @kind spacing */
+  --28: 24; /* @kind spacing */
+  --32: 28; /* @kind spacing */
+  --4-2: 0; /* @kind spacing */
+  --40-2: 36; /* @kind spacing */
+  --40: 36; /* @kind spacing */
+  --48: 44; /* @kind spacing */
+  --4: 0; /* @kind spacing */
+  --8-2: 4; /* @kind spacing */
+  --80-2: 76; /* @kind spacing */
+  --80: 76; /* @kind spacing */
+  --8: 4; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+}
+
+:root[data-theme="dark"], .dark {
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-4: rgba(0,0,0,0.1); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --background-5: rgba(255,255,255,0.8); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --primary: var(--secondary-indigo); /* @kind color */
+  --secondary-blue: rgb(10,132,255); /* @kind color */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-green: rgb(48,209,88); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-indigo: rgb(94,92,230); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-purple: rgb(191,90,242); /* @kind color */
+  --secondary-red: rgb(255,69,58); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --secondary-yellow: rgb(255,214,10); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+}
+
+:root[data-theme="light"], .light {
+  --background-1: rgb(245,245,246); /* @kind color */
+  --background-2: rgb(255,255,255); /* @kind color */
+  --background-3: rgba(0,0,0,0.03); /* @kind color */
+  --background-4: rgba(0,0,0,0.02); /* @kind color */
+  --background-5: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --secondary-blue: rgb(0,122,255); /* @kind color */
+  --secondary-green: rgb(52,199,89); /* @kind color */
+  --secondary-indigo: rgb(88,86,214); /* @kind color */
+  --secondary-purple: rgb(175,82,222); /* @kind color */
+  --secondary-red: rgb(255,59,48); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="paragraph"] {
+  --10: 10; /* @kind spacing */
+  --12-3: 12; /* @kind spacing */
+  --14: 14; /* @kind spacing */
+  --18: 18; /* @kind spacing */
+  --8-3: 8; /* @kind spacing */
+}
+
+:root[data-mode="sf-pro"] {
+  --font-family: "SF Pro"; /* @kind font */
+  --font: "SF Pro"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="bai-jamjuree"] {
+  --font-family: "Bai Jamjuree"; /* @kind font */
+  --font: "Bai Jamjuree"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="space-grotesk"] {
+  --font-family: "Space Grotesk"; /* @kind font */
+  --font: "Space Grotesk"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="semi-bold-regular"] {
+  --regular-2: 600; /* @kind font */
+  --regular: 600; /* @kind font */
+  --semi-bold: 400; /* @kind font */
+  --semibold: 400; /* @kind font */
+}
+
+/* No TEXT/EFFECT styles in this file. */
+
+/* Semantic aliases layered over the raw Figma Variables in fig-tokens.css.
+   Raw names are the file's own (--black-100, --background-2, --24-2, …); these read better in product code.
+   FLOAT tokens are unitless — always wrap in calc(var(--x) * 1px). */
+
+:root {
+  /* Text */
+  --text-primary: var(--black-100);          /* rgb(0,0,0) — 674 uses, the workhorse */
+  --text-secondary: var(--black-80);         /* rgba(0,0,0,0.8) */
+  --text-muted: var(--black-40);             /* rgba(0,0,0,0.4) — placeholders, timestamps */
+  --text-disabled: var(--black-20);
+  --text-on-dark: var(--white-100);
+  --text-sidebar: rgb(58,58,58);             /* literal in the file: sidebar labels + wordmark */
+  --text-link: var(--logo-2);                /* rgb(79,80,127) — the indigo "Click here to…" links */
+
+  /* Surfaces */
+  --surface-page: var(--background-1);       /* rgb(255,255,255) */
+  --surface-sunken: var(--background-2);     /* rgb(249,249,250) — 174 uses: panels, card wells */
+  --surface-glass: var(--background-3);      /* rgba(255,255,255,0.8) — behind backdrop-filter */
+  --surface-tint-indigo: var(--background-4);/* rgb(237,238,252) */
+  --surface-tint-blue: var(--background-5);  /* rgb(230,241,253) */
+  --surface-hover: var(--black-4);           /* rgba(0,0,0,0.04) — the universal hover wash */
+  --surface-inverse: rgb(28,28,30);          /* section plates, filled buttons */
+
+  /* Lines */
+  --border-subtle: var(--black-4);
+  --border-default: var(--black-10);
+  --border-strong: var(--black-20);
+
+  /* Brand */
+  --brand-mark-bg: rgb(0,0,0);
+  --brand-logo-blue: var(--logo);            /* rgb(76,152,253) */
+  --brand-logo-indigo: var(--logo-2);        /* rgb(79,80,127) */
+
+  /* Status / channel colors (iOS-derived secondary ramp) */
+  --status-green: var(--secondary-green);
+  --status-red: var(--secondary-red);
+  --status-yellow: var(--secondary-yellow);
+  --status-blue: var(--secondary-blue);
+  --status-indigo: var(--secondary-indigo);
+  --status-purple: var(--secondary-purple);
+  --channel-whatsapp: rgb(37,211,102);
+
+  /* Type — the file's real ladder */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --size-body: 14px;      /* line-height 20px — 68 of the file's 96 text runs */
+  --size-body-lg: 16px;   /* line-height 24px */
+  --size-caption: 12px;   /* line-height 16px */
+  --size-micro: 10px;
+  --size-title: 24px;     /* Semi Bold, page + card headings */
+  --size-hero: 44px;      /* Semi Bold -2% tracking, login headline */
+  --size-plate: 80px;     /* Bold, section plates */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-hero: -0.02em;
+
+  /* Radii — the file's actual values, not a rounded scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-card: 30px;    /* login side panel */
+  --radius-pill: 80px;    /* avatars, chips */
+
+  /* Elevation. The file leans on hairline insets, not drop shadows. */
+  --ring-hairline: inset 0 0 0 1px var(--black-10);
+  --ring-avatar: inset 0 0 0 3.2px rgb(249,249,250); /* @kind shadow */
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-float: 0 8px 24px rgba(0,0,0,0.08);
+  --blur-glass: blur(45.113px); /* @kind other */
+
+  /* Motion. Nothing in the file is animated; these are the house defaults for recreations. */
+  --ease-standard: cubic-bezier(0.2, 0, 0.2, 1); /* @kind other */
+  --duration-fast: 120ms; /* @kind other */
+  --duration-base: 200ms; /* @kind other */
+}
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { color: var(--text-primary); text-decoration: underline; }
+
+/* Inter — the only text face the source Figma file uses (Regular 400, Medium 500, Semi Bold 600, Bold 700, plus italics).
+   Served from Google Fonts as a variable font; matches the file's family name exactly. */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/d7c2557c-d21a-4a93-8e09-a3f22a323107.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/edad0fee-4eec-4ed1-9cc2-b128e29d9493.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/a834d93c-8a18-4624-b53e-2ac11d8514aa.woff2") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/d020bb38-c835-4555-9723-98fd26718197.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/6bd9d279-d5fa-434f-9801-c78ef18b951e.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/4f975b8f-ea74-45e8-9362-b27eab40cf6f.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/9ad8d431-1cb6-41a5-8cc8-686ff610acc4.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/b7833b12-03ed-47c3-8516-7aaea2ba6ead.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/68c44241-921a-4519-8a85-7ae2c0636719.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/331825a6-e378-4de5-9777-80432017f029.woff2") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/0775ec13-de89-4aba-a888-ab23b3fa574b.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/13a41def-b068-43f1-9b14-f322d09542f9.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/e83f29cc-16ca-4e5a-bf37-bf44356fe770.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/vendor/fonts/c3eb1efc-209c-44d8-800b-cb44a0234fef.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+/* "Figma Hand" appears twice in the source file, only inside two scratch/demo frames that are not part
+   of the product surface. It is a Figma-internal face with no public distribution; it is NOT declared here. */
+
+/* Generated from Figma Variables. First mode = :root default.
+   FLOAT tokens are unitless — multiply by 1px in calc() where a length is needed. */
+
+:root {
+  --10: 0; /* @kind spacing */
+  --12-2: 12; /* @kind spacing */
+  --12-3: 0; /* @kind spacing */
+  --12: 12; /* @kind spacing */
+  --14: 0; /* @kind spacing */
+  --16-2: 16; /* @kind spacing */
+  --16-3: 16; /* @kind spacing */
+  --16-4: 16; /* @kind spacing */
+  --16: 16; /* @kind spacing */
+  --18: 0; /* @kind spacing */
+  --20-2: 20; /* @kind spacing */
+  --20-3: 20; /* @kind spacing */
+  --20-4: 20; /* @kind spacing */
+  --20: 20; /* @kind spacing */
+  --24-2: 24; /* @kind spacing */
+  --24-3: 24; /* @kind spacing */
+  --24-4: 24; /* @kind spacing */
+  --24: 24; /* @kind spacing */
+  --28-2: 28; /* @kind spacing */
+  --28-3: 28; /* @kind spacing */
+  --28: 28; /* @kind spacing */
+  --32: 32; /* @kind spacing */
+  --4-2: 4; /* @kind spacing */
+  --40-2: 40; /* @kind spacing */
+  --40: 40; /* @kind spacing */
+  --48: 48; /* @kind spacing */
+  --4: 4; /* @kind spacing */
+  --8-2: 8; /* @kind spacing */
+  --8-3: 0; /* @kind spacing */
+  --80-2: 80; /* @kind spacing */
+  --80: 80; /* @kind spacing */
+  --8: 8; /* @kind spacing */
+  --background-1: rgb(255,255,255); /* @kind color */
+  --background-2: rgb(249,249,250); /* @kind color */
+  --background-3: rgba(255,255,255,0.8); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --font-family: "Inter"; /* @kind font */
+  --font: "Inter"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --primary: var(--black-100); /* @kind color */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --regular-2: 400; /* @kind font */
+  --regular: 400; /* @kind font */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --semi-bold: 600; /* @kind font */
+  --semibold: 600; /* @kind font */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="expanded-4"] {
+  --12-2: 16; /* @kind spacing */
+  --12: 16; /* @kind spacing */
+  --16-2: 20; /* @kind spacing */
+  --16-3: 20; /* @kind spacing */
+  --16-4: 20; /* @kind spacing */
+  --16: 20; /* @kind spacing */
+  --20-2: 24; /* @kind spacing */
+  --20-3: 24; /* @kind spacing */
+  --20-4: 24; /* @kind spacing */
+  --20: 24; /* @kind spacing */
+  --24-2: 28; /* @kind spacing */
+  --24-3: 28; /* @kind spacing */
+  --24-4: 28; /* @kind spacing */
+  --24: 28; /* @kind spacing */
+  --28-2: 32; /* @kind spacing */
+  --28-3: 32; /* @kind spacing */
+  --28: 32; /* @kind spacing */
+  --32: 36; /* @kind spacing */
+  --4-2: 8; /* @kind spacing */
+  --40-2: 44; /* @kind spacing */
+  --40: 44; /* @kind spacing */
+  --48: 52; /* @kind spacing */
+  --4: 8; /* @kind spacing */
+  --8-2: 12; /* @kind spacing */
+  --80-2: 84; /* @kind spacing */
+  --80: 84; /* @kind spacing */
+  --8: 12; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 20; /* @kind font */
+  --size-20: 24; /* @kind font */
+  --size-28: 32; /* @kind font */
+}
+
+:root[data-mode="expanded-8"] {
+  --12-2: 20; /* @kind spacing */
+  --12: 20; /* @kind spacing */
+  --16-2: 24; /* @kind spacing */
+  --16-3: 24; /* @kind spacing */
+  --16-4: 24; /* @kind spacing */
+  --16: 24; /* @kind spacing */
+  --20-2: 28; /* @kind spacing */
+  --20-3: 28; /* @kind spacing */
+  --20-4: 28; /* @kind spacing */
+  --20: 28; /* @kind spacing */
+  --24-2: 32; /* @kind spacing */
+  --24-3: 32; /* @kind spacing */
+  --24-4: 32; /* @kind spacing */
+  --24: 32; /* @kind spacing */
+  --28-2: 36; /* @kind spacing */
+  --28-3: 36; /* @kind spacing */
+  --28: 36; /* @kind spacing */
+  --32: 40; /* @kind spacing */
+  --4-2: 12; /* @kind spacing */
+  --40-2: 48; /* @kind spacing */
+  --40: 48; /* @kind spacing */
+  --48: 56; /* @kind spacing */
+  --4: 12; /* @kind spacing */
+  --8-2: 16; /* @kind spacing */
+  --80-2: 88; /* @kind spacing */
+  --80: 88; /* @kind spacing */
+  --8: 16; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 12; /* @kind font */
+  --size-20: 16; /* @kind font */
+  --size-28: 24; /* @kind font */
+}
+
+:root[data-mode="condensed-4"] {
+  --12-2: 8; /* @kind spacing */
+  --12: 8; /* @kind spacing */
+  --16-2: 12; /* @kind spacing */
+  --16-3: 12; /* @kind spacing */
+  --16-4: 12; /* @kind spacing */
+  --16: 12; /* @kind spacing */
+  --20-2: 16; /* @kind spacing */
+  --20-3: 16; /* @kind spacing */
+  --20-4: 16; /* @kind spacing */
+  --20: 16; /* @kind spacing */
+  --24-2: 20; /* @kind spacing */
+  --24-3: 20; /* @kind spacing */
+  --24-4: 20; /* @kind spacing */
+  --24: 20; /* @kind spacing */
+  --28-2: 24; /* @kind spacing */
+  --28-3: 24; /* @kind spacing */
+  --28: 24; /* @kind spacing */
+  --32: 28; /* @kind spacing */
+  --4-2: 0; /* @kind spacing */
+  --40-2: 36; /* @kind spacing */
+  --40: 36; /* @kind spacing */
+  --48: 44; /* @kind spacing */
+  --4: 0; /* @kind spacing */
+  --8-2: 4; /* @kind spacing */
+  --80-2: 76; /* @kind spacing */
+  --80: 76; /* @kind spacing */
+  --8: 4; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+}
+
+:root[data-theme="dark"], .dark {
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-4: rgba(0,0,0,0.1); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --background-5: rgba(255,255,255,0.8); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --primary: var(--secondary-indigo); /* @kind color */
+  --secondary-blue: rgb(10,132,255); /* @kind color */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-green: rgb(48,209,88); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-indigo: rgb(94,92,230); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-purple: rgb(191,90,242); /* @kind color */
+  --secondary-red: rgb(255,69,58); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --secondary-yellow: rgb(255,214,10); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+}
+
+:root[data-theme="light"], .light {
+  --background-1: rgb(245,245,246); /* @kind color */
+  --background-2: rgb(255,255,255); /* @kind color */
+  --background-3: rgba(0,0,0,0.03); /* @kind color */
+  --background-4: rgba(0,0,0,0.02); /* @kind color */
+  --background-5: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --secondary-blue: rgb(0,122,255); /* @kind color */
+  --secondary-green: rgb(52,199,89); /* @kind color */
+  --secondary-indigo: rgb(88,86,214); /* @kind color */
+  --secondary-purple: rgb(175,82,222); /* @kind color */
+  --secondary-red: rgb(255,59,48); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="paragraph"] {
+  --10: 10; /* @kind spacing */
+  --12-3: 12; /* @kind spacing */
+  --14: 14; /* @kind spacing */
+  --18: 18; /* @kind spacing */
+  --8-3: 8; /* @kind spacing */
+}
+
+:root[data-mode="sf-pro"] {
+  --font-family: "SF Pro"; /* @kind font */
+  --font: "SF Pro"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="bai-jamjuree"] {
+  --font-family: "Bai Jamjuree"; /* @kind font */
+  --font: "Bai Jamjuree"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="space-grotesk"] {
+  --font-family: "Space Grotesk"; /* @kind font */
+  --font: "Space Grotesk"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="semi-bold-regular"] {
+  --regular-2: 600; /* @kind font */
+  --regular: 600; /* @kind font */
+  --semi-bold: 400; /* @kind font */
+  --semibold: 400; /* @kind font */
+}
+
+/* No TEXT/EFFECT styles in this file. */
+
+/* Semantic aliases layered over the raw Figma Variables in fig-tokens.css.
+   Raw names are the file's own (--black-100, --background-2, --24-2, …); these read better in product code.
+   FLOAT tokens are unitless — always wrap in calc(var(--x) * 1px). */
+
+:root {
+  /* Text */
+  --text-primary: var(--black-100);          /* rgb(0,0,0) — 674 uses, the workhorse */
+  --text-secondary: var(--black-80);         /* rgba(0,0,0,0.8) */
+  --text-muted: var(--black-40);             /* rgba(0,0,0,0.4) — placeholders, timestamps */
+  --text-disabled: var(--black-20);
+  --text-on-dark: var(--white-100);
+  --text-sidebar: rgb(58,58,58);             /* literal in the file: sidebar labels + wordmark */
+  --text-link: var(--logo-2);                /* rgb(79,80,127) — the indigo "Click here to…" links */
+
+  /* Surfaces */
+  --surface-page: var(--background-1);       /* rgb(255,255,255) */
+  --surface-sunken: var(--background-2);     /* rgb(249,249,250) — 174 uses: panels, card wells */
+  --surface-glass: var(--background-3);      /* rgba(255,255,255,0.8) — behind backdrop-filter */
+  --surface-tint-indigo: var(--background-4);/* rgb(237,238,252) */
+  --surface-tint-blue: var(--background-5);  /* rgb(230,241,253) */
+  --surface-hover: var(--black-4);           /* rgba(0,0,0,0.04) — the universal hover wash */
+  --surface-inverse: rgb(28,28,30);          /* section plates, filled buttons */
+
+  /* Lines */
+  --border-subtle: var(--black-4);
+  --border-default: var(--black-10);
+  --border-strong: var(--black-20);
+
+  /* Brand */
+  --brand-mark-bg: rgb(0,0,0);
+  --brand-logo-blue: var(--logo);            /* rgb(76,152,253) */
+  --brand-logo-indigo: var(--logo-2);        /* rgb(79,80,127) */
+
+  /* Status / channel colors (iOS-derived secondary ramp) */
+  --status-green: var(--secondary-green);
+  --status-red: var(--secondary-red);
+  --status-yellow: var(--secondary-yellow);
+  --status-blue: var(--secondary-blue);
+  --status-indigo: var(--secondary-indigo);
+  --status-purple: var(--secondary-purple);
+  --channel-whatsapp: rgb(37,211,102);
+
+  /* Type — the file's real ladder */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --size-body: 14px;      /* line-height 20px — 68 of the file's 96 text runs */
+  --size-body-lg: 16px;   /* line-height 24px */
+  --size-caption: 12px;   /* line-height 16px */
+  --size-micro: 10px;
+  --size-title: 24px;     /* Semi Bold, page + card headings */
+  --size-hero: 44px;      /* Semi Bold -2% tracking, login headline */
+  --size-plate: 80px;     /* Bold, section plates */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-hero: -0.02em;
+
+  /* Radii — the file's actual values, not a rounded scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-card: 30px;    /* login side panel */
+  --radius-pill: 80px;    /* avatars, chips */
+
+  /* Elevation. The file leans on hairline insets, not drop shadows. */
+  --ring-hairline: inset 0 0 0 1px var(--black-10);
+  --ring-avatar: inset 0 0 0 3.2px rgb(249,249,250); /* @kind shadow */
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-float: 0 8px 24px rgba(0,0,0,0.08);
+  --blur-glass: blur(45.113px); /* @kind other */
+
+  /* Motion. Nothing in the file is animated; these are the house defaults for recreations. */
+  --ease-standard: cubic-bezier(0.2, 0, 0.2, 1); /* @kind other */
+  --duration-fast: 120ms; /* @kind other */
+  --duration-base: 200ms; /* @kind other */
+}
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { color: var(--text-primary); text-decoration: underline; }
+
+
+
+body{margin:0;background:rgb(232,232,234);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:rgb(79,80,127);text-decoration:none}
+a:hover{color:rgb(0,0,0);text-decoration:underline}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes lf-pulse{0%{opacity:1}50%{opacity:.25}100%{opacity:1}}
+@keyframes lf-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes lf-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+
+@keyframes lf-pulse { 0%,100% { opacity:1 } 50% { opacity:.45 } }
+</style>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>/* Inter — the only text face the source Figma file uses (Regular 400, Medium 500, Semi Bold 600, Bold 700, plus italics).
+   Served from Google Fonts as a variable font; matches the file's family name exactly. */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("d7c2557c-d21a-4a93-8e09-a3f22a323107") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("edad0fee-4eec-4ed1-9cc2-b128e29d9493") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("a834d93c-8a18-4624-b53e-2ac11d8514aa") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("d020bb38-c835-4555-9723-98fd26718197") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("6bd9d279-d5fa-434f-9801-c78ef18b951e") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("4f975b8f-ea74-45e8-9362-b27eab40cf6f") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("9ad8d431-1cb6-41a5-8cc8-686ff610acc4") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("b7833b12-03ed-47c3-8516-7aaea2ba6ead") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("68c44241-921a-4519-8a85-7ae2c0636719") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("331825a6-e378-4de5-9777-80432017f029") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("0775ec13-de89-4aba-a888-ab23b3fa574b") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("13a41def-b068-43f1-9b14-f322d09542f9") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("e83f29cc-16ca-4e5a-bf37-bf44356fe770") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("c3eb1efc-209c-44d8-800b-cb44a0234fef") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+/* "Figma Hand" appears twice in the source file, only inside two scratch/demo frames that are not part
+   of the product surface. It is a Figma-internal face with no public distribution; it is NOT declared here. */
+</style>
+<style>/* Generated from Figma Variables. First mode = :root default.
+   FLOAT tokens are unitless — multiply by 1px in calc() where a length is needed. */
+
+:root {
+  --10: 0; /* @kind spacing */
+  --12-2: 12; /* @kind spacing */
+  --12-3: 0; /* @kind spacing */
+  --12: 12; /* @kind spacing */
+  --14: 0; /* @kind spacing */
+  --16-2: 16; /* @kind spacing */
+  --16-3: 16; /* @kind spacing */
+  --16-4: 16; /* @kind spacing */
+  --16: 16; /* @kind spacing */
+  --18: 0; /* @kind spacing */
+  --20-2: 20; /* @kind spacing */
+  --20-3: 20; /* @kind spacing */
+  --20-4: 20; /* @kind spacing */
+  --20: 20; /* @kind spacing */
+  --24-2: 24; /* @kind spacing */
+  --24-3: 24; /* @kind spacing */
+  --24-4: 24; /* @kind spacing */
+  --24: 24; /* @kind spacing */
+  --28-2: 28; /* @kind spacing */
+  --28-3: 28; /* @kind spacing */
+  --28: 28; /* @kind spacing */
+  --32: 32; /* @kind spacing */
+  --4-2: 4; /* @kind spacing */
+  --40-2: 40; /* @kind spacing */
+  --40: 40; /* @kind spacing */
+  --48: 48; /* @kind spacing */
+  --4: 4; /* @kind spacing */
+  --8-2: 8; /* @kind spacing */
+  --8-3: 0; /* @kind spacing */
+  --80-2: 80; /* @kind spacing */
+  --80: 80; /* @kind spacing */
+  --8: 8; /* @kind spacing */
+  --background-1: rgb(255,255,255); /* @kind color */
+  --background-2: rgb(249,249,250); /* @kind color */
+  --background-3: rgba(255,255,255,0.8); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --font-family: "Inter"; /* @kind font */
+  --font: "Inter"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --primary: var(--black-100); /* @kind color */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --regular-2: 400; /* @kind font */
+  --regular: 400; /* @kind font */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --semi-bold: 600; /* @kind font */
+  --semibold: 600; /* @kind font */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="expanded-4"] {
+  --12-2: 16; /* @kind spacing */
+  --12: 16; /* @kind spacing */
+  --16-2: 20; /* @kind spacing */
+  --16-3: 20; /* @kind spacing */
+  --16-4: 20; /* @kind spacing */
+  --16: 20; /* @kind spacing */
+  --20-2: 24; /* @kind spacing */
+  --20-3: 24; /* @kind spacing */
+  --20-4: 24; /* @kind spacing */
+  --20: 24; /* @kind spacing */
+  --24-2: 28; /* @kind spacing */
+  --24-3: 28; /* @kind spacing */
+  --24-4: 28; /* @kind spacing */
+  --24: 28; /* @kind spacing */
+  --28-2: 32; /* @kind spacing */
+  --28-3: 32; /* @kind spacing */
+  --28: 32; /* @kind spacing */
+  --32: 36; /* @kind spacing */
+  --4-2: 8; /* @kind spacing */
+  --40-2: 44; /* @kind spacing */
+  --40: 44; /* @kind spacing */
+  --48: 52; /* @kind spacing */
+  --4: 8; /* @kind spacing */
+  --8-2: 12; /* @kind spacing */
+  --80-2: 84; /* @kind spacing */
+  --80: 84; /* @kind spacing */
+  --8: 12; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 20; /* @kind font */
+  --size-20: 24; /* @kind font */
+  --size-28: 32; /* @kind font */
+}
+
+:root[data-mode="expanded-8"] {
+  --12-2: 20; /* @kind spacing */
+  --12: 20; /* @kind spacing */
+  --16-2: 24; /* @kind spacing */
+  --16-3: 24; /* @kind spacing */
+  --16-4: 24; /* @kind spacing */
+  --16: 24; /* @kind spacing */
+  --20-2: 28; /* @kind spacing */
+  --20-3: 28; /* @kind spacing */
+  --20-4: 28; /* @kind spacing */
+  --20: 28; /* @kind spacing */
+  --24-2: 32; /* @kind spacing */
+  --24-3: 32; /* @kind spacing */
+  --24-4: 32; /* @kind spacing */
+  --24: 32; /* @kind spacing */
+  --28-2: 36; /* @kind spacing */
+  --28-3: 36; /* @kind spacing */
+  --28: 36; /* @kind spacing */
+  --32: 40; /* @kind spacing */
+  --4-2: 12; /* @kind spacing */
+  --40-2: 48; /* @kind spacing */
+  --40: 48; /* @kind spacing */
+  --48: 56; /* @kind spacing */
+  --4: 12; /* @kind spacing */
+  --8-2: 16; /* @kind spacing */
+  --80-2: 88; /* @kind spacing */
+  --80: 88; /* @kind spacing */
+  --8: 16; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 12; /* @kind font */
+  --size-20: 16; /* @kind font */
+  --size-28: 24; /* @kind font */
+}
+
+:root[data-mode="condensed-4"] {
+  --12-2: 8; /* @kind spacing */
+  --12: 8; /* @kind spacing */
+  --16-2: 12; /* @kind spacing */
+  --16-3: 12; /* @kind spacing */
+  --16-4: 12; /* @kind spacing */
+  --16: 12; /* @kind spacing */
+  --20-2: 16; /* @kind spacing */
+  --20-3: 16; /* @kind spacing */
+  --20-4: 16; /* @kind spacing */
+  --20: 16; /* @kind spacing */
+  --24-2: 20; /* @kind spacing */
+  --24-3: 20; /* @kind spacing */
+  --24-4: 20; /* @kind spacing */
+  --24: 20; /* @kind spacing */
+  --28-2: 24; /* @kind spacing */
+  --28-3: 24; /* @kind spacing */
+  --28: 24; /* @kind spacing */
+  --32: 28; /* @kind spacing */
+  --4-2: 0; /* @kind spacing */
+  --40-2: 36; /* @kind spacing */
+  --40: 36; /* @kind spacing */
+  --48: 44; /* @kind spacing */
+  --4: 0; /* @kind spacing */
+  --8-2: 4; /* @kind spacing */
+  --80-2: 76; /* @kind spacing */
+  --80: 76; /* @kind spacing */
+  --8: 4; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+}
+
+:root[data-theme="dark"], .dark {
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-4: rgba(0,0,0,0.1); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --background-5: rgba(255,255,255,0.8); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --primary: var(--secondary-indigo); /* @kind color */
+  --secondary-blue: rgb(10,132,255); /* @kind color */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-green: rgb(48,209,88); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-indigo: rgb(94,92,230); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-purple: rgb(191,90,242); /* @kind color */
+  --secondary-red: rgb(255,69,58); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --secondary-yellow: rgb(255,214,10); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+}
+
+:root[data-theme="light"], .light {
+  --background-1: rgb(245,245,246); /* @kind color */
+  --background-2: rgb(255,255,255); /* @kind color */
+  --background-3: rgba(0,0,0,0.03); /* @kind color */
+  --background-4: rgba(0,0,0,0.02); /* @kind color */
+  --background-5: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --secondary-blue: rgb(0,122,255); /* @kind color */
+  --secondary-green: rgb(52,199,89); /* @kind color */
+  --secondary-indigo: rgb(88,86,214); /* @kind color */
+  --secondary-purple: rgb(175,82,222); /* @kind color */
+  --secondary-red: rgb(255,59,48); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="paragraph"] {
+  --10: 10; /* @kind spacing */
+  --12-3: 12; /* @kind spacing */
+  --14: 14; /* @kind spacing */
+  --18: 18; /* @kind spacing */
+  --8-3: 8; /* @kind spacing */
+}
+
+:root[data-mode="sf-pro"] {
+  --font-family: "SF Pro"; /* @kind font */
+  --font: "SF Pro"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="bai-jamjuree"] {
+  --font-family: "Bai Jamjuree"; /* @kind font */
+  --font: "Bai Jamjuree"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="space-grotesk"] {
+  --font-family: "Space Grotesk"; /* @kind font */
+  --font: "Space Grotesk"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="semi-bold-regular"] {
+  --regular-2: 600; /* @kind font */
+  --regular: 600; /* @kind font */
+  --semi-bold: 400; /* @kind font */
+  --semibold: 400; /* @kind font */
+}
+</style>
+<style>/* No TEXT/EFFECT styles in this file. */
+</style>
+<style>/* Semantic aliases layered over the raw Figma Variables in fig-tokens.css.
+   Raw names are the file's own (--black-100, --background-2, --24-2, …); these read better in product code.
+   FLOAT tokens are unitless — always wrap in calc(var(--x) * 1px). */
+
+:root {
+  /* Text */
+  --text-primary: var(--black-100);          /* rgb(0,0,0) — 674 uses, the workhorse */
+  --text-secondary: var(--black-80);         /* rgba(0,0,0,0.8) */
+  --text-muted: var(--black-40);             /* rgba(0,0,0,0.4) — placeholders, timestamps */
+  --text-disabled: var(--black-20);
+  --text-on-dark: var(--white-100);
+  --text-sidebar: rgb(58,58,58);             /* literal in the file: sidebar labels + wordmark */
+  --text-link: var(--logo-2);                /* rgb(79,80,127) — the indigo "Click here to…" links */
+
+  /* Surfaces */
+  --surface-page: var(--background-1);       /* rgb(255,255,255) */
+  --surface-sunken: var(--background-2);     /* rgb(249,249,250) — 174 uses: panels, card wells */
+  --surface-glass: var(--background-3);      /* rgba(255,255,255,0.8) — behind backdrop-filter */
+  --surface-tint-indigo: var(--background-4);/* rgb(237,238,252) */
+  --surface-tint-blue: var(--background-5);  /* rgb(230,241,253) */
+  --surface-hover: var(--black-4);           /* rgba(0,0,0,0.04) — the universal hover wash */
+  --surface-inverse: rgb(28,28,30);          /* section plates, filled buttons */
+
+  /* Lines */
+  --border-subtle: var(--black-4);
+  --border-default: var(--black-10);
+  --border-strong: var(--black-20);
+
+  /* Brand */
+  --brand-mark-bg: rgb(0,0,0);
+  --brand-logo-blue: var(--logo);            /* rgb(76,152,253) */
+  --brand-logo-indigo: var(--logo-2);        /* rgb(79,80,127) */
+
+  /* Status / channel colors (iOS-derived secondary ramp) */
+  --status-green: var(--secondary-green);
+  --status-red: var(--secondary-red);
+  --status-yellow: var(--secondary-yellow);
+  --status-blue: var(--secondary-blue);
+  --status-indigo: var(--secondary-indigo);
+  --status-purple: var(--secondary-purple);
+  --channel-whatsapp: rgb(37,211,102);
+
+  /* Type — the file's real ladder */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --size-body: 14px;      /* line-height 20px — 68 of the file's 96 text runs */
+  --size-body-lg: 16px;   /* line-height 24px */
+  --size-caption: 12px;   /* line-height 16px */
+  --size-micro: 10px;
+  --size-title: 24px;     /* Semi Bold, page + card headings */
+  --size-hero: 44px;      /* Semi Bold -2% tracking, login headline */
+  --size-plate: 80px;     /* Bold, section plates */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-hero: -0.02em;
+
+  /* Radii — the file's actual values, not a rounded scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-card: 30px;    /* login side panel */
+  --radius-pill: 80px;    /* avatars, chips */
+
+  /* Elevation. The file leans on hairline insets, not drop shadows. */
+  --ring-hairline: inset 0 0 0 1px var(--black-10);
+  --ring-avatar: inset 0 0 0 3.2px rgb(249,249,250); /* @kind shadow */
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-float: 0 8px 24px rgba(0,0,0,0.08);
+  --blur-glass: blur(45.113px); /* @kind other */
+
+  /* Motion. Nothing in the file is animated; these are the house defaults for recreations. */
+  --ease-standard: cubic-bezier(0.2, 0, 0.2, 1); /* @kind other */
+  --duration-fast: 120ms; /* @kind other */
+  --duration-base: 200ms; /* @kind other */
+}
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { color: var(--text-primary); text-decoration: underline; }
+</style>
+<style>/* Inter — the only text face the source Figma file uses (Regular 400, Medium 500, Semi Bold 600, Bold 700, plus italics).
+   Served from Google Fonts as a variable font; matches the file's family name exactly. */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("d7c2557c-d21a-4a93-8e09-a3f22a323107") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("edad0fee-4eec-4ed1-9cc2-b128e29d9493") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("a834d93c-8a18-4624-b53e-2ac11d8514aa") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("d020bb38-c835-4555-9723-98fd26718197") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("6bd9d279-d5fa-434f-9801-c78ef18b951e") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("4f975b8f-ea74-45e8-9362-b27eab40cf6f") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("9ad8d431-1cb6-41a5-8cc8-686ff610acc4") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("b7833b12-03ed-47c3-8516-7aaea2ba6ead") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("68c44241-921a-4519-8a85-7ae2c0636719") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("331825a6-e378-4de5-9777-80432017f029") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("0775ec13-de89-4aba-a888-ab23b3fa574b") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("13a41def-b068-43f1-9b14-f322d09542f9") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("e83f29cc-16ca-4e5a-bf37-bf44356fe770") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("c3eb1efc-209c-44d8-800b-cb44a0234fef") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+/* "Figma Hand" appears twice in the source file, only inside two scratch/demo frames that are not part
+   of the product surface. It is a Figma-internal face with no public distribution; it is NOT declared here. */
+
+/* Generated from Figma Variables. First mode = :root default.
+   FLOAT tokens are unitless — multiply by 1px in calc() where a length is needed. */
+
+:root {
+  --10: 0; /* @kind spacing */
+  --12-2: 12; /* @kind spacing */
+  --12-3: 0; /* @kind spacing */
+  --12: 12; /* @kind spacing */
+  --14: 0; /* @kind spacing */
+  --16-2: 16; /* @kind spacing */
+  --16-3: 16; /* @kind spacing */
+  --16-4: 16; /* @kind spacing */
+  --16: 16; /* @kind spacing */
+  --18: 0; /* @kind spacing */
+  --20-2: 20; /* @kind spacing */
+  --20-3: 20; /* @kind spacing */
+  --20-4: 20; /* @kind spacing */
+  --20: 20; /* @kind spacing */
+  --24-2: 24; /* @kind spacing */
+  --24-3: 24; /* @kind spacing */
+  --24-4: 24; /* @kind spacing */
+  --24: 24; /* @kind spacing */
+  --28-2: 28; /* @kind spacing */
+  --28-3: 28; /* @kind spacing */
+  --28: 28; /* @kind spacing */
+  --32: 32; /* @kind spacing */
+  --4-2: 4; /* @kind spacing */
+  --40-2: 40; /* @kind spacing */
+  --40: 40; /* @kind spacing */
+  --48: 48; /* @kind spacing */
+  --4: 4; /* @kind spacing */
+  --8-2: 8; /* @kind spacing */
+  --8-3: 0; /* @kind spacing */
+  --80-2: 80; /* @kind spacing */
+  --80: 80; /* @kind spacing */
+  --8: 8; /* @kind spacing */
+  --background-1: rgb(255,255,255); /* @kind color */
+  --background-2: rgb(249,249,250); /* @kind color */
+  --background-3: rgba(255,255,255,0.8); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --font-family: "Inter"; /* @kind font */
+  --font: "Inter"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --primary: var(--black-100); /* @kind color */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --regular-2: 400; /* @kind font */
+  --regular: 400; /* @kind font */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --semi-bold: 600; /* @kind font */
+  --semibold: 600; /* @kind font */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="expanded-4"] {
+  --12-2: 16; /* @kind spacing */
+  --12: 16; /* @kind spacing */
+  --16-2: 20; /* @kind spacing */
+  --16-3: 20; /* @kind spacing */
+  --16-4: 20; /* @kind spacing */
+  --16: 20; /* @kind spacing */
+  --20-2: 24; /* @kind spacing */
+  --20-3: 24; /* @kind spacing */
+  --20-4: 24; /* @kind spacing */
+  --20: 24; /* @kind spacing */
+  --24-2: 28; /* @kind spacing */
+  --24-3: 28; /* @kind spacing */
+  --24-4: 28; /* @kind spacing */
+  --24: 28; /* @kind spacing */
+  --28-2: 32; /* @kind spacing */
+  --28-3: 32; /* @kind spacing */
+  --28: 32; /* @kind spacing */
+  --32: 36; /* @kind spacing */
+  --4-2: 8; /* @kind spacing */
+  --40-2: 44; /* @kind spacing */
+  --40: 44; /* @kind spacing */
+  --48: 52; /* @kind spacing */
+  --4: 8; /* @kind spacing */
+  --8-2: 12; /* @kind spacing */
+  --80-2: 84; /* @kind spacing */
+  --80: 84; /* @kind spacing */
+  --8: 12; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 20; /* @kind font */
+  --size-20: 24; /* @kind font */
+  --size-28: 32; /* @kind font */
+}
+
+:root[data-mode="expanded-8"] {
+  --12-2: 20; /* @kind spacing */
+  --12: 20; /* @kind spacing */
+  --16-2: 24; /* @kind spacing */
+  --16-3: 24; /* @kind spacing */
+  --16-4: 24; /* @kind spacing */
+  --16: 24; /* @kind spacing */
+  --20-2: 28; /* @kind spacing */
+  --20-3: 28; /* @kind spacing */
+  --20-4: 28; /* @kind spacing */
+  --20: 28; /* @kind spacing */
+  --24-2: 32; /* @kind spacing */
+  --24-3: 32; /* @kind spacing */
+  --24-4: 32; /* @kind spacing */
+  --24: 32; /* @kind spacing */
+  --28-2: 36; /* @kind spacing */
+  --28-3: 36; /* @kind spacing */
+  --28: 36; /* @kind spacing */
+  --32: 40; /* @kind spacing */
+  --4-2: 12; /* @kind spacing */
+  --40-2: 48; /* @kind spacing */
+  --40: 48; /* @kind spacing */
+  --48: 56; /* @kind spacing */
+  --4: 12; /* @kind spacing */
+  --8-2: 16; /* @kind spacing */
+  --80-2: 88; /* @kind spacing */
+  --80: 88; /* @kind spacing */
+  --8: 16; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 12; /* @kind font */
+  --size-20: 16; /* @kind font */
+  --size-28: 24; /* @kind font */
+}
+
+:root[data-mode="condensed-4"] {
+  --12-2: 8; /* @kind spacing */
+  --12: 8; /* @kind spacing */
+  --16-2: 12; /* @kind spacing */
+  --16-3: 12; /* @kind spacing */
+  --16-4: 12; /* @kind spacing */
+  --16: 12; /* @kind spacing */
+  --20-2: 16; /* @kind spacing */
+  --20-3: 16; /* @kind spacing */
+  --20-4: 16; /* @kind spacing */
+  --20: 16; /* @kind spacing */
+  --24-2: 20; /* @kind spacing */
+  --24-3: 20; /* @kind spacing */
+  --24-4: 20; /* @kind spacing */
+  --24: 20; /* @kind spacing */
+  --28-2: 24; /* @kind spacing */
+  --28-3: 24; /* @kind spacing */
+  --28: 24; /* @kind spacing */
+  --32: 28; /* @kind spacing */
+  --4-2: 0; /* @kind spacing */
+  --40-2: 36; /* @kind spacing */
+  --40: 36; /* @kind spacing */
+  --48: 44; /* @kind spacing */
+  --4: 0; /* @kind spacing */
+  --8-2: 4; /* @kind spacing */
+  --80-2: 76; /* @kind spacing */
+  --80: 76; /* @kind spacing */
+  --8: 4; /* @kind spacing */
+  --radius-4: 4; /* @kind radius */
+  --radius-8: 8; /* @kind radius */
+  --size-16: 16; /* @kind font */
+  --size-20: 20; /* @kind font */
+  --size-28: 28; /* @kind font */
+}
+
+:root[data-theme="dark"], .dark {
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-1: rgb(51,51,51); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-2: rgba(255,255,255,0.04); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-3: rgba(0,0,0,0.1); /* @kind color */
+  --background-4: rgb(237,238,252); /* @kind color */
+  --background-4: rgba(0,0,0,0.1); /* @kind color */
+  --background-5: rgb(230,241,253); /* @kind color */
+  --background-5: rgba(255,255,255,0.8); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-3: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100-4: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-100: rgb(255,255,255); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-10: rgba(255,255,255,0.15); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-20: rgba(255,255,255,0.2); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-2: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-3: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-40: rgba(255,255,255,0.4); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-4: rgba(255,255,255,0.1); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80-2: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --black-80: rgba(255,255,255,0.8); /* @kind color */
+  --color-1: rgb(230,241,253); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --color-2: rgb(237,238,252); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo-2: rgb(237,237,255); /* @kind color */
+  --logo: rgb(76,152,253); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --primary: var(--secondary-indigo); /* @kind color */
+  --secondary-blue: rgb(10,132,255); /* @kind color */
+  --secondary-blue: rgb(125,187,255); /* @kind color */
+  --secondary-green: rgb(113,221,140); /* @kind color */
+  --secondary-green: rgb(48,209,88); /* @kind color */
+  --secondary-indigo: rgb(173,173,251); /* @kind color */
+  --secondary-indigo: rgb(94,92,230); /* @kind color */
+  --secondary-purple: rgb(184,153,235); /* @kind color */
+  --secondary-purple: rgb(191,90,242); /* @kind color */
+  --secondary-red: rgb(255,69,58); /* @kind color */
+  --secondary-red: rgb(255,71,71); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --secondary-yellow: rgb(255,214,10); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-100: rgb(0,0,0); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-10: rgba(0,0,0,0.1); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-20: rgba(0,0,0,0.2); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40-2: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+  --white-40: rgba(0,0,0,0.4); /* @kind color */
+}
+
+:root[data-theme="light"], .light {
+  --background-1: rgb(245,245,246); /* @kind color */
+  --background-2: rgb(255,255,255); /* @kind color */
+  --background-3: rgba(0,0,0,0.03); /* @kind color */
+  --background-4: rgba(0,0,0,0.02); /* @kind color */
+  --background-5: rgb(255,255,255); /* @kind color */
+  --black-100-2: rgb(0,0,0); /* @kind color */
+  --black-100-3: rgb(0,0,0); /* @kind color */
+  --black-100-4: rgb(0,0,0); /* @kind color */
+  --black-100: rgb(0,0,0); /* @kind color */
+  --black-10: rgba(0,0,0,0.1); /* @kind color */
+  --black-20: rgba(0,0,0,0.2); /* @kind color */
+  --black-4-2: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-3: rgba(0,0,0,0.04); /* @kind color */
+  --black-4-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-40: rgba(0,0,0,0.4); /* @kind color */
+  --black-4: rgba(0,0,0,0.04); /* @kind color */
+  --black-80-2: rgba(0,0,0,0.8); /* @kind color */
+  --black-80: rgba(0,0,0,0.8); /* @kind color */
+  --color-1: rgb(231,235,245); /* @kind color */
+  --color-2: rgb(231,231,238); /* @kind color */
+  --logo-2: rgb(79,80,127); /* @kind color */
+  --logo: var(--primary); /* @kind color */
+  --primary: var(--secondary-blue); /* @kind color */
+  --secondary-blue: rgb(0,122,255); /* @kind color */
+  --secondary-green: rgb(52,199,89); /* @kind color */
+  --secondary-indigo: rgb(88,86,214); /* @kind color */
+  --secondary-purple: rgb(175,82,222); /* @kind color */
+  --secondary-red: rgb(255,59,48); /* @kind color */
+  --secondary-yellow: rgb(255,204,0); /* @kind color */
+  --white-100: rgb(255,255,255); /* @kind color */
+  --white-10: rgba(255,255,255,0.1); /* @kind color */
+  --white-20: rgba(255,255,255,0.2); /* @kind color */
+  --white-40-2: rgba(255,255,255,0.4); /* @kind color */
+  --white-40: rgba(255,255,255,0.4); /* @kind color */
+}
+
+:root[data-mode="paragraph"] {
+  --10: 10; /* @kind spacing */
+  --12-3: 12; /* @kind spacing */
+  --14: 14; /* @kind spacing */
+  --18: 18; /* @kind spacing */
+  --8-3: 8; /* @kind spacing */
+}
+
+:root[data-mode="sf-pro"] {
+  --font-family: "SF Pro"; /* @kind font */
+  --font: "SF Pro"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="bai-jamjuree"] {
+  --font-family: "Bai Jamjuree"; /* @kind font */
+  --font: "Bai Jamjuree"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="space-grotesk"] {
+  --font-family: "Space Grotesk"; /* @kind font */
+  --font: "Space Grotesk"; /* @kind font */
+  --letter-spacing-2: 0; /* @kind spacing */
+  --letter-spacing: 0; /* @kind spacing */
+}
+
+:root[data-mode="semi-bold-regular"] {
+  --regular-2: 600; /* @kind font */
+  --regular: 600; /* @kind font */
+  --semi-bold: 400; /* @kind font */
+  --semibold: 400; /* @kind font */
+}
+
+/* No TEXT/EFFECT styles in this file. */
+
+/* Semantic aliases layered over the raw Figma Variables in fig-tokens.css.
+   Raw names are the file's own (--black-100, --background-2, --24-2, …); these read better in product code.
+   FLOAT tokens are unitless — always wrap in calc(var(--x) * 1px). */
+
+:root {
+  /* Text */
+  --text-primary: var(--black-100);          /* rgb(0,0,0) — 674 uses, the workhorse */
+  --text-secondary: var(--black-80);         /* rgba(0,0,0,0.8) */
+  --text-muted: var(--black-40);             /* rgba(0,0,0,0.4) — placeholders, timestamps */
+  --text-disabled: var(--black-20);
+  --text-on-dark: var(--white-100);
+  --text-sidebar: rgb(58,58,58);             /* literal in the file: sidebar labels + wordmark */
+  --text-link: var(--logo-2);                /* rgb(79,80,127) — the indigo "Click here to…" links */
+
+  /* Surfaces */
+  --surface-page: var(--background-1);       /* rgb(255,255,255) */
+  --surface-sunken: var(--background-2);     /* rgb(249,249,250) — 174 uses: panels, card wells */
+  --surface-glass: var(--background-3);      /* rgba(255,255,255,0.8) — behind backdrop-filter */
+  --surface-tint-indigo: var(--background-4);/* rgb(237,238,252) */
+  --surface-tint-blue: var(--background-5);  /* rgb(230,241,253) */
+  --surface-hover: var(--black-4);           /* rgba(0,0,0,0.04) — the universal hover wash */
+  --surface-inverse: rgb(28,28,30);          /* section plates, filled buttons */
+
+  /* Lines */
+  --border-subtle: var(--black-4);
+  --border-default: var(--black-10);
+  --border-strong: var(--black-20);
+
+  /* Brand */
+  --brand-mark-bg: rgb(0,0,0);
+  --brand-logo-blue: var(--logo);            /* rgb(76,152,253) */
+  --brand-logo-indigo: var(--logo-2);        /* rgb(79,80,127) */
+
+  /* Status / channel colors (iOS-derived secondary ramp) */
+  --status-green: var(--secondary-green);
+  --status-red: var(--secondary-red);
+  --status-yellow: var(--secondary-yellow);
+  --status-blue: var(--secondary-blue);
+  --status-indigo: var(--secondary-indigo);
+  --status-purple: var(--secondary-purple);
+  --channel-whatsapp: rgb(37,211,102);
+
+  /* Type — the file's real ladder */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --size-body: 14px;      /* line-height 20px — 68 of the file's 96 text runs */
+  --size-body-lg: 16px;   /* line-height 24px */
+  --size-caption: 12px;   /* line-height 16px */
+  --size-micro: 10px;
+  --size-title: 24px;     /* Semi Bold, page + card headings */
+  --size-hero: 44px;      /* Semi Bold -2% tracking, login headline */
+  --size-plate: 80px;     /* Bold, section plates */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-hero: -0.02em;
+
+  /* Radii — the file's actual values, not a rounded scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-card: 30px;    /* login side panel */
+  --radius-pill: 80px;    /* avatars, chips */
+
+  /* Elevation. The file leans on hairline insets, not drop shadows. */
+  --ring-hairline: inset 0 0 0 1px var(--black-10);
+  --ring-avatar: inset 0 0 0 3.2px rgb(249,249,250); /* @kind shadow */
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-float: 0 8px 24px rgba(0,0,0,0.08);
+  --blur-glass: blur(45.113px); /* @kind other */
+
+  /* Motion. Nothing in the file is animated; these are the house defaults for recreations. */
+  --ease-standard: cubic-bezier(0.2, 0, 0.2, 1); /* @kind other */
+  --duration-fast: 120ms; /* @kind other */
+  --duration-base: 200ms; /* @kind other */
+}
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { color: var(--text-primary); text-decoration: underline; }
+
+</style>
+
+<style>
+body{margin:0;background:rgb(232,232,234);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:rgb(79,80,127);text-decoration:none}
+a:hover{color:rgb(0,0,0);text-decoration:underline}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes lf-pulse{0%{opacity:1}50%{opacity:.25}100%{opacity:1}}
+@keyframes lf-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes lf-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div style="width:100%;max-width:430px;height:100vh;margin:0 auto;background:rgb(249,249,250);position:relative;display:flex;flex-direction:column;overflow-y:auto;color:#000">
+
+  <header style="position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06);padding:14px 16px 12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font:italic 500 11px/16px 'Inter',sans-serif;letter-spacing:0.06em;color:rgba(0,0,0,0.35)">LEADFLO.WASUP</div>
+        <div style="font:600 20px/26px 'Inter',sans-serif;letter-spacing:-0.01em;color:#000">{{ screenTitle }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;padding:3px 10px 3px 8px;border-radius:80px;background:rgba(113,221,140,0.16)">
+        <span style="width:6px;height:6px;border-radius:80px;background:var(--secondary-green)"></span>
+        <span style="font:500 11px/16px 'Inter',sans-serif;color:rgb(38,138,72)">live</span>
+      </div>
+      <div sc-camel-on-click="{{ runPoll }}" style="width:38px;height:38px;flex:none;border-radius:80px;background:rgb(28,28,30);display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <span style="--sp: {{ pollSpin }};display:flex;animation:var(--sp,none)">
+          <x-import component-from-global-scope="RapidScreenDesignSystem_347418.ArrowsDownUp" size="18" dc-props="{{ whiteIcon }}" hint-size="18px,18px"></x-import>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <div style="flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:14px">
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <sc-for list="{{ metrics }}" as="m" hint-placeholder-count="4">
+            <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:14px">
+              <div style="font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">{{ m.label }}</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px">
+                <span style="font:600 24px/30px 'Inter',sans-serif;letter-spacing:-0.01em;color:#000">{{ m.value }}</span>
+                <span style="--dc: {{ m.deltaColor }};font:500 11px/16px 'Inter',sans-serif;color:var(--dc,rgba(0,0,0,0.4))">{{ m.delta }}</span>
+              </div>
+              <div style="font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-top:2px">{{ m.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px 12px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:600 14px/20px 'Inter',sans-serif;color:#000">Leads by day</span>
+            <span style="font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">last 30 days</span>
+          </div>
+          <div style="display:flex;gap:14px;margin:6px 0 10px">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:80px;background:rgb(28,28,30)"></span><span style="font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.6)">All</span></span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:80px;background:var(--secondary-indigo)"></span><span style="font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.6)">Implant</span></span>
+          </div>
+          <div style="position:relative">
+            <svg sc-camel-view-box="0 0 360 150" style="display:block;width:100%;height:auto;overflow:visible">
+              <sc-for list="{{ gridLines }}" as="g" hint-placeholder-count="4">
+                <g>
+                  <line x1="20" y1="{{ g.y }}" x2="360" y2="{{ g.y }}" stroke="rgba(0,0,0,0.06)" stroke-width="1"></line>
+                  <text x="0" y="{{ g.ty }}" fill="rgba(0,0,0,0.32)" font-size="9" font-family="Inter, sans-serif">{{ g.label }}</text>
+                </g>
+              </sc-for>
+              <sc-if value="{{ isCurve }}">
+                <g>
+                  <defs>
+                    <linearGradient id="lfmArea" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="rgba(0,0,0,0.10)"></stop>
+                      <stop offset="100%" stop-color="rgba(0,0,0,0)"></stop>
+                    </linearGradient>
+                  </defs>
+                  <path d="{{ areaPath }}" fill="url(#lfmArea)"></path>
+                  <path d="{{ linePath }}" fill="none" stroke="rgb(28,28,30)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="{{ implantPath }}" fill="none" stroke="var(--secondary-indigo)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </g>
+              </sc-if>
+              <sc-if value="{{ isBars }}">
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="30">
+                  <g>
+                    <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="2" fill="rgba(0,0,0,0.14)"></rect>
+                    <rect x="{{ b.x }}" y="{{ b.iy }}" width="{{ b.w }}" height="{{ b.ih }}" rx="2" fill="var(--secondary-indigo)"></rect>
+                  </g>
+                </sc-for>
+              </sc-if>
+              <sc-for list="{{ hits }}" as="h" hint-placeholder-count="30">
+                <g>
+                  <rect x="{{ h.x }}" y="0" width="{{ h.w }}" height="130" fill="transparent" sc-camel-on-click="{{ h.on }}"></rect>
+                  <circle cx="{{ h.cx }}" cy="{{ h.cy }}" r="{{ h.r }}" fill="rgb(28,28,30)"></circle>
+                </g>
+              </sc-for>
+            </svg>
+            <sc-if value="{{ tipOn }}">
+              <div style="--tl: {{ tipLeft }};position:absolute;top:-4px;left:var(--tl,0px);transform:translateX(-50%);background:rgb(28,28,30);color:#fff;border-radius:8px;padding:6px 9px;pointer-events:none;white-space:nowrap">
+                <div style="font:500 10px/14px 'Inter',sans-serif;color:rgba(255,255,255,0.6)">{{ tipDate }}</div>
+                <div style="font:600 13px/18px 'Inter',sans-serif">{{ tipTotal }} leads · {{ tipImplant }} implant</div>
+              </div>
+            </sc-if>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0 0 20px">
+            <sc-for list="{{ xLabels }}" as="x" hint-placeholder-count="4">
+              <span style="font:400 10px/14px 'Inter',sans-serif;color:rgba(0,0,0,0.32)">{{ x.label }}</span>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="font:600 14px/20px 'Inter',sans-serif;color:#000;margin-bottom:12px">Lead type mix</div>
+          <sc-if value="{{ isDonut }}">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+              <div style="position:relative;flex:none">
+                <svg sc-camel-view-box="0 0 180 180" style="width:132px;height:132px;transform:rotate(-90deg)">
+                  <sc-for list="{{ donut }}" as="s" hint-placeholder-count="6">
+                    <circle cx="90" cy="90" r="64" fill="none" stroke="{{ s.color }}" stroke-width="24" stroke-dasharray="{{ s.dash }}" stroke-dashoffset="{{ s.offset }}"></circle>
+                  </sc-for>
+                </svg>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                  <span style="font:600 20px/24px 'Inter',sans-serif;color:#000">{{ totalLeads }}</span>
+                  <span style="font:400 10px/14px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">leads · 30d</span>
+                </div>
+              </div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px">
+                <sc-for list="{{ donut }}" as="s" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:center;gap:7px">
+                    <span style="--c: {{ s.color }};width:8px;height:8px;border-radius:2px;background:var(--c,#000);flex:none"></span>
+                    <span style="flex:1;min-width:0;font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span>
+                    <span style="font:500 11px/16px 'Inter',sans-serif;color:#000;flex:none">{{ s.pct }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isTypeBars }}">
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ donut }}" as="s" hint-placeholder-count="6">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.7);margin-bottom:4px">
+                    <span>{{ s.name }}</span><span style="color:rgba(0,0,0,0.4)">{{ s.value }}</span>
+                  </div>
+                  <div style="height:8px;border-radius:80px;background:rgba(0,0,0,0.05);overflow:hidden">
+                    <div style="--w: {{ s.pctW }}; --c: {{ s.color }};width:var(--w,0%);background:var(--c,#000);height:100%;border-radius:80px"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 14px 10px">
+            <span style="font:600 14px/20px 'Inter',sans-serif;color:#000">Latest implant leads</span>
+            <span sc-camel-on-click="{{ goLeads }}" style="font:500 12px/16px 'Inter',sans-serif;color:rgb(79,80,127)">All</span>
+          </div>
+          <sc-for list="{{ recentLeads }}" as="l" hint-placeholder-count="5">
+            <div sc-camel-on-click="{{ l.open }}" style="display:flex;align-items:center;gap:11px;padding:11px 14px;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04);cursor:pointer">
+              <span style="width:36px;height:36px;flex:none;border-radius:80px;background:rgb(249,249,250);box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font:500 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.5)">{{ l.initials }}</span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font:500 14px/20px 'Inter',sans-serif;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+                <span style="display:block;font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">{{ l.stageLabel }} · {{ l.seen }}</span>
+              </span>
+              <span style="--c: {{ l.statusColor }}; --bg: {{ l.statusTint }};flex:none;display:inline-flex;align-items:center;border-radius:80px;padding:2px 9px;background:var(--bg,rgba(0,0,0,0.05));color:var(--c,rgba(0,0,0,0.55));font:500 11px/16px 'Inter',sans-serif;white-space:nowrap">{{ l.statusShort }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <span style="font:600 14px/20px 'Inter',sans-serif;color:#000">Activity</span>
+            <span sc-camel-on-click="{{ goActivity }}" style="font:500 12px/16px 'Inter',sans-serif;color:rgb(79,80,127)">Full log</span>
+          </div>
+          <sc-for list="{{ recentEvents }}" as="e" hint-placeholder-count="4">
+            <div style="display:flex;gap:10px;padding:9px 0;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04)">
+              <span style="--c: {{ e.color }};width:6px;height:6px;border-radius:80px;background:var(--c,#000);margin-top:7px;flex:none"></span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font:500 13px/18px 'Inter',sans-serif;color:#000">{{ e.title }}</span>
+                <span style="display:block;font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">{{ e.time }}</span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLeads }}">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+            <span sc-camel-on-click="{{ f.go }}" style="--bg: {{ f.bg }}; --fc: {{ f.fc }};flex:none;background:var(--bg,#fff);color:var(--fc,rgba(0,0,0,0.65));box-shadow:inset 0 0 0 1px rgba(0,0,0,0.08);font:500 13px/18px 'Inter',sans-serif;padding:7px 14px;border-radius:80px;cursor:pointer">{{ f.label }}</span>
+          </sc-for>
+        </div>
+        <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">{{ leadCountLabel }}</div>
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);overflow:hidden">
+          <sc-for list="{{ filteredLeads }}" as="l" hint-placeholder-count="10">
+            <div sc-camel-on-click="{{ l.open }}" style="display:flex;align-items:center;gap:11px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04);cursor:pointer">
+              <span style="width:38px;height:38px;flex:none;border-radius:80px;background:rgb(249,249,250);box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font:500 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.5)">{{ l.initials }}</span>
+              <span style="flex:1;min-width:0">
+                <span style="display:flex;align-items:center;gap:6px">
+                  <span style="font:500 14px/20px 'Inter',sans-serif;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+                  <sc-if value="{{ l.isTest }}">
+                    <span style="flex:none;font:500 10px/14px 'Inter',sans-serif;color:rgb(79,80,127);background:rgb(237,238,252);padding:1px 6px;border-radius:80px">test</span>
+                  </sc-if>
+                </span>
+                <span style="display:block;font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">{{ l.type }} · {{ l.source }}</span>
+              </span>
+              <span style="flex:none;text-align:right">
+                <span style="--c: {{ l.statusColor }}; --bg: {{ l.statusTint }};display:inline-flex;align-items:center;border-radius:80px;padding:2px 9px;background:var(--bg,rgba(0,0,0,0.05));color:var(--c,rgba(0,0,0,0.55));font:500 11px/16px 'Inter',sans-serif;white-space:nowrap">{{ l.statusShort }}</span>
+                <span style="display:block;font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.3);margin-top:3px">{{ l.seen }}</span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isActivityScreen }}">
+      <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:6px 14px 10px">
+        <sc-for list="{{ allEvents }}" as="e" hint-placeholder-count="12">
+          <div style="display:flex;gap:11px;padding:12px 0;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04)">
+            <span style="--c: {{ e.color }};width:8px;height:8px;border-radius:80px;background:var(--c,#000);margin-top:6px;flex:none"></span>
+            <span style="flex:1;min-width:0">
+              <span style="display:flex;align-items:baseline;gap:8px">
+                <span style="font:500 13px/18px 'Inter',sans-serif;color:#000">{{ e.title }}</span>
+                <span style="font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.3);margin-left:auto;flex:none">{{ e.time }}</span>
+              </span>
+              <span style="display:block;font:400 11px/17px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.45);margin-top:2px;word-break:break-word">{{ e.detail }}</span>
+              <span style="display:inline-block;margin-top:5px;font:500 10px/16px ui-monospace,monospace;color:rgba(0,0,0,0.5);background:rgba(0,0,0,0.04);border-radius:4px;padding:0 6px">{{ e.kind }}</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSettings }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="font:600 14px/20px 'Inter',sans-serif;color:#000">Poll frequency</div>
+          <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:12px">How often the scraper hits Leadflo /actions/due.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ intervals }}" as="iv" hint-placeholder-count="4">
+              <span sc-camel-on-click="{{ iv.go }}" style="--bg: {{ iv.bg }}; --fc: {{ iv.fc }};background:var(--bg,#fff);color:var(--fc,rgba(0,0,0,0.7));box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:500 14px/20px 'Inter',sans-serif;padding:11px 0;border-radius:20px;text-align:center;cursor:pointer">{{ iv.label }}</span>
+            </sc-for>
+          </div>
+          <div style="margin-top:12px;font:400 11px/17px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.45)">pollIntervalMs = {{ intervalMs }} · ~{{ runsPerDay }} runs a day</div>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="font:600 14px/20px 'Inter',sans-serif;color:#000">Tracked treatment types</div>
+          <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:8px">Untracked types are logged but never sent to your webhook.</div>
+          <sc-for list="{{ typeToggles }}" as="t" hint-placeholder-count="6">
+            <div sc-camel-on-click="{{ t.go }}" style="display:flex;align-items:center;gap:12px;padding:11px 0;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04);cursor:pointer;min-height:44px;box-sizing:border-box">
+              <span style="--bg: {{ t.boxBg }}; --bs: {{ t.boxRing }};background:var(--bg,#fff);box-shadow:var(--bs,inset 0 0 0 1px rgba(0,0,0,0.2));width:22px;height:22px;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font:700 12px/12px 'Inter',sans-serif">{{ t.tick }}</span>
+              <span style="flex:1;min-width:0;font:400 15px/20px 'Inter',sans-serif;color:#000">{{ t.name }}</span>
+              <span style="flex:none;font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.35)">{{ t.count }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="font:600 14px/20px 'Inter',sans-serif;color:#000;margin-bottom:4px">Write-back rules</div>
+          <sc-for list="{{ switches }}" as="s" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 0;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04)">
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font:500 14px/20px 'Inter',sans-serif;color:#000">{{ s.label }}</span>
+                <span style="display:block;font:400 12px/17px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">{{ s.hint }}</span>
+              </span>
+              <span sc-camel-on-click="{{ s.go }}" style="--bg: {{ s.trackBg }};background:var(--bg,rgba(0,0,0,0.1));width:48px;height:28px;border-radius:80px;flex:none;cursor:pointer;display:flex;align-items:center;padding:2px;box-sizing:border-box">
+                <span style="--ml: {{ s.knobLeft }};margin-left:var(--ml,0px);width:24px;height:24px;border-radius:80px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.2);transition:margin-left 160ms cubic-bezier(0.2,0,0.2,1)"></span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="font:600 14px/20px 'Inter',sans-serif;color:#000;margin-bottom:12px">Webhooks</div>
+          <span style="display:block;font:500 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.5);margin-bottom:6px">WEBHOOK_URL</span>
+          <input value="{{ webhookUrl }}" sc-camel-on-change="{{ setWebhook }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:400 13px/18px ui-monospace,Menlo,monospace;color:#000;background:#fff;outline:none">
+          <div style="font:400 12px/18px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-top:10px">Signed with <span style="font-family:ui-monospace,monospace">X-Signature</span> (HMAC-SHA256).</div>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="font:600 14px/20px 'Inter',sans-serif;color:#000;margin-bottom:10px">Runtime config</div>
+          <pre style="margin:0;padding:12px;border-radius:10px;background:rgb(249,249,250);font:400 11px/18px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.75);white-space:pre-wrap;word-break:break-word">{{ configJson }}</pre>
+        </div>
+
+        <div sc-camel-on-click="{{ saveSettings }}" style="padding:14px;border-radius:20px;background:rgb(28,28,30);color:#fff;font:500 15px/20px 'Inter',sans-serif;text-align:center;cursor:pointer">Save changes</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDocs }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <p style="margin:0;font:400 14px/22px 'Inter',sans-serif;color:rgba(0,0,0,0.8);text-wrap:pretty">This service polls Leadflo for <b>Implant</b> leads every minute, POSTs each <i>new</i> lead to your webhook, then accepts an AI response and writes it back as a Leadflo note (test-named leads only by default).</p>
+          <div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:rgb(249,249,250)">
+            <div style="font:500 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">Base URL</div>
+            <div style="font:400 12px/18px ui-monospace,Menlo,monospace;color:#000;word-break:break-all">https://your-app.azurewebsites.net</div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+          <div style="font:600 14px/20px 'Inter',sans-serif;color:#000;margin-bottom:8px">Flow</div>
+          <sc-for list="{{ flowSteps }}" as="s" hint-placeholder-count="5">
+            <div style="display:flex;gap:11px;align-items:flex-start;padding:9px 0;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04)">
+              <span style="width:22px;height:22px;flex:none;border-radius:80px;background:rgb(28,28,30);color:#fff;display:flex;align-items:center;justify-content:center;font:500 12px/16px 'Inter',sans-serif">{{ s.n }}</span>
+              <span style="font:400 13px/20px 'Inter',sans-serif;color:rgba(0,0,0,0.8)">{{ s.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="font:500 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.35);text-transform:uppercase;letter-spacing:0.06em;padding:0 2px">Endpoints</div>
+        <sc-for list="{{ endpoints }}" as="e" hint-placeholder-count="7">
+          <div sc-camel-on-click="{{ e.toggle }}" style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);overflow:hidden;cursor:pointer">
+            <div style="display:flex;align-items:center;gap:9px;padding:13px 14px">
+              <span style="--c: {{ e.mColor }}; --bg: {{ e.mBg }};flex:none;color:var(--c,#000);background:var(--bg,rgba(0,0,0,0.05));padding:2px 8px;border-radius:80px;font:600 10px/16px ui-monospace,monospace;letter-spacing:0.04em">{{ e.method }}</span>
+              <span style="flex:1;min-width:0;font:500 13px/18px ui-monospace,Menlo,monospace;color:#000;word-break:break-all">{{ e.path }}</span>
+              <span style="flex:none;font:400 16px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.25)">{{ e.chev }}</span>
+            </div>
+            <div style="padding:0 14px 13px;font:400 12px/18px 'Inter',sans-serif;color:rgba(0,0,0,0.5)">{{ e.desc }}</div>
+            <sc-if value="{{ e.showSample }}">
+              <pre style="margin:0;padding:12px 14px;background:rgb(249,249,250);font:400 11px/18px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.75);white-space:pre-wrap;word-break:break-word">{{ e.sample }}</pre>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <nav style="position:sticky;bottom:0;z-index:30;background:rgba(255,255,255,0.94);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(0,0,0,0.06);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px 10px">
+    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="5">
+      <div sc-camel-on-click="{{ item.go }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 4px;min-height:44px;box-sizing:border-box;cursor:pointer">
+        <span style="--op: {{ item.op }};opacity:var(--op,0.4);display:flex">
+          <x-import component-from-global-scope="{{ item.comp }}" size="22" hint-size="22px,22px"></x-import>
+        </span>
+        <span style="--fc: {{ item.fc }}; --fw: {{ item.fw }};color:var(--fc,rgba(0,0,0,0.4));font-weight:var(--fw,400);font-size:10px;line-height:14px;font-family:'Inter',sans-serif">{{ item.label }}</span>
+      </div>
+    </sc-for>
+  </nav>
+
+  <sc-if value="{{ panelOpen }}">
+    <div style="position:fixed;inset:0;z-index:50;display:flex;justify-content:center">
+      <div style="width:100%;max-width:430px;background:rgb(249,249,250);display:flex;flex-direction:column;overflow:auto;animation:lf-in 220ms cubic-bezier(0.2,0,0.2,1)">
+        <div style="position:sticky;top:0;z-index:2;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06);padding:12px 16px">
+          <div sc-camel-on-click="{{ closePanel }}" style="display:inline-flex;align-items:center;gap:6px;font:500 14px/20px 'Inter',sans-serif;color:rgb(79,80,127);cursor:pointer;min-height:44px">‹ Leads</div>
+        </div>
+
+        <div style="padding:4px 16px 40px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="width:52px;height:52px;flex:none;border-radius:80px;background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font:500 16px/22px 'Inter',sans-serif;color:rgba(0,0,0,0.5)">{{ sel.initials }}</span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:7px">
+                <span style="font:600 20px/26px 'Inter',sans-serif;color:#000">{{ sel.name }}</span>
+                <sc-if value="{{ sel.isTest }}">
+                  <span style="flex:none;font:500 10px/14px 'Inter',sans-serif;color:rgb(79,80,127);background:rgb(237,238,252);padding:1px 6px;border-radius:80px">test</span>
+                </sc-if>
+              </div>
+              <div style="font:400 11px/17px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.4);word-break:break-all">{{ sel.patientId }}</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <span sc-camel-on-click="{{ openNote }}" style="padding:13px 0;border-radius:20px;background:rgb(28,28,30);color:#fff;font:500 14px/20px 'Inter',sans-serif;text-align:center;cursor:pointer">Write AI note</span>
+            <span sc-camel-on-click="{{ resendWebhook }}" style="padding:13px 0;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);color:#000;font:500 14px/20px 'Inter',sans-serif;text-align:center;cursor:pointer">Resend webhook</span>
+          </div>
+
+          <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ selFields }}" as="f" hint-placeholder-count="8">
+              <div style="min-width:0">
+                <div style="font:400 10px/14px 'Inter',sans-serif;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:0.04em">{{ f.label }}</div>
+                <div style="font:400 14px/20px 'Inter',sans-serif;color:#000;word-break:break-word">{{ f.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:16px 14px">
+            <div style="font:600 14px/20px 'Inter',sans-serif;color:#000;margin-bottom:4px">Notes &amp; actions</div>
+            <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">Everything this service did for {{ sel.firstName }}.</div>
+            <sc-for list="{{ selTimeline }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px">
+                <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:10px">
+                  <span style="--c: {{ t.color }};width:10px;height:10px;border-radius:80px;background:var(--c,#000);margin-top:5px;flex:none"></span>
+                  <span style="--lo: {{ t.lineOpacity }};opacity:var(--lo,1);width:1px;flex:1;background:rgba(0,0,0,0.1);margin:4px 0"></span>
+                </div>
+                <div style="flex:1;min-width:0;padding-bottom:16px">
+                  <div style="display:flex;align-items:baseline;gap:8px">
+                    <span style="font:500 14px/20px 'Inter',sans-serif;color:#000">{{ t.title }}</span>
+                    <span style="font:400 11px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.35)">{{ t.time }}</span>
+                  </div>
+                  <div style="font:400 13px/20px 'Inter',sans-serif;color:rgba(0,0,0,0.6);text-wrap:pretty">{{ t.detail }}</div>
+                  <sc-if value="{{ t.body }}">
+                    <div style="--bg: {{ t.bodyBg }};background:var(--bg,rgb(249,249,250));margin-top:8px;padding:11px 12px;border-radius:12px;font:400 13px/20px 'Inter',sans-serif;color:rgba(0,0,0,0.8);text-wrap:pretty">{{ t.body }}</div>
+                  </sc-if>
+                  <sc-if value="{{ t.code }}">
+                    <pre style="margin:8px 0 0;padding:11px 12px;border-radius:12px;background:rgb(249,249,250);font:400 11px/17px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.6);white-space:pre-wrap;word-break:break-word">{{ t.code }}</pre>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ noteOpen }}">
+    <div style="position:fixed;inset:0;z-index:70;display:flex;align-items:flex-end;justify-content:center">
+      <div sc-camel-on-click="{{ closeNote }}" style="position:absolute;inset:0;background:rgba(0,0,0,0.28)"></div>
+      <div style="position:relative;width:100%;max-width:430px;background:#fff;border-radius:24px 24px 0 0;padding:20px 16px 28px;animation:lf-up 220ms cubic-bezier(0.2,0,0.2,1)">
+        <div style="width:36px;height:4px;border-radius:80px;background:rgba(0,0,0,0.15);margin:0 auto 16px"></div>
+        <div style="font:600 18px/24px 'Inter',sans-serif;color:#000">Write AI note</div>
+        <div style="font:400 12px/18px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.45);margin-bottom:14px;word-break:break-all">POST /api/leads/{{ sel.patientId }}/notes</div>
+        <textarea value="{{ noteText }}" sc-camel-on-change="{{ setNote }}" placeholder="AI-written note content" style="width:100%;box-sizing:border-box;height:132px;resize:none;padding:12px 14px;border-radius:12px;border:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:400 15px/22px 'Inter',sans-serif;color:#000;outline:none"></textarea>
+        <div sc-camel-on-click="{{ toggleForce }}" style="display:flex;align-items:center;gap:11px;margin-top:14px;cursor:pointer;min-height:44px">
+          <span style="--bg: {{ forceBg }}; --bs: {{ forceRing }};background:var(--bg,#fff);box-shadow:var(--bs,inset 0 0 0 1px rgba(0,0,0,0.2));width:22px;height:22px;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font:700 12px/12px 'Inter',sans-serif">{{ forceTick }}</span>
+          <span style="font:400 14px/20px 'Inter',sans-serif;color:#000">Force write even if name is not a test lead</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
+          <span sc-camel-on-click="{{ closeNote }}" style="padding:14px 0;border-radius:20px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:500 15px/20px 'Inter',sans-serif;color:#000;text-align:center;cursor:pointer">Cancel</span>
+          <span sc-camel-on-click="{{ sendNote }}" style="padding:14px 0;border-radius:20px;background:rgb(28,28,30);color:#fff;font:500 15px/20px 'Inter',sans-serif;text-align:center;cursor:pointer">Send note</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}">
+    <div style="position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:90;background:rgb(28,28,30);color:#fff;border-radius:20px;padding:10px 18px;font:500 13px/20px 'Inter',sans-serif;white-space:nowrap;animation:lf-up 180ms cubic-bezier(0.2,0,0.2,1)">{{ toast }}</div>
+  </sc-if>
+
+</div>
+
+
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900},&quot;trendStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Smooth curve&quot;,&quot;Bars&quot;],&quot;default&quot;:&quot;Smooth curve&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Charts&quot;},&quot;typeChart&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Donut&quot;,&quot;Bars&quot;],&quot;default&quot;:&quot;Donut&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Charts&quot;}}">
+
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = {
+      screen: 'dashboard',
+      selectedId: null,
+      noteOpen: false,
+      noteText: '',
+      force: false,
+      hover: null,
+      toast: '',
+      spinning: false,
+      filter: 'All',
+      openEndpoint: null,
+      days: this.buildDays(),
+      leads: this.buildLeads(),
+      events: this.buildEvents(),
+      intervalMs: 60000,
+      tracked: { Implant: true, Invisalign: false, Veneers: false, Whitening: false, 'Composite Bonding': false, Hygiene: false },
+      notesOnlyTest: true,
+      signWebhooks: true,
+      dedupe: true,
+      webhookUrl: '',
+      typeMix: [],
+      timelines: {},
+      kpi: null,
+      practiceName: 'Dental Asthetica',
+      lastPollAgo: '—',
+      nextRunIn: '—',
+      mode: 'live',
+      hydrated: false
+    };
+    // Live data from Leadflo tracker API
+    queueMicrotask(() => this.hydrate());
+    this._refresh = setInterval(() => this.hydrate(), 15000);
+  }
+
+  buildDays() {
+    let s = 20260807;
+    const rnd = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
+    const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const end = Date.UTC(2026, 7, 7);
+    const out = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(end - i * 86400000);
+      const dow = d.getUTCDay();
+      let total = Math.round(3 + rnd() * 6 + (i < 9 ? 1.4 : 0));
+      if (dow === 0 || dow === 6) total = Math.max(0, total - 3);
+      const implant = Math.max(0, Math.round(total * (0.42 + rnd() * 0.26)));
+      out.push({ label: d.getUTCDate() + ' ' + mon[d.getUTCMonth()], total, implant });
+    }
+    return out;
+  }
+
+  buildLeads() {
+    const raw = [
+      ['asif test','07599 211739','asif@smilefast.com','Implant','Practice Website','newLead','note_written',true,'12m ago','Thanks for your implant enquiry. Our treatment coordinator will call you today to book a free assessment and CT scan — typically a 40 minute appointment.'],
+      ['Marianne Whitlock','07700 900182','m.whitlock@outlook.com','Implant','Google Ads','contacted','webhook_sent',false,'41m ago',''],
+      ['Dev Chandra','07700 900413','dev.chandra@gmail.com','Implant','Practice Website','newLead','note_skipped',false,'1h ago','Single implant enquiry, upper right. Suggest same-week consult slot.'],
+      ['Priya Raghavan','07700 900771','priya.r@gmail.com','Invisalign','Instagram','newLead','untracked',false,'1h ago',''],
+      ['Tom Fenwick','07700 900228','tfenwick@btinternet.com','Implant','Referral','consultBooked','note_written',false,'2h ago','Referred by Dr Ellis. Consult booked Tuesday 11:00. Bring previous OPG.'],
+      ['Sadia Rahman','07700 900604','sadia.rahman@icloud.com','Implant','Practice Website','newLead','webhook_sent',false,'3h ago',''],
+      ['Grace Okonjo','07700 900355','g.okonjo@gmail.com','Veneers','Practice Website','newLead','untracked',false,'4h ago',''],
+      ['Liam Petrov','07700 900919','liam.petrov@yahoo.com','Implant','Facebook','newLead','note_failed',false,'5h ago','Enquiry about full arch. Awaiting retry.'],
+      ['Hannah Beaumont','07700 900147','hbeaumont@gmail.com','Implant','Google Ads','contacted','note_written',false,'7h ago','Two missing lower molars. Quoted range shared, finance options explained.'],
+      ['Yusuf Demir','07700 900530','yusuf.demir@gmail.com','Whitening','Practice Website','newLead','untracked',false,'9h ago',''],
+      ['Clara Nightingale','07700 900802','clara.n@hotmail.com','Implant','Referral','newLead','webhook_sent',false,'11h ago',''],
+      ['Owen Blackwood','07700 900066','owen.blackwood@gmail.com','Implant','Practice Website','treatmentPlanned','note_written',false,'1d ago','Treatment plan sent. Deposit link issued, valid 14 days.'],
+      ['Nadia test','07599 211740','nadia@smilefast.com','Implant','Practice Website','newLead','note_written',true,'1d ago','Test lead — note written to confirm the write-back path is healthy.'],
+      ['Ravi Shanmugam','07700 900487','ravi.s@gmail.com','Composite Bonding','Instagram','newLead','untracked',false,'1d ago',''],
+      ['Eleanor Mensah','07700 900291','e.mensah@gmail.com','Implant','Google Ads','contacted','note_written',false,'2d ago','Wants implant-retained denture. Scan appointment offered Thursday.'],
+      ['Jack Ferreira','07700 900738','jack.ferreira@gmail.com','Implant','Practice Website','newLead','note_skipped',false,'2d ago','Note held — non-test name and write-back is restricted.']
+    ];
+    const labels = { Implant: ['Completed Implant Contact Form'], Invisalign: ['Ortho enquiry'], Veneers: ['Cosmetic enquiry'], Whitening: ['Cosmetic enquiry'], 'Composite Bonding': ['Cosmetic enquiry'], Hygiene: ['Hygiene recall'] };
+    return raw.map((r, i) => ({
+      id: 'ld' + i,
+      patientId: 'lf_' + (742100 + i * 37) + 'a' + (i + 3) + 'e',
+      name: r[0], firstName: r[0].split(' ')[0],
+      phone: r[1], email: r[2], type: r[3], source: r[4], stage: r[5],
+      status: r[6], isTest: r[7], seen: r[8], aiNote: r[9],
+      labels: labels[r[3]] || [], tracked: r[3] === 'Implant'
+    }));
+  }
+
+  buildEvents() {
+    return [
+      ['poll.run','Poll run completed','18 due actions scanned · 3 implant · 1 new','12m ago','var(--secondary-blue)'],
+      ['lead.created','Webhook sent — asif test','POST /webhook/leadflo-implant → 200 (184ms)','12m ago','var(--secondary-indigo)'],
+      ['ai.response','AI response received','lf_742100a3e · 412 chars · force=false','11m ago','var(--secondary-purple)'],
+      ['note.written','Note written to Leadflo','POST /v3/patients/lf_742100a3e/notes → 201','11m ago','var(--secondary-green)'],
+      ['poll.run','Poll run completed','16 due actions scanned · 2 implant · 0 new','1h ago','var(--secondary-blue)'],
+      ['note.skipped','Note skipped — Dev Chandra','Non-test name and NOTES_ONLY_TEST_NAMES=true','1h ago','rgba(0,0,0,0.3)'],
+      ['lead.created','Webhook sent — Sadia Rahman','POST /webhook/leadflo-implant → 200 (211ms)','3h ago','var(--secondary-indigo)'],
+      ['note.failed','Note write failed — Liam Petrov','Leadflo responded 502 · retry in 15m','5h ago','var(--secondary-red)'],
+      ['poll.run','Poll run completed','21 due actions scanned · 4 implant · 2 new','5h ago','var(--secondary-blue)'],
+      ['note.written','Note written to Leadflo','POST /v3/patients/lf_742248a6e/notes → 201','7h ago','var(--secondary-green)'],
+      ['lead.created','Webhook sent — Clara Nightingale','POST /webhook/leadflo-implant → 200 (169ms)','11h ago','var(--secondary-indigo)'],
+      ['poll.run','Poll run completed','14 due actions scanned · 1 implant · 1 new','1d ago','var(--secondary-blue)']
+    ].map((e, i) => ({ id: 'ev' + i, kind: e[0], title: e[1], detail: e[2], time: e[3], color: e[4] }));
+  }
+
+
+  ago(iso) {
+    if (!iso) return '—';
+    const ms = Date.now() - new Date(iso).getTime();
+    if (!Number.isFinite(ms) || ms < 0) return 'just now';
+    const s = Math.floor(ms / 1000);
+    if (s < 60) return s + 's ago';
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 48) return h + 'h ago';
+    return Math.floor(h / 24) + 'd ago';
+  }
+
+  fmtDuration(ms) {
+    if (ms == null) return '—';
+    const sec = Math.round(ms / 1000);
+    if (sec < 60) return sec + 's';
+    const m = Math.floor(sec / 60), s = sec % 60;
+    if (m < 60) return s ? (m + 'm ' + s + 's') : (m + 'm');
+    return Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
+  }
+
+  eventTitle(kind, message) {
+    if (kind === 'poll.ok') return 'Poll run completed';
+    if (kind === 'poll.error') return 'Poll failed';
+    if (kind === 'webhook.sent') return message && message.indexOf('Resent') >= 0 ? 'Webhook resent' : ('Webhook sent' + (message && message.indexOf('—') >= 0 ? '' : ''));
+    if (kind === 'webhook.skipped') return 'Webhook skipped';
+    if (kind === 'webhook.failed') return 'Webhook failed';
+    if (kind === 'ai.received') return 'AI response received';
+    if (kind === 'note.written') return 'Note written to Leadflo';
+    if (kind === 'note.skipped') return 'Note skipped';
+    if (kind === 'note.failed') return 'Note write failed';
+    if (kind === 'lead.discovered') return 'Lead discovered';
+    if (kind === 'notes.polled') return 'Notes polled';
+    if (kind === 'poller.started') return 'Poller started';
+    return kind;
+  }
+
+  eventColor(kind) {
+    if (kind === 'poll.ok' || kind === 'poller.started') return 'var(--secondary-blue)';
+    if (kind.indexOf('webhook') === 0) return 'var(--secondary-indigo)';
+    if (kind === 'ai.received') return 'var(--secondary-purple)';
+    if (kind === 'note.written') return 'var(--secondary-green)';
+    if (kind === 'note.failed' || kind === 'poll.error') return 'var(--secondary-red)';
+    return 'rgba(0,0,0,0.3)';
+  }
+
+  mapLead(l) {
+    const tracked = String(l.treatmentType || '').toLowerCase().indexOf('implant') >= 0;
+    let status = l.status || 'discovered';
+    if (!tracked && status === 'discovered') status = 'untracked';
+    return {
+      id: l.patientId,
+      patientId: l.patientId,
+      name: l.fullName,
+      firstName: l.firstName || String(l.fullName || '').split(' ')[0],
+      phone: l.phone || '—',
+      email: l.email || '—',
+      type: l.treatmentType || 'Unknown',
+      source: l.source || 'Unknown',
+      stage: l.stage || 'newLead',
+      status,
+      isTest: !!l.isTestName,
+      seen: this.ago(l.lastSeenAt || l.firstSeenAt),
+      firstSeenAt: l.firstSeenAt,
+      aiNote: l.aiNote || '',
+      labels: l.labels || [],
+      tracked
+    };
+  }
+
+  async hydrate() {
+    try {
+      const [statusRes, leadsRes, eventsRes, analyticsRes] = await Promise.all([
+        fetch('/api/status'), fetch('/api/leads'), fetch('/api/events'), fetch('/api/analytics?days=30')
+      ]);
+      const status = await statusRes.json();
+      const leadsJson = await leadsRes.json();
+      const eventsJson = await eventsRes.json();
+      const analytics = await analyticsRes.json();
+
+      const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const days = (analytics.leadsPerDay || []).map(d => {
+        const dt = new Date(d.date + 'T00:00:00Z');
+        return { label: dt.getUTCDate() + ' ' + mon[dt.getUTCMonth()], total: d.count || 0, implant: d.tracked || 0 };
+      });
+      // keep chart readable if empty
+      const safeDays = days.length ? days : this.buildDays().map(d => ({ ...d, total: 0, implant: 0 }));
+
+      const leads = (leadsJson.leads || []).map(l => this.mapLead(l));
+      const events = (eventsJson.events || []).slice(0, 40).map((e, i) => ({
+        id: 'ev' + e.id,
+        kind: e.kind,
+        title: this.eventTitle(e.kind, e.message),
+        detail: e.message,
+        time: this.ago(e.created_at),
+        color: this.eventColor(e.kind)
+      }));
+
+      const tracked = { Implant: true, Invisalign: false, Veneers: false, Whitening: false, 'Composite Bonding': false, Hygiene: false };
+      (status.config?.trackedTypes || ['implant']).forEach(t => {
+        const key = Object.keys(tracked).find(k => k.toLowerCase() === t) || (t[0].toUpperCase() + t.slice(1));
+        tracked[key] = true;
+      });
+
+      const typeMix = (analytics.byType || []).map(t => ({
+        name: t.type,
+        value: t.count,
+        tracked: !!t.tracked
+      }));
+
+      const totals = analytics.totals || {};
+      const last = status.latestPoll?.finished_at || status.latestPoll?.started_at;
+      const intervalMs = status.config?.pollIntervalMs || 60000;
+      const nextMs = last ? Math.max(0, new Date(last).getTime() + intervalMs - Date.now()) : intervalMs;
+
+      this.setState({
+        days: safeDays,
+        leads,
+        events: events.length ? events : this.buildEvents(),
+        intervalMs,
+        tracked,
+        notesOnlyTest: !!status.config?.notesOnlyTestNames,
+        webhookUrl: status.config?.webhookConfigured ? '[configured]' : '',
+        typeMix,
+        kpi: {
+          discovered: totals.discovered ?? leads.length,
+          tracked: totals.tracked ?? leads.filter(l => l.tracked).length,
+          notesWritten: totals.notesWritten ?? leads.filter(l => l.status === 'note_written').length,
+          median: this.fmtDuration(totals.medianTimeToNoteMs)
+        },
+        practiceName: status.practiceName || status.config?.practiceName || 'Dental Asthetica',
+        lastPollAgo: last ? this.ago(last) : '—',
+        nextRunIn: Math.round(nextMs / 1000) + 's',
+        mode: status.mode || 'live',
+        hydrated: true
+      });
+    } catch (err) {
+      console.error('hydrate failed', err);
+      this.flash('Failed to load live data');
+    }
+  }
+
+  async openLeadLive(id) {
+    this.setState({ selectedId: id });
+    try {
+      const res = await fetch('/api/leads/' + encodeURIComponent(id) + '/timeline');
+      if (!res.ok) return;
+      const data = await res.json();
+      this.setState(s => ({ timelines: { ...(s.timelines || {}), [id]: data } }));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  flash(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2400);
+  }
+
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._s); clearInterval(this._refresh); }
+
+
+  runPoll = () => {
+    this.setState({ spinning: true });
+    fetch('/api/poll', { method: 'POST' })
+      .then(r => r.json())
+      .then(async (data) => {
+        await this.hydrate();
+        this.setState({ spinning: false });
+        this.flash('Scrape complete — ' + (data.newLeads || 0) + ' new lead(s)');
+      })
+      .catch(err => {
+        this.setState({ spinning: false });
+        this.flash('Scrape failed');
+        console.error(err);
+      });
+  };
+
+
+  statusMeta(status) {
+    const m = {
+      note_written: ['Note written', 'Note', 'rgb(38,138,72)', 'rgba(113,221,140,0.16)'],
+      webhook_sent: ['Webhook sent', 'Sent', 'rgb(45,102,175)', 'rgba(125,187,255,0.18)'],
+      note_skipped: ['Note skipped', 'Skipped', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.05)'],
+      note_failed: ['Note failed', 'Failed', 'rgb(191,42,42)', 'rgba(255,71,71,0.12)'],
+      untracked: ['Not tracked', 'Untracked', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.04)']
+    };
+    return m[status] || ['Unknown', 'Unknown', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.05)'];
+  }
+
+  stageLabel(s) {
+    return { newLead: 'New lead', contacted: 'Contacted', consultBooked: 'Consult booked', treatmentPlanned: 'Treatment planned' }[s] || s;
+  }
+
+  initials(n) { return n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
+
+  smooth(pts) {
+    if (!pts.length) return '';
+    let d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      d += ' C ' + (p1.x + (p2.x - p0.x) / 6).toFixed(1) + ' ' + (p1.y + (p2.y - p0.y) / 6).toFixed(1) + ', ' +
+           (p2.x - (p3.x - p1.x) / 6).toFixed(1) + ' ' + (p2.y - (p3.y - p1.y) / 6).toFixed(1) + ', ' +
+           p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+    }
+    return d;
+  }
+
+  renderVals() {
+    const S = this.state;
+    const trendStyle = this.props.trendStyle || 'Smooth curve';
+    const typeChart = this.props.typeChart || 'Donut';
+    const screen = S.screen;
+    const titles = { dashboard: 'Dashboard', leads: 'Leads', activity: 'Activity', settings: 'Scraper', docs: 'API docs' };
+
+    let totalLeads = S.days.reduce((a, b) => a + b.total, 0);
+    const implantLeads = S.days.reduce((a, b) => a + b.implant, 0);
+    const notesWritten = Math.round(implantLeads * 0.63);
+
+    const nav = [
+      ['dashboard', 'Home', 'ChartLine'],
+      ['leads', 'Leads', 'AddressBook'],
+      ['activity', 'Activity', 'ArrowsDownUp'],
+      ['settings', 'Scraper', 'Gear'],
+      ['docs', 'Docs', 'BracketsCurly']
+    ];
+    const navItems = nav.map(n => ({
+      key: n[0], label: n[1],
+      comp: 'RapidScreenDesignSystem_347418.' + n[2],
+      op: screen === n[0] ? '1' : '0.35',
+      fc: screen === n[0] ? '#000' : '',
+      fw: screen === n[0] ? '500' : '400',
+      go: () => this.setState({ screen: n[0], selectedId: null })
+    }));
+
+    /* chart */
+    const W = 360, top = 8, bottom = 130, left = 22, right = 356;
+    const max = Math.max(6, Math.ceil(Math.max(...S.days.map(d => d.total)) / 2) * 2);
+    const x = i => left + i * (right - left) / (S.days.length - 1);
+    const y = v => bottom - (v / max) * (bottom - top);
+    const pts = S.days.map((d, i) => ({ x: x(i), y: y(d.total) }));
+    const iPts = S.days.map((d, i) => ({ x: x(i), y: y(d.implant) }));
+    const linePath = this.smooth(pts);
+    const gridLines = [0, 0.5, 1].map(f => {
+      const v = Math.round(max * (1 - f));
+      return { id: 'g' + f, y: y(v), ty: y(v) + 3, label: String(v) };
+    });
+    const bw = (right - left) / S.days.length - 3;
+    const bars = S.days.map((d, i) => ({
+      id: 'b' + i, x: x(i) - bw / 2, w: bw,
+      y: y(d.total), h: Math.max(2, bottom - y(d.total)),
+      iy: y(d.implant), ih: Math.max(2, bottom - y(d.implant))
+    }));
+    const hits = S.days.map((d, i) => ({
+      id: 'h' + i, x: x(i) - (right - left) / 58, w: (right - left) / 29,
+      cx: x(i), cy: y(d.total), r: S.hover === i ? 4 : 0,
+      on: () => this.setState(s => ({ hover: s.hover === i ? null : i }))
+    }));
+    const xLabels = S.days.filter((d, i) => i % 9 === 0 || i === 29).map((d, i) => ({ id: 'x' + i, label: d.label }));
+    const hv = S.hover != null ? S.days[S.hover] : null;
+
+    /* types — live */
+    let segsRaw;
+    if (S.typeMix && S.typeMix.length) {
+      segsRaw = S.typeMix.map(t => ({ name: t.name, value: t.value, tracked: !!t.tracked }));
+    } else {
+      const others = [['Invisalign', 0.34], ['Veneers', 0.22], ['Whitening', 0.18], ['Composite Bonding', 0.15], ['Hygiene', 0.11]];
+      const rest = Math.max(0, totalLeads - implantLeads);
+      let acc = 0;
+      const counts = others.map((o, i) => {
+        const v = i === others.length - 1 ? rest - acc : Math.round(rest * o[1]);
+        acc += v;
+        return { name: o[0], value: Math.max(0, v) };
+      });
+      segsRaw = [{ name: 'Implant', value: implantLeads, tracked: true }].concat(counts.map(c => ({ ...c, tracked: false })));
+    }
+    if (!segsRaw.length) segsRaw = [{ name: 'None', value: 1, tracked: false }];
+    totalLeads = segsRaw.reduce((a, b) => a + b.value, 0) || 1;
+    const colors = ['rgb(28,28,30)', 'var(--secondary-indigo)', 'var(--secondary-blue)', 'var(--secondary-green)', 'var(--secondary-yellow)', 'var(--secondary-purple)'];
+    const C = 2 * Math.PI * 64;
+    let off = 0;
+    const donut = segsRaw.map((s, i) => {
+      const frac = s.value / totalLeads;
+      const len = frac * C - 2;
+      const seg = {
+        id: 'dn' + i, name: s.name, value: s.value, tracked: s.tracked, color: colors[i],
+        pct: Math.round(frac * 100) + '%', pctW: (frac * 100).toFixed(1) + '%',
+        dash: len.toFixed(1) + ' ' + (C - len).toFixed(1), offset: (-off).toFixed(1)
+      };
+      off += frac * C;
+      return seg;
+    });
+
+    /* leads */
+    const decorate = l => {
+      const m = this.statusMeta(l.status);
+      return {
+        ...l,
+        initials: this.initials(l.name),
+        statusLabel: m[0], statusShort: m[1], statusColor: m[2], statusTint: m[3],
+        stageLabel: this.stageLabel(l.stage),
+        open: () => this.openLeadLive(l.id)
+      };
+    };
+    const allLeads = S.leads.map(decorate);
+    const recentLeads = allLeads.filter(l => l.tracked).slice(0, 5);
+    const filters = ['All', 'Implant only', 'Needs attention'].map(f => ({
+      id: 'f' + f, label: f,
+      bg: S.filter === f ? 'rgb(28,28,30)' : '',
+      fc: S.filter === f ? '#fff' : '',
+      go: () => this.setState({ filter: f })
+    }));
+    const filteredLeads = allLeads.filter(l => {
+      if (S.filter === 'Implant only') return l.tracked;
+      if (S.filter === 'Needs attention') return l.status === 'note_failed' || l.status === 'note_skipped';
+      return true;
+    });
+
+    const kpi = S.kpi || {};
+    const metrics = [
+      { id: 'm1', label: 'Leads discovered', value: String(kpi.discovered ?? totalLeads), delta: '', deltaColor: 'rgb(38,138,72)', sub: 'last 30 days' },
+      { id: 'm2', label: 'Implant tracked', value: String(kpi.tracked ?? implantLeads), delta: '', deltaColor: 'rgb(38,138,72)', sub: 'sent to webhook' },
+      { id: 'm3', label: 'AI notes written', value: String(kpi.notesWritten ?? notesWritten), delta: '', deltaColor: '', sub: 'test names only' },
+      { id: 'm4', label: 'Time to note', value: String(kpi.median ?? '—'), delta: '', deltaColor: 'rgb(38,138,72)', sub: 'median' }
+    ];
+
+    /* selected */
+    const sel = S.leads.find(l => l.id === S.selectedId);
+    const selD = sel ? decorate(sel) : {};
+    const selFields = sel ? [
+      { id: 'sf1', label: 'Treatment', value: sel.type },
+      { id: 'sf2', label: 'Source', value: sel.source },
+      { id: 'sf3', label: 'Stage', value: this.stageLabel(sel.stage) },
+      { id: 'sf4', label: 'Status', value: this.statusMeta(sel.status)[0] },
+      { id: 'sf5', label: 'Phone', value: sel.phone },
+      { id: 'sf6', label: 'Email', value: sel.email },
+      { id: 'sf7', label: 'First seen', value: sel.seen },
+      { id: 'sf8', label: 'Tracked', value: sel.tracked ? 'Yes' : 'No — type not tracked' }
+    ] : [];
+
+    let selTimeline = [];
+    if (sel) {
+      selTimeline.push({ id: 't1', title: 'Lead discovered', time: sel.seen, color: 'rgb(28,28,30)', lineOpacity: '1', detail: 'Scraped from Leadflo /actions/due · ' + sel.source, code: '', body: '' });
+      if (sel.tracked) {
+        selTimeline.push({ id: 't2', title: 'Webhook sent', time: sel.seen, color: 'var(--secondary-indigo)', lineOpacity: '1', detail: 'POST ' + S.webhookUrl + ' → 200', body: '', code: '{ "event": "lead.created",\n  "lead": { "patientId": "' + sel.patientId + '",\n    "treatmentType": "' + sel.type + '",\n    "isTestName": ' + sel.isTest + ' } }' });
+      } else {
+        selTimeline.push({ id: 't2', title: 'Filtered out', time: sel.seen, color: 'rgba(0,0,0,0.3)', lineOpacity: '1', detail: sel.type + ' is not in trackedTypes, so no webhook was sent.', body: '', code: '' });
+      }
+      if (sel.aiNote) {
+        selTimeline.push({ id: 't3', title: 'AI response received', time: sel.seen, color: 'var(--secondary-purple)', lineOpacity: '1', detail: 'POST /api/webhooks/ai-response · ' + sel.aiNote.length + ' chars', body: sel.aiNote, bodyBg: 'rgb(237,238,252)', code: '' });
+      }
+      const endMap = {
+        note_written: ['Note written to Leadflo', 'var(--secondary-green)', 'POST /v3/patients/' + sel.patientId + '/notes → 201 Created'],
+        note_skipped: ['Leadflo write skipped', 'rgba(0,0,0,0.3)', 'Stored here only — name does not contain "test". Use force to override.'],
+        note_failed: ['Leadflo write failed', 'var(--secondary-red)', 'Leadflo responded 502 · retry scheduled in 15m']
+      };
+      const e = endMap[sel.status] || ['Waiting on AI response', 'rgba(0,0,0,0.2)', 'No POST to /api/webhooks/ai-response yet.'];
+      selTimeline.push({ id: 't4', title: e[0], time: sel.seen, color: e[1], lineOpacity: '0', detail: e[2], body: '', code: '' });
+    }
+
+    /* settings */
+    const intervals = [['30 seconds', 30000], ['1 minute', 60000], ['5 minutes', 300000], ['15 minutes', 900000]].map(o => ({
+      id: 'iv' + o[1], label: o[0],
+      bg: S.intervalMs === o[1] ? 'rgb(28,28,30)' : '',
+      fc: S.intervalMs === o[1] ? '#fff' : '',
+      go: () => this.setState({ intervalMs: o[1] })
+    }));
+    const typeCounts = {};
+    donut.forEach(d => { typeCounts[d.name] = d.value; });
+    const typeToggles = Object.keys(S.tracked).map(name => ({
+      id: 'tt' + name, name, count: typeCounts[name] != null ? String(typeCounts[name]) : '—',
+      tick: S.tracked[name] ? '✓' : '',
+      boxBg: S.tracked[name] ? 'rgb(28,28,30)' : '',
+      boxRing: S.tracked[name] ? 'none' : '',
+      go: () => this.setState(s => ({ tracked: { ...s.tracked, [name]: !s.tracked[name] } }))
+    }));
+    const sw = (key, label, hint) => ({
+      id: key, label, hint,
+      trackBg: S[key] ? 'rgb(28,28,30)' : '',
+      knobLeft: S[key] ? '20px' : '0px',
+      go: () => this.setState(s => ({ [key]: !s[key] }))
+    });
+    const switches = [
+      sw('notesOnlyTest', 'Only write notes for test names', 'NOTES_ONLY_TEST_NAMES — non-test leads are stored but never written.'),
+      sw('signWebhooks', 'Sign outbound webhooks', 'Adds X-Signature (HMAC-SHA256 of body).'),
+      sw('dedupe', 'Send each lead once', 'Unknown patientId triggers lead.created.')
+    ];
+    const trackedList = Object.keys(S.tracked).filter(k => S.tracked[k]).map(k => k.toLowerCase());
+    const configJson = JSON.stringify({ ok: true, mode: S.mode || 'live', trackedTypes: trackedList, pollIntervalMs: S.intervalMs, notesOnlyTestNames: S.notesOnlyTest, webhookConfigured: !!S.webhookUrl }, null, 2);
+
+    /* docs */
+    const endpoints = [
+      ['GET', '/api/health', 'Liveness + basic config flags.', configJson],
+      ['GET', '/api/status', 'Leadflo ping, stats, latest poll run, runtime config.', ''],
+      ['GET', '/api/leads', 'Tracked implant leads (newest first).', '{\n  "leads": [{\n    "patientId": "…",\n    "fullName": "asif test",\n    "treatmentType": "Implant",\n    "isTestName": true,\n    "status": "note_written"\n  }]\n}'],
+      ['GET', '/api/events', 'Recent activity log (polls, webhooks, notes).', ''],
+      ['POST', '/api/poll', 'Run one scrape immediately.', '{ "discovered": 2, "newLeads": 1 }'],
+      ['POST', '/api/webhooks/ai-response', 'Inbound: AI / n8n posts the note to write.', '{\n  "patientId": "leadflo-patient-id",\n  "note": "AI-written note content",\n  "force": false\n}'],
+      ['POST', '/api/leads/:patientId/notes', 'Same as inbound webhook; used by the Note dialog.', '']
+    ].map((e, i) => {
+      const open = S.openEndpoint === i;
+      return {
+        id: 'de' + i, method: e[0], path: e[1], desc: e[2], sample: e[3],
+        showSample: open && !!e[3], chev: e[3] ? (open ? '−' : '+') : '',
+        mColor: e[0] === 'GET' ? 'rgb(45,102,175)' : 'rgb(122,86,168)',
+        mBg: e[0] === 'GET' ? 'rgba(125,187,255,0.18)' : 'rgba(184,153,235,0.18)',
+        toggle: () => this.setState(s => ({ openEndpoint: s.openEndpoint === i ? null : i }))
+      };
+    });
+    const flowSteps = [
+      'Poller scrapes Leadflo /actions/due for configured stages.',
+      'Filters to tracked treatment types (default: Implant).',
+      'Unknown patientId → outbound lead.created webhook.',
+      'Your agent replies to POST /api/webhooks/ai-response.',
+      'Service writes POST /v3/patients/:id/notes when allowed.'
+    ].map((t, i) => ({ id: 'fs' + i, n: i + 1, text: t }));
+
+    return {
+      screenTitle: titles[screen],
+      navItems,
+      whiteIcon: { style: { color: '#fff' } },
+      pollSpin: S.spinning ? 'lf-pulse 700ms infinite' : '',
+      runPoll: this.runPoll,
+
+      isDashboard: screen === 'dashboard',
+      isLeads: screen === 'leads',
+      isActivityScreen: screen === 'activity',
+      isSettings: screen === 'settings',
+      isDocs: screen === 'docs',
+      goLeads: () => this.setState({ screen: 'leads' }),
+      goActivity: () => this.setState({ screen: 'activity' }),
+
+      metrics, gridLines, bars, hits, xLabels,
+      linePath, areaPath: linePath + ' L ' + right + ' ' + bottom + ' L ' + left + ' ' + bottom + ' Z',
+      implantPath: this.smooth(iPts),
+      isCurve: trendStyle === 'Smooth curve',
+      isBars: trendStyle === 'Bars',
+      tipOn: !!hv,
+      tipLeft: hv ? (((x(S.hover) - left) / (right - left) * 100).toFixed(1) + '%') : '0px',
+      tipDate: hv ? hv.label : '',
+      tipTotal: hv ? hv.total : '',
+      tipImplant: hv ? hv.implant : '',
+
+      donut, totalLeads,
+      isDonut: typeChart === 'Donut',
+      isTypeBars: typeChart === 'Bars',
+
+      recentLeads, filteredLeads, filters,
+      leadCountLabel: filteredLeads.length + ' of ' + allLeads.length + ' leads · ' + implantLeads + ' implant tracked in 30d',
+      recentEvents: S.events.slice(0, 4),
+      allEvents: S.events,
+
+      intervals, intervalMs: S.intervalMs,
+      runsPerDay: Math.round(86400000 / S.intervalMs),
+      typeToggles, switches, configJson,
+      webhookUrl: S.webhookUrl,
+      setWebhook: e => this.setState({ webhookUrl: e.target.value }),
+      saveSettings: () => this.flash('Scraper settings saved'),
+
+      endpoints, flowSteps,
+
+      panelOpen: !!sel,
+      sel: selD, selFields, selTimeline,
+      closePanel: () => this.setState({ selectedId: null }),
+      resendWebhook: () => {
+        if (!sel) return;
+        fetch('/api/leads/' + encodeURIComponent(sel.patientId) + '/webhook', { method: 'POST' })
+          .then(r => r.json()).then(d => {
+            this.flash(d.skipped ? 'No WEBHOOK_URL configured' : (d.ok ? 'Webhook resent' : (d.message || 'Webhook failed')));
+            this.hydrate();
+          });
+      },
+
+      noteOpen: S.noteOpen,
+      noteText: S.noteText,
+      openNote: () => this.setState({ noteOpen: true, noteText: (sel && sel.aiNote) || '' }),
+      closeNote: () => this.setState({ noteOpen: false }),
+      setNote: e => this.setState({ noteText: e.target.value }),
+      toggleForce: () => this.setState(s => ({ force: !s.force })),
+      forceTick: S.force ? '✓' : '',
+      forceBg: S.force ? 'rgb(28,28,30)' : '',
+      forceRing: S.force ? 'none' : '',
+      sendNote: () => {
+        if (!sel) return;
+        const note = S.noteText;
+        const force = S.force;
+        fetch('/api/leads/' + encodeURIComponent(sel.patientId) + '/notes', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note, force })
+        }).then(r => r.json()).then(d => {
+          this.setState({ noteOpen: false });
+          this.flash(d.message || (d.ok ? 'Note written' : 'Note failed'));
+          this.hydrate().then(() => this.openLeadLive(sel.patientId));
+        }).catch(() => this.flash('Note failed'));
+      },
+
+      toast: S.toast
+    };
+  }
+}
+
+</script>
+</x-dc>
+<script src="/vendor/react.js"></script>
+<script src="/vendor/react-dom.js"></script>
+<script src="/vendor/design-system.js"></script>
+<script src="/vendor/dc-runtime.js"></script>
+</body>
+</html>

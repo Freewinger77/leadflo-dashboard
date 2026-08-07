@@ -1,73 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>LEADFLO.WASUP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body>
-    <div class="app" id="app">
-      <aside class="sidebar" aria-label="Primary">
-        <div class="brand">LEADFLO.WASUP</div>
-        <nav class="side-nav" id="sideNav"></nav>
-        <div class="poller-card">
-          <div class="poller-title"><span class="dot live"></span> Poller live</div>
-          <div class="poller-sub" id="pollerSub">Next run soon</div>
-        </div>
-      </aside>
-
-      <div class="main">
-        <header class="topbar">
-          <div class="crumbs">
-            <span class="muted" id="practiceName">Dental Asthetica</span>
-            <span class="sep">/</span>
-            <strong id="screenTitle">Dashboard</strong>
-          </div>
-          <div class="live-pill" id="modePill"><span class="dot"></span> <span id="modeText">…</span></div>
-          <div class="spacer"></div>
-          <div class="muted small" id="lastPollLabel">Last poll —</div>
-          <button class="btn primary" id="pollBtn" type="button">
-            <span class="btn-icon" aria-hidden="true">⇅</span> Scrape now
-          </button>
-          <button class="icon-btn mobile-only" id="menuBtn" type="button" aria-label="Menu">☰</button>
-        </header>
-
-        <div class="content" id="content"></div>
-      </div>
-
-      <nav class="bottom-nav mobile-only" id="bottomNav" aria-label="Mobile"></nav>
-    </div>
-
-    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
-    <aside class="drawer" id="drawer" hidden aria-label="Lead detail">
-      <div class="drawer-inner" id="drawerInner"></div>
-    </aside>
-
-    <dialog id="noteDialog">
-      <form method="dialog" id="noteForm">
-        <h3>Write AI note</h3>
-        <p class="muted" id="noteLead"></p>
-        <p class="muted small" id="noteEndpoint"></p>
-        <textarea id="noteText" rows="5" placeholder="Note to post into Leadflo…" required></textarea>
-        <label class="check">
-          <input type="checkbox" id="noteForce" />
-          Force write even if name is not a test lead
-        </label>
-        <div class="dialog-actions">
-          <button value="cancel" class="btn ghost" type="submit">Cancel</button>
-          <button value="default" class="btn primary" type="submit">Send note</button>
-        </div>
-      </form>
-    </dialog>
-
-    <div class="toast" id="toast" hidden></div>
-    <script src="/app.js" type="module"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>LEADFLO.WASUP</title>
+  <style>html,body{margin:0;height:100%;background:#faf9f5;font-family:Inter,system-ui,sans-serif;color:#111}
+  .boot{display:grid;place-items:center;height:100%;letter-spacing:.04em;font:italic 500 14px/20px Inter,system-ui,sans-serif}</style>
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var force = q.get('view');
+      var mobile = force === 'mobile' || (force !== 'desktop' && window.matchMedia('(max-width: 860px)').matches);
+      location.replace(mobile ? '/m.html' : '/d.html');
+    })();
+  </script>
+</head>
+<body><div class="boot">LEADFLO.WASUP</div></body>
 </html>
