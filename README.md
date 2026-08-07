@@ -108,7 +108,10 @@ Leadflo sits behind AWS ELB/WAF. Many datacenter IPs (including AWS) get **403 F
 If login fails with a WAF 403:
 
 1. Run this service on a laptop / residential VPS / non-AWS host, **or**
-2. Set `LEADFLO_MODE=mock` to exercise the dashboard + webhook loop locally.
+2. Set `LEADFLO_HTTP_PROXY` to a residential proxy, **or**
+3. Set `LEADFLO_MODE=mock` to exercise the dashboard + webhook loop locally.
+
+This cloud agent environment is AWS-hosted and receives that WAF 403, so live scrape was verified only up to the auth gate here; the full loop is covered under `LEADFLO_MODE=mock`.
 
 ## Tests
 
