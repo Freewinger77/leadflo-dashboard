@@ -65,29 +65,79 @@ export function createApp(deps: AppDeps): Express {
   });
 
   app.get("/api/leads", (_req, res) => {
-    const leads = store.listLeads().map((row) => ({
-      patientId: row.patient_id,
-      firstName: row.first_name,
-      lastName: row.last_name,
-      fullName: row.full_name,
-      phone: row.phone,
-      email: row.email,
-      treatmentType: row.treatment_type,
-      source: row.source,
-      stage: row.stage,
-      dueDate: row.due_date,
-      labels: JSON.parse(row.labels_json || "[]"),
-      isTestName: row.is_test_name === 1,
-      status: row.status,
-      firstSeenAt: row.first_seen_at,
-      lastSeenAt: row.last_seen_at,
-      webhookSentAt: row.webhook_sent_at,
-      aiResponseAt: row.ai_response_at,
-      noteWrittenAt: row.note_written_at,
-      lastError: row.last_error,
-      aiNote: row.ai_note,
-    }));
+    const leads = store.listLeads().map((row) => serializeLead(row));
     res.json({ leads });
+  });
+
+  app.get("/api/analytics", (_req, res) => {
+    const days = Number(_req.query.days ?? 14);
+    res.json(store.analytics(Number.isFinite(days) ? days : 14));
+  });
+
+  app.get("/api/leads/:patientId", (req, res) => {
+    const row = store.getLead(req.params.patientId);
+    if (!row) {
+      res.status(404).json({ error: "Lead not found" });
+      return;
+    }
+    res.json({ lead: serializeLead(row) });
+  });
+
+  /** Live Leadflo timeline + notes (new vs previously seen). */
+  app.get("/api/leads/:patientId/timeline", async (req, res) => {
+    const patientId = req.params.patientId;
+    const row = store.getLead(patientId);
+    if (!row) {
+      res.status(404).json({ error: "Lead not found — scrape first" });
+      return;
+    }
+
+    try {
+      const items = await client.getTimeline(patientId);
+      const rawNotes = items
+        .filter((item) => String(item.type).toLowerCase() === "note")
+        .map((item) => ({
+          id: String(item.id),
+          title: String(item.title ?? ""),
+          content: String(item.content ?? item.message ?? ""),
+          datetime: String(item.datetime ?? ""),
+        }));
+
+      const notes = store.syncLeadNotes(patientId, rawNotes);
+      const newNotes = notes.filter((n) => n.isNew);
+      const oldNotes = notes.filter((n) => !n.isNew);
+
+      const activity = items
+        .filter((item) => String(item.type).toLowerCase() !== "note")
+        .map((item) => ({
+          id: String(item.id),
+          type: String(item.type),
+          datetime: String(item.datetime ?? ""),
+          summary: timelineSummary(item),
+          raw: item,
+        }))
+        .sort((a, b) => b.datetime.localeCompare(a.datetime));
+
+      store.logEvent(
+        "notes.polled",
+        `Timeline for ${row.full_name}: ${notes.length} note(s), ${newNotes.length} new`,
+        patientId,
+        { newCount: newNotes.length, noteCount: notes.length },
+      );
+
+      res.json({
+        patientId,
+        lead: serializeLead(row),
+        notes,
+        newNotes,
+        oldNotes,
+        activity,
+        fetchedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      res.status(502).json({ error: "Failed to fetch Leadflo timeline", message });
+    }
   });
 
   app.get("/api/events", (_req, res) => {
@@ -141,4 +191,51 @@ export function createApp(deps: AppDeps): Express {
   });
 
   return app;
+}
+
+function serializeLead(row: ReturnType<Store["listLeads"]>[number]) {
+  return {
+    patientId: row.patient_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    fullName: row.full_name,
+    phone: row.phone,
+    email: row.email,
+    treatmentType: row.treatment_type,
+    source: row.source,
+    stage: row.stage,
+    dueDate: row.due_date,
+    labels: JSON.parse(row.labels_json || "[]"),
+    isTestName: row.is_test_name === 1,
+    status: row.status,
+    firstSeenAt: row.first_seen_at,
+    lastSeenAt: row.last_seen_at,
+    webhookSentAt: row.webhook_sent_at,
+    aiResponseAt: row.ai_response_at,
+    noteWrittenAt: row.note_written_at,
+    lastError: row.last_error,
+    aiNote: row.ai_note,
+  };
+}
+
+function timelineSummary(item: {
+  type: string;
+  title?: string;
+  content?: string;
+  message?: string;
+  form?: string;
+  comm_type?: string;
+  text_content?: string;
+  [key: string]: unknown;
+}): string {
+  const type = String(item.type).toLowerCase();
+  if (type === "form_submission") {
+    return `Form: ${item.form || item.message || "submission"}`;
+  }
+  if (type === "communication") {
+    const body = String(item.text_content || item.message || "").trim();
+    const head = item.comm_type ? `${item.comm_type}` : "Message";
+    return body ? `${head} — ${body.slice(0, 160)}` : head;
+  }
+  return String(item.content || item.message || item.title || item.type);
 }

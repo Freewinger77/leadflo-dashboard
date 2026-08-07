@@ -5,6 +5,7 @@ import type {
   LeadfloAction,
   LeadfloClient,
   LeadfloPatient,
+  LeadfloTimelineItem,
 } from "./types.js";
 
 type FetchFn = (input: string, init?: UndiciRequestInit) => Promise<Response>;
@@ -185,6 +186,25 @@ export class LiveLeadfloClient implements LeadfloClient {
     }
     const data = res.data as LeadfloPatient & { data?: LeadfloPatient };
     return (data?.data ?? data) as LeadfloPatient;
+  }
+
+  async getTimeline(patientId: string): Promise<LeadfloTimelineItem[]> {
+    await this.ensureSession();
+    const res = await this.request<{ items?: LeadfloTimelineItem[] } | LeadfloTimelineItem[]>(
+      "GET",
+      `/v3/patients/${encodeURIComponent(patientId)}/timeline`,
+    );
+    if (res.status < 200 || res.status >= 300) {
+      throw new Error(
+        `getTimeline failed (${res.status}): ${res.rawText.slice(0, 300)}`,
+      );
+    }
+    const data = res.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === "object" && Array.isArray(data.items)) {
+      return data.items;
+    }
+    return [];
   }
 
   async addNote(patientId: string, content: string, title = ""): Promise<void> {

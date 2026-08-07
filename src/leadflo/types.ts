@@ -61,11 +61,33 @@ export interface NotePayload {
   content: string;
 }
 
+export interface LeadfloTimelineItem {
+  id: string;
+  type: string;
+  datetime: string;
+  title?: string;
+  content?: string;
+  message?: string;
+  form?: string;
+  comm_type?: string;
+  text_content?: string;
+  inbound?: boolean;
+  [key: string]: unknown;
+}
+
+export interface LeadfloNote {
+  id: string;
+  title: string;
+  content: string;
+  datetime: string;
+}
+
 export interface LeadfloClient {
   login(): Promise<void>;
   ensureSession(): Promise<void>;
   getDueActions(stages: string[]): Promise<LeadfloAction[]>;
   getPatient(patientId: string): Promise<LeadfloPatient>;
+  getTimeline(patientId: string): Promise<LeadfloTimelineItem[]>;
   addNote(patientId: string, content: string, title?: string): Promise<void>;
   ping(): Promise<{ ok: boolean; detail?: string }>;
 }

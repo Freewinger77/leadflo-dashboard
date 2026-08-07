@@ -56,12 +56,12 @@ export class Poller {
     const runId = this.store.startPollRun();
     try {
       const actions = await this.client.getDueActions(config.scrapeStages);
-      const implantActions = actions.filter((a) => isTrackedTreatment(a.type));
 
       const leads: NormalizedLead[] = [];
       let newLeads = 0;
+      let webhooked = 0;
 
-      for (const action of implantActions) {
+      for (const action of actions) {
         let patient = null;
         try {
           patient = await this.client.getPatient(action.patient_id);
@@ -74,15 +74,22 @@ export class Poller {
         }
 
         const lead = normalizeLead(action, patient);
-        // Re-check type from patient detail if present
-        if (!isTrackedTreatment(lead.treatmentType)) continue;
-
         const { isNew } = this.store.upsertScrapedLead(lead);
         leads.push(lead);
 
         if (isNew) {
           newLeads += 1;
-          await this.dispatchNewLead(lead);
+          // Only auto-webhook configured treatment types (default: Implant)
+          if (isTrackedTreatment(lead.treatmentType)) {
+            webhooked += 1;
+            await this.dispatchNewLead(lead);
+          } else {
+            this.store.logEvent(
+              "lead.tracked",
+              `Tracked ${lead.fullName} (${lead.treatmentType}) — no webhook (not in TRACKED_TREATMENT_TYPES)`,
+              lead.patientId,
+            );
+          }
         }
       }
 
@@ -94,7 +101,7 @@ export class Poller {
       });
       this.store.logEvent(
         "poll.ok",
-        `Scraped ${leads.length} implant lead(s), ${newLeads} new`,
+        `Scraped ${leads.length} lead(s), ${newLeads} new, ${webhooked} webhooked`,
       );
       return { discovered: leads.length, newLeads, leads };
     } catch (err) {

@@ -127,19 +127,27 @@ Interactive reference: **`/docs.html`** (also `/docs`).
 | POST | `/api/webhooks/ai-response` | AI note write-back |
 | POST | `/api/leads/:id/notes` | Manual note (dashboard) |
 
+## Production
+
+Live (UK residential proxy → Leadflo):
+
+- **App:** https://dental-asthetica.wasup.co  
+- **Azure default:** https://dental-asthetica.azurewebsites.net  
+- **Docs:** https://dental-asthetica.wasup.co/docs.html  
+- **AI note webhook:** `POST https://dental-asthetica.wasup.co/api/webhooks/ai-response`
+
+DNS: GoDaddy CNAME `dental-asthetica` → `dental-asthetica.azurewebsites.net` + Azure managed TLS.
+
 ## Azure deploy
 
 ```bash
 az login
 export LEADFLO_EMAIL=arslan@tryrapidscreen.com
 export LEADFLO_PASSWORD='…'
-export LEADFLO_HTTP_PROXY='http://USER:PASS@HOST:PORT'   # optional
+export LEADFLO_HTTP_PROXY='http://USER:PASS@HOST:PORT'   # UK residential required for WAF
 export WEBHOOK_URL='https://…'
 ./scripts/deploy-azure.sh
 ```
-
-Default app URL: `https://leadflo-tracker-arslan.azurewebsites.net`  
-Docs: `https://leadflo-tracker-arslan.azurewebsites.net/docs.html`
 
 ## Tests
 

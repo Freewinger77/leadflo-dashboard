@@ -106,6 +106,19 @@ export class Store {
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS lead_notes (
+        note_id TEXT PRIMARY KEY,
+        patient_id TEXT NOT NULL,
+        title TEXT NOT NULL DEFAULT '',
+        content TEXT NOT NULL DEFAULT '',
+        note_datetime TEXT NOT NULL,
+        first_seen_at TEXT NOT NULL,
+        last_seen_at TEXT NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_lead_notes_patient
+        ON lead_notes(patient_id);
     `);
   }
 
@@ -330,6 +343,141 @@ export class Store {
         .get() as { c: number }
     ).c;
     return { total, webhookSent, notesWritten, testLeads, errors };
+  }
+
+  /** Upsert Leadflo notes; returns each note with isNew relative to prior store state. */
+  syncLeadNotes(
+    patientId: string,
+    notes: Array<{ id: string; title?: string; content: string; datetime: string }>,
+  ): Array<{
+    id: string;
+    title: string;
+    content: string;
+    datetime: string;
+    isNew: boolean;
+    firstSeenAt: string;
+  }> {
+    const now = new Date().toISOString();
+    const existing = new Set(
+      (
+        this.db
+          .prepare(`SELECT note_id FROM lead_notes WHERE patient_id = ?`)
+          .all(patientId) as Array<{ note_id: string }>
+      ).map((r) => r.note_id),
+    );
+
+    const insert = this.db.prepare(
+      `INSERT INTO lead_notes (note_id, patient_id, title, content, note_datetime, first_seen_at, last_seen_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    );
+    const update = this.db.prepare(
+      `UPDATE lead_notes SET title = ?, content = ?, note_datetime = ?, last_seen_at = ?
+       WHERE note_id = ?`,
+    );
+
+    const out: Array<{
+      id: string;
+      title: string;
+      content: string;
+      datetime: string;
+      isNew: boolean;
+      firstSeenAt: string;
+    }> = [];
+
+    const sync = this.db.transaction(() => {
+      for (const note of notes) {
+        const title = note.title ?? "";
+        const isNew = !existing.has(note.id);
+        if (isNew) {
+          insert.run(note.id, patientId, title, note.content, note.datetime, now, now);
+          out.push({
+            id: note.id,
+            title,
+            content: note.content,
+            datetime: note.datetime,
+            isNew: true,
+            firstSeenAt: now,
+          });
+        } else {
+          update.run(title, note.content, note.datetime, now, note.id);
+          const row = this.db
+            .prepare(`SELECT first_seen_at FROM lead_notes WHERE note_id = ?`)
+            .get(note.id) as { first_seen_at: string };
+          out.push({
+            id: note.id,
+            title,
+            content: note.content,
+            datetime: note.datetime,
+            isNew: false,
+            firstSeenAt: row.first_seen_at,
+          });
+        }
+      }
+    });
+    sync();
+
+    return out.sort((a, b) => b.datetime.localeCompare(a.datetime));
+  }
+
+  analytics(days = 14): {
+    leadsPerDay: Array<{ date: string; count: number }>;
+    byType: Array<{ type: string; count: number }>;
+    byStage: Array<{ stage: string; count: number }>;
+    bySource: Array<{ source: string; count: number }>;
+  } {
+    const safeDays = Math.max(1, Math.min(90, Math.floor(days)));
+    const start = new Date();
+    start.setUTCHours(0, 0, 0, 0);
+    start.setUTCDate(start.getUTCDate() - (safeDays - 1));
+    const startIso = start.toISOString();
+
+    const dayRows = this.db
+      .prepare(
+        `SELECT substr(first_seen_at, 1, 10) AS day, COUNT(*) AS c
+         FROM leads
+         WHERE datetime(first_seen_at) >= datetime(?)
+         GROUP BY day
+         ORDER BY day ASC`,
+      )
+      .all(startIso) as Array<{ day: string; c: number }>;
+
+    const counts = new Map(dayRows.map((r) => [r.day, r.c]));
+    const leadsPerDay: Array<{ date: string; count: number }> = [];
+    for (let i = 0; i < safeDays; i++) {
+      const d = new Date(start);
+      d.setUTCDate(start.getUTCDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      leadsPerDay.push({ date: key, count: counts.get(key) ?? 0 });
+    }
+
+    const byType = (
+      this.db
+        .prepare(
+          `SELECT COALESCE(NULLIF(trim(treatment_type), ''), 'Unknown') AS type, COUNT(*) AS c
+           FROM leads GROUP BY type ORDER BY c DESC, type ASC`,
+        )
+        .all() as Array<{ type: string; c: number }>
+    ).map((r) => ({ type: r.type, count: r.c }));
+
+    const byStage = (
+      this.db
+        .prepare(
+          `SELECT COALESCE(NULLIF(trim(stage), ''), 'unknown') AS stage, COUNT(*) AS c
+           FROM leads GROUP BY stage ORDER BY c DESC, stage ASC`,
+        )
+        .all() as Array<{ stage: string; c: number }>
+    ).map((r) => ({ stage: r.stage, count: r.c }));
+
+    const bySource = (
+      this.db
+        .prepare(
+          `SELECT COALESCE(NULLIF(trim(source), ''), 'Unknown') AS source, COUNT(*) AS c
+           FROM leads GROUP BY source ORDER BY c DESC, source ASC`,
+        )
+        .all() as Array<{ source: string; c: number }>
+    ).map((r) => ({ source: r.source, count: r.c }));
+
+    return { leadsPerDay, byType, byStage, bySource };
   }
 
   close(): void {
