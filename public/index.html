@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Leadflo Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <header class="top">
+      <div class="brand-block">
+        <p class="brand">Leadflo Tracker</p>
+        <p class="tagline">Implant leads in, AI notes back — on a one-minute loop.</p>
+      </div>
+      <div class="top-actions">
+        <button id="pollBtn" class="btn primary" type="button">Scrape now</button>
+        <span id="modeBadge" class="badge">…</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="stats" id="stats" aria-label="Pipeline stats"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Tracked implant leads</h2>
+          <p>New leads hit your webhook once. Notes write back only for names containing <em>test</em> (configurable).</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Lead</th>
+                <th>Type</th>
+                <th>Stage</th>
+                <th>Status</th>
+                <th>Seen</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="leadsBody">
+              <tr><td colspan="6" class="empty">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel narrow">
+        <div class="panel-head">
+          <h2>Activity</h2>
+          <p>Poll runs, webhooks, and note writes.</p>
+        </div>
+        <ol id="events" class="events"></ol>
+      </section>
+    </main>
+
+    <dialog id="noteDialog">
+      <form method="dialog" id="noteForm">
+        <h3>Write AI note</h3>
+        <p id="noteLead" class="muted"></p>
+        <textarea id="noteText" rows="5" placeholder="Note to post into Leadflo…" required></textarea>
+        <label class="check">
+          <input type="checkbox" id="noteForce" />
+          Force write even if name is not a test lead
+        </label>
+        <div class="dialog-actions">
+          <button value="cancel" class="btn ghost" type="submit">Cancel</button>
+          <button id="noteSubmit" value="default" class="btn primary" type="submit">Send note</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
