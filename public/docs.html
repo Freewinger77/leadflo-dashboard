@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>API Docs — Leadflo Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/docs.css" />
+  </head>
+  <body class="docs-body">
+    <div class="atmosphere" aria-hidden="true"></div>
+    <header class="top docs-top">
+      <div class="brand-block">
+        <p class="brand"><a href="/">Leadflo Tracker</a></p>
+        <p class="tagline">HTTP API reference for scrape → webhook → note write-back.</p>
+      </div>
+      <div class="top-actions">
+        <a class="btn ghost" href="/">Dashboard</a>
+        <span class="badge" id="baseBadge">…</span>
+      </div>
+    </header>
+
+    <main class="docs-main">
+      <nav class="docs-nav" aria-label="On this page">
+        <a href="#overview">Overview</a>
+        <a href="#auth">Auth</a>
+        <a href="#flow">Flow</a>
+        <a href="#endpoints">Endpoints</a>
+        <a href="#outbound">Outbound webhook</a>
+        <a href="#inbound">Inbound AI note</a>
+        <a href="#examples">Examples</a>
+      </nav>
+
+      <article class="docs-content">
+        <section id="overview">
+          <h1>API docs</h1>
+          <p>
+            This service polls Leadflo for <strong>Implant</strong> leads every minute,
+            POSTs each <em>new</em> lead to your webhook, then accepts an AI response and
+            writes it back as a Leadflo note (test-named leads only by default).
+          </p>
+          <div class="callout">
+            <p><strong>Base URL</strong> <code id="baseUrl">https://your-app.azurewebsites.net</code></p>
+            <p>All JSON endpoints accept <code>Content-Type: application/json</code>.</p>
+          </div>
+        </section>
+
+        <section id="auth">
+          <h2>Auth</h2>
+          <ul>
+            <li>Dashboard + read APIs are open (no API key) unless you put the app behind Azure Easy Auth / network rules.</li>
+            <li>Inbound AI webhook can require <code>INBOUND_WEBHOOK_SECRET</code> via header <code>X-Webhook-Secret</code> or <code>Authorization: Bearer …</code>.</li>
+            <li>Outbound webhooks are signed with <code>X-Signature</code> (HMAC-SHA256 of body) when <code>WEBHOOK_SECRET</code> is set.</li>
+          </ul>
+        </section>
+
+        <section id="flow">
+          <h2>Flow</h2>
+          <ol class="flow">
+            <li>Poller scrapes Leadflo <code>/actions/due</code> for configured stages.</li>
+            <li>Filters to tracked treatment types (default: Implant).</li>
+            <li>Unknown <code>patientId</code> → outbound <code>lead.created</code> webhook.</li>
+            <li>Your agent replies to <code>POST /api/webhooks/ai-response</code>.</li>
+            <li>Service writes <code>POST /v3/patients/:id/notes</code> on Leadflo when allowed.</li>
+          </ol>
+        </section>
+
+        <section id="endpoints">
+          <h2>Endpoints</h2>
+
+          <div class="endpoint" data-method="GET">
+            <div class="ep-head"><span class="method get">GET</span><code>/api/health</code></div>
+            <p>Liveness + basic config flags.</p>
+            <pre><code>{
+  "ok": true,
+  "mode": "live",
+  "trackedTypes": ["implant"],
+  "pollIntervalMs": 60000,
+  "notesOnlyTestNames": true,
+  "webhookConfigured": true
+}</code></pre>
+          </div>
+
+          <div class="endpoint" data-method="GET">
+            <div class="ep-head"><span class="method get">GET</span><code>/api/status</code></div>
+            <p>Leadflo ping, stats, latest poll run, runtime config.</p>
+          </div>
+
+          <div class="endpoint" data-method="GET">
+            <div class="ep-head"><span class="method get">GET</span><code>/api/leads</code></div>
+            <p>Tracked implant leads (newest first).</p>
+            <pre><code>{
+  "leads": [
+    {
+      "patientId": "…",
+      "fullName": "asif test",
+      "phone": "07599 211739",
+      "email": "asif@smilefast.com",
+      "treatmentType": "Implant",
+      "source": "Practice Website",
+      "stage": "newLead",
+      "isTestName": true,
+      "status": "note_written",
+      "firstSeenAt": "2026-08-07T13:57:57.353Z",
+      "webhookSentAt": "…",
+      "noteWrittenAt": "…",
+      "aiNote": "…"
+    }
+  ]
+}</code></pre>
+          </div>
+
+          <div class="endpoint" data-method="GET">
+            <div class="ep-head"><span class="method get">GET</span><code>/api/events</code></div>
+            <p>Recent activity log (polls, webhooks, notes).</p>
+          </div>
+
+          <div class="endpoint" data-method="POST">
+            <div class="ep-head"><span class="method post">POST</span><code>/api/poll</code></div>
+            <p>Run one scrape immediately (same work as the 1-minute timer).</p>
+            <pre><code>{ "discovered": 2, "newLeads": 1, "leads": [/* NormalizedLead */] }</code></pre>
+          </div>
+
+          <div class="endpoint" data-method="POST">
+            <div class="ep-head"><span class="method post">POST</span><code>/api/webhooks/ai-response</code></div>
+            <p>Inbound: AI / n8n posts the note to write into Leadflo.</p>
+            <pre><code>{
+  "patientId": "leadflo-patient-id",
+  "note": "AI-written note content",
+  "title": "",
+  "force": false
+}</code></pre>
+            <p>Responses:</p>
+            <ul>
+              <li><code>note_written</code> — posted to Leadflo</li>
+              <li><code>note_skipped</code> — stored here, skipped Leadflo write (non-test name)</li>
+              <li><code>note_failed</code> / <code>unknown_lead</code> — error</li>
+            </ul>
+          </div>
+
+          <div class="endpoint" data-method="POST">
+            <div class="ep-head"><span class="method post">POST</span><code>/api/leads/:patientId/notes</code></div>
+            <p>Same as inbound webhook; used by the dashboard Note dialog.</p>
+          </div>
+        </section>
+
+        <section id="outbound">
+          <h2>Outbound webhook (new lead)</h2>
+          <p>When a new implant lead is discovered, we <code>POST</code> to <code>WEBHOOK_URL</code>:</p>
+          <pre><code>{
+  "event": "lead.created",
+  "platform": "leadflo",
+  "trackedTreatmentFilter": ["implant"],
+  "lead": {
+    "patientId": "…",
+    "firstName": "asif",
+    "lastName": "test",
+    "fullName": "asif test",
+    "phone": "07599 211739",
+    "email": "asif@smilefast.com",
+    "treatmentType": "Implant",
+    "source": "Practice Website",
+    "stage": "newLead",
+    "dueDate": "2026-08-07",
+    "labels": ["Completed Implant Contact Form"],
+    "isTestName": true,
+    "scrapedAt": "2026-08-07T13:57:57.353Z"
+  },
+  "callback": {
+    "noteWebhook": "https://your-app.azurewebsites.net/api/webhooks/ai-response",
+    "description": "POST JSON { patientId, note, title? } when AI has a response."
+  }
+}</code></pre>
+          <p>Headers: <code>X-Webhook-Secret</code>, <code>X-Signature</code> (if <code>WEBHOOK_SECRET</code> set).</p>
+        </section>
+
+        <section id="inbound">
+          <h2>Inbound AI note</h2>
+          <p>
+            With <code>NOTES_ONLY_TEST_NAMES=true</code> (default), Leadflo notes are only written when
+            <code>fullName</code> contains <code>test</code>. Pass <code>"force": true</code> to override.
+          </p>
+        </section>
+
+        <section id="examples">
+          <h2>Examples</h2>
+          <pre><code># Health
+curl -s "$BASE/api/health" | jq
+
+# Force a scrape
+curl -s -X POST "$BASE/api/poll" | jq
+
+# List tracked leads
+curl -s "$BASE/api/leads" | jq '.leads[] | {fullName, status, isTestName}'
+
+# AI note write-back (test lead)
+curl -s -X POST "$BASE/api/webhooks/ai-response" \
+  -H 'Content-Type: application/json' \
+  -H "X-Webhook-Secret: $INBOUND_WEBHOOK_SECRET" \
+  -d '{"patientId":"…","note":"Thanks for your implant enquiry — we will call shortly."}' | jq
+</code></pre>
+        </section>
+      </article>
+    </main>
+    <script>
+      const base = window.location.origin;
+      document.getElementById("baseUrl").textContent = base;
+      document.getElementById("baseBadge").textContent = base.replace(/^https?:\/\//, "");
+      document.querySelectorAll("pre code").forEach((el) => {
+        el.textContent = el.textContent.replaceAll("https://your-app.azurewebsites.net", base);
+        el.textContent = el.textContent.replaceAll("$BASE", base);
+      });
+    </script>
+  </body>
+</html>

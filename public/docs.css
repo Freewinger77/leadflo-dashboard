@@ -1,0 +1,150 @@
+.docs-body .brand a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.docs-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3.5rem;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.docs-nav {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--line);
+}
+
+.docs-nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.docs-nav a:hover {
+  color: var(--sea-deep);
+}
+
+.docs-content {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow);
+  padding: 1.5rem 1.6rem 2rem;
+  animation: rise 0.7s ease both;
+}
+
+.docs-content h1 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  color: var(--sea-deep);
+  line-height: 1;
+}
+
+.docs-content h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.docs-content p,
+.docs-content li {
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.callout {
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: rgba(15, 106, 90, 0.08);
+  border: 1px solid rgba(15, 106, 90, 0.18);
+}
+
+.callout p {
+  margin: 0.25rem 0;
+  color: var(--ink);
+}
+
+.flow {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.endpoint {
+  margin: 1rem 0 1.4rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.ep-head {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.45rem;
+}
+
+.method {
+  display: inline-flex;
+  min-width: 3.4rem;
+  justify-content: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.method.get {
+  background: rgba(31, 122, 76, 0.14);
+  color: var(--ok);
+}
+
+.method.post {
+  background: rgba(15, 106, 90, 0.14);
+  color: var(--sea-deep);
+}
+
+.docs-content code,
+.docs-content pre {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.docs-content pre {
+  overflow-x: auto;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: #13231f;
+  color: #d7ebe3;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.docs-content :not(pre) > code {
+  background: rgba(15, 106, 90, 0.1);
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.88em;
+  color: var(--sea-deep);
+}
+
+@media (max-width: 860px) {
+  .docs-main {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-nav {
+    position: static;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}

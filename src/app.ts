@@ -129,6 +129,10 @@ export function createApp(deps: AppDeps): Express {
     res.status(result.ok ? 200 : 400).json(result);
   });
 
+  app.get("/docs", (_req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "docs.html"));
+  });
+
   app.use(express.static(path.join(__dirname, "..", "public")));
 
   app.get("*", (req, res, next) => {

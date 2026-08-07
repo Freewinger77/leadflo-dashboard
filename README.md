@@ -108,10 +108,38 @@ Leadflo sits behind AWS ELB/WAF. Many datacenter IPs (including AWS) get **403 F
 If login fails with a WAF 403:
 
 1. Run this service on a laptop / residential VPS / non-AWS host, **or**
-2. Set `LEADFLO_HTTP_PROXY` to a residential proxy, **or**
+2. Set `LEADFLO_HTTP_PROXY` to a residential proxy (prefer **UK** exit IPs — SE exits still hit WAF on `/auth/session`), **or**
 3. Set `LEADFLO_MODE=mock` to exercise the dashboard + webhook loop locally.
 
 This cloud agent environment is AWS-hosted and receives that WAF 403, so live scrape was verified only up to the auth gate here; the full loop is covered under `LEADFLO_MODE=mock`.
+
+## API docs
+
+Interactive reference: **`/docs.html`** (also `/docs`).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/health` | Liveness |
+| GET | `/api/status` | Leadflo ping + stats |
+| GET | `/api/leads` | Tracked implant leads |
+| GET | `/api/events` | Activity log |
+| POST | `/api/poll` | Run one scrape now |
+| POST | `/api/webhooks/ai-response` | AI note write-back |
+| POST | `/api/leads/:id/notes` | Manual note (dashboard) |
+
+## Azure deploy
+
+```bash
+az login
+export LEADFLO_EMAIL=arslan@tryrapidscreen.com
+export LEADFLO_PASSWORD='…'
+export LEADFLO_HTTP_PROXY='http://USER:PASS@HOST:PORT'   # optional
+export WEBHOOK_URL='https://…'
+./scripts/deploy-azure.sh
+```
+
+Default app URL: `https://leadflo-tracker-arslan.azurewebsites.net`  
+Docs: `https://leadflo-tracker-arslan.azurewebsites.net/docs.html`
 
 ## Tests
 
@@ -125,3 +153,4 @@ npm run typecheck
 - `npm run dev` — dashboard + poller
 - `npm run scrape:once` — single scrape, print JSON
 - `npm start` — production-style start via `tsx`
+- `./scripts/deploy-azure.sh` — provision + zip-deploy App Service
