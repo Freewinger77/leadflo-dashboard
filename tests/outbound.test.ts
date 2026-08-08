@@ -47,13 +47,16 @@ describe("phone normalisation", () => {
     assert.equal(normalizePhone("447700900123").msisdn, "447700900123");
   });
 
-  it("refuses anything it cannot resolve to a UK mobile", () => {
+  it("refuses anything it cannot resolve to a reachable number", () => {
     assert.equal(normalizePhone("").ok, false);
-    assert.equal(normalizePhone("+2347012345678").ok, false, "non-UK");
-    assert.equal(normalizePhone("+441614643072").ok, false, "landline");
+    assert.equal(normalizePhone("+441614643072").ok, false, "UK landline");
     assert.equal(normalizePhone("12345").ok, false, "too short");
     // A bare national number without a leading 0 is not safely resolvable.
     assert.equal(normalizePhone("7700900123").ok, false);
+  });
+
+  it("treats a foreign mobile as well-formed — reachability is not geography", () => {
+    assert.equal(normalizePhone("+2347012345678").msisdn, "2347012345678");
   });
 });
 
@@ -95,7 +98,23 @@ describe("outbound candidate selection", () => {
     assert.match(reasonFor("general"), /not tracked/);
     assert.match(reasonFor("late"), /past the contact stages/);
     assert.match(reasonFor("nophone"), /no phone number/);
-    assert.match(reasonFor("foreign"), /not a UK mobile/);
+    assert.match(reasonFor("foreign"), /country not in OUTBOUND_ALLOWED_COUNTRIES/);
+  });
+
+  it("lets an allowlisted foreign number through the country policy", async () => {
+    const { config } = await import("../src/config.js");
+    const previous = config.outbound.allowlist;
+    config.outbound.allowlist = ["2347012345678"];
+
+    const { selected, skipped } = selectCandidates(store, 10);
+    const stillBlocked = skipped.find((s) => s.patientId === "foreign")?.reason;
+    assert.ok(
+      selected.some((c) => c.patientId === "foreign") ||
+        stillBlocked === "eligible, held back by run cap",
+      `an allowlisted tester abroad must be reachable, got: ${stillBlocked}`,
+    );
+
+    config.outbound.allowlist = previous;
   });
 
   it("caps the batch and reports who was held back", () => {

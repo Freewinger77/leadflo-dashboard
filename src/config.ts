@@ -79,6 +79,13 @@ export const config = {
     apiKey: process.env.WF1_API_KEY ?? "",
     /** Country code assumed for local-format numbers (UK practice). */
     defaultCountryCode: process.env.OUTBOUND_COUNTRY_CODE ?? "44",
+    /**
+     * Countries the practice will message unprompted. Allowlisted numbers
+     * bypass this, so a tester abroad does not need the policy widened.
+     */
+    allowedCountryCodes: list(process.env.OUTBOUND_ALLOWED_COUNTRIES, ["44"]).map(
+      digitsOnly,
+    ),
   },
   notesOnlyTestNames: bool(process.env.NOTES_ONLY_TEST_NAMES, true),
   inboundWebhookSecret: process.env.INBOUND_WEBHOOK_SECRET ?? "",

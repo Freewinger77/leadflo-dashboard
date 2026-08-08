@@ -23,6 +23,9 @@ export interface PhoneResult {
  * Leadflo stores numbers inconsistently (+44…, 07…, spaces). WhatsApp needs an
  * unambiguous MSISDN, and a wrong guess means messaging a stranger, so anything
  * we cannot resolve confidently is rejected rather than coerced.
+ *
+ * This checks only that a number is well-formed and reachable. Which countries
+ * the practice is willing to message is a separate, overridable policy.
  */
 export function normalizePhone(raw: string | null | undefined): PhoneResult {
   const trimmed = String(raw ?? "").trim();
@@ -51,8 +54,9 @@ export function normalizePhone(raw: string | null | undefined): PhoneResult {
     return { ok: false, msisdn: "", e164: "", reason: `implausible length: ${trimmed}` };
   }
 
-  // A UK practice messaging a non-UK number is nearly always a bad record.
-  if (cc === "44" && !/^447\d{9}$/.test(digits)) {
+  // UK landlines cannot receive WhatsApp, so a 44 number that isn't 447 is
+  // unreachable rather than merely foreign.
+  if (digits.startsWith("44") && !/^447\d{9}$/.test(digits)) {
     return {
       ok: false,
       msisdn: "",
@@ -62,6 +66,10 @@ export function normalizePhone(raw: string | null | undefined): PhoneResult {
   }
 
   return { ok: true, msisdn: digits, e164: `+${digits}` };
+}
+
+function isAllowedCountry(msisdn: string): boolean {
+  return config.outbound.allowedCountryCodes.some((cc) => msisdn.startsWith(cc));
 }
 
 export interface Candidate {
@@ -144,11 +152,16 @@ function ineligibleReason(row: TrackedLeadRow, phone: PhoneResult): string | nul
   if (row.outbound_status === "sent") return "already contacted";
   if (row.outbound_status === "opted_out") return "opted out";
   if (row.outbound_status === "locked") return "already claimed by a running batch";
-  if (
-    config.outbound.allowlistOnly &&
-    !config.outbound.allowlist.includes(phone.msisdn)
-  ) {
+
+  const onAllowlist = config.outbound.allowlist.includes(phone.msisdn);
+  if (config.outbound.allowlistOnly && !onAllowlist) {
     return "not on the outbound allowlist";
+  }
+  // Naming a number on the allowlist is a deliberate human decision, so it
+  // overrides the country policy — a tester on a foreign mobile is still a
+  // valid recipient.
+  if (!onAllowlist && !isAllowedCountry(phone.msisdn)) {
+    return `country not in OUTBOUND_ALLOWED_COUNTRIES (+${phone.msisdn.slice(0, 3)}…)`;
   }
   return null;
 }
