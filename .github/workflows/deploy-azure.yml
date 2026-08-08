@@ -13,6 +13,9 @@ concurrency:
   group: deploy-azure-production
   cancel-in-progress: false
 
+# Azure Entra app: leadflo-github-deploy
+# Federated subject must match GitHub's claim (includes numeric IDs):
+#   repo:Freewinger77@135714302/leadflo-dashboard@1326708531:ref:refs/heads/main
 env:
   AZURE_CLIENT_ID: 4e59105d-0bf3-4ca0-a3ba-3158480da603
   AZURE_TENANT_ID: d2190b52-443e-4ff1-9c5e-088aecce41f9
