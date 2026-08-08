@@ -107,6 +107,11 @@ is only offered to WF-1 when it is an implant enquiry in an early stage, has a
 resolvable UK mobile, has never been contacted, and is not locked by another
 run. Per-run and per-day caps and an allowlist apply on top.
 
+All `/api/wf1/*` routes require `WF1_API_KEY`, sent as `X-WF1-Key`. They return
+patient names and mobile numbers on a publicly deployed URL, so an unset key
+returns 503 rather than serving the data unauthenticated — set it in the App
+Service configuration before deploying.
+
 Nothing can be sent until `OUTBOUND_ENABLED=true`; until then `/api/wf1/claim`
 refuses and only the preview endpoint works. Claimed batches are locked and
 auto-released after `OUTBOUND_LOCK_TTL_MS` so a crashed run cannot strand leads.

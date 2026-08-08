@@ -107,4 +107,39 @@ describe("implant tracking flow", () => {
     assert.equal(again.body.newNotes.length, 0);
     assert.ok(again.body.oldNotes.length >= 1);
   });
+
+  describe("WF-1 endpoint auth", () => {
+    it("refuses to serve patient contact details when no key is configured", async () => {
+      const { config } = await import("../src/config.js");
+      const previous = config.outbound.apiKey;
+      config.outbound.apiKey = "";
+
+      // These routes are public once deployed, so an unset key must fail
+      // closed rather than expose names and mobile numbers.
+      await request(app).get("/api/wf1/candidates").expect(503);
+      await request(app).get("/api/wf1/dispatches").expect(503);
+      await request(app).post("/api/wf1/claim").send({ limit: 1 }).expect(503);
+      await request(app).post("/api/wf1/release").send({ batchId: "x" }).expect(503);
+      await request(app).post("/api/wf1/result").send({}).expect(503);
+
+      config.outbound.apiKey = previous;
+    });
+
+    it("rejects a wrong key and accepts the configured one", async () => {
+      const { config } = await import("../src/config.js");
+      const previous = config.outbound.apiKey;
+      config.outbound.apiKey = "test-key";
+
+      await request(app)
+        .get("/api/wf1/candidates")
+        .set("x-wf1-key", "wrong")
+        .expect(401);
+      await request(app)
+        .get("/api/wf1/candidates")
+        .set("x-wf1-key", "test-key")
+        .expect(200);
+
+      config.outbound.apiKey = previous;
+    });
+  });
 });

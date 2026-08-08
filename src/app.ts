@@ -29,9 +29,18 @@ function requireInboundSecret(req: Request, res: Response): boolean {
   return true;
 }
 
-/** Claiming and reporting change who gets messaged, so they are key-gated. */
+/**
+ * Claiming and reporting change who gets messaged, so they are key-gated.
+ *
+ * A missing key refuses the request rather than waving it through: these
+ * routes expose patient names and mobile numbers, and the app is deployed to a
+ * public URL, so an unset environment variable must not silently publish them.
+ */
 function requireOutboundKey(req: Request, res: Response): boolean {
-  if (!config.outbound.apiKey) return true;
+  if (!config.outbound.apiKey) {
+    res.status(503).json({ error: "WF1_API_KEY is not configured" });
+    return false;
+  }
   const provided =
     req.get("x-wf1-key") || req.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (provided !== config.outbound.apiKey) {
@@ -274,6 +283,7 @@ export function createApp(deps: AppDeps): Express {
    * recipients, and it stays refused until OUTBOUND_ENABLED is set.
    */
   app.get("/api/wf1/candidates", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
     const limit = Number(req.query.limit ?? config.outbound.maxPerRun);
     res.json({
       preview: true,
@@ -340,7 +350,8 @@ export function createApp(deps: AppDeps): Express {
     res.json({ ok: true, released });
   });
 
-  app.get("/api/wf1/dispatches", (_req, res) => {
+  app.get("/api/wf1/dispatches", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
     res.json({ dispatches: store.listOutboundDispatches(100) });
   });
 
