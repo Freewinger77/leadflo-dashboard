@@ -125,6 +125,45 @@ describe("outbound candidate selection", () => {
     );
   });
 
+  it("scans every lead, not a truncated window", () => {
+    // A bulk backfill writes hundreds of rows inside one second. A capped scan
+    // ordered on a second-precision timestamp would leave the eligible lead
+    // outside an arbitrary window, so it could never be contacted.
+    const sameSecond = new Date().toISOString();
+    for (let i = 0; i < 600; i += 1) {
+      store.upsertScrapedLead(
+        {
+          patientId: `bulk-${i}`,
+          firstName: "Bulk",
+          lastName: String(i),
+          fullName: `Bulk ${i}`,
+          phone: "+441614643072",
+          email: "",
+          treatmentType: "Cosmetic",
+          source: "Google Ads",
+          stage: "consultation",
+          dueDate: null,
+          labels: [],
+          isTestName: false,
+          scrapedAt: sameSecond,
+          raw: {},
+        } as never,
+        { detailFetched: true },
+      );
+    }
+
+    const selection = selectCandidates(store, 1);
+    assert.ok(
+      selection.scanned >= 600,
+      `expected the whole table to be scanned, got ${selection.scanned}`,
+    );
+    assert.equal(
+      selection.selected.length,
+      1,
+      "the eligible lead must still be found behind hundreds of ineligible ones",
+    );
+  });
+
   it("seeds the session key WF-2 reads so the reply continues the thread", () => {
     const [first] = selectCandidates(store, 1).selected;
     assert.equal(first?.sessionKey, sessionKeyFor(first!.msisdn));

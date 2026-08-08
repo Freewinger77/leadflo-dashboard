@@ -236,12 +236,30 @@ export class Store {
       .get(patientId) as TrackedLeadRow | undefined;
   }
 
+  /**
+   * Ordered on the raw ISO timestamp rather than datetime(), which truncates to
+   * whole seconds. A bulk backfill lands hundreds of rows inside one second, so
+   * truncating leaves the order among them arbitrary and unstable between
+   * calls. patient_id breaks any remaining tie.
+   */
   listLeads(limit = 200): TrackedLeadRow[] {
     return this.db
       .prepare(
-        `SELECT * FROM leads ORDER BY datetime(first_seen_at) DESC LIMIT ?`,
+        `SELECT * FROM leads ORDER BY first_seen_at DESC, patient_id ASC LIMIT ?`,
       )
       .all(limit) as TrackedLeadRow[];
+  }
+
+  /**
+   * Every lead, for eligibility scanning. Outbound selection must see the whole
+   * table: capping the scan means leads outside the window can never be
+   * contacted, and with an unstable sort order it is not even the same leads
+   * each time.
+   */
+  listAllLeads(): TrackedLeadRow[] {
+    return this.db
+      .prepare(`SELECT * FROM leads ORDER BY first_seen_at DESC, patient_id ASC`)
+      .all() as TrackedLeadRow[];
   }
 
   listEvents(limit = 100): EventRow[] {

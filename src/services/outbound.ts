@@ -96,6 +96,9 @@ export interface SkippedCandidate {
 export interface CandidateSelection {
   selected: Candidate[];
   skipped: SkippedCandidate[];
+  scanned: number;
+  skippedCount: number;
+  skippedByReason: Record<string, number>;
   limit: number;
   filters: {
     trackedTreatmentTypes: string[];
@@ -180,8 +183,10 @@ export function selectCandidates(store: Store, limit: number): CandidateSelectio
 
   const selected: Candidate[] = [];
   const skipped: SkippedCandidate[] = [];
+  let scanned = 0;
 
-  for (const row of store.listLeads(500)) {
+  for (const row of store.listAllLeads()) {
+    scanned += 1;
     const phone = normalizePhone(row.phone);
     const reason = ineligibleReason(row, phone);
     if (reason) {
@@ -199,9 +204,20 @@ export function selectCandidates(store: Store, limit: number): CandidateSelectio
     selected.push(toCandidate(row, phone.msisdn));
   }
 
+  // The per-lead list is a diagnostic sample; the counts are what tell you
+  // whether a filter is quietly excluding everyone.
+  const skippedByReason: Record<string, number> = {};
+  for (const s of skipped) {
+    const key = s.reason.replace(/"[^"]*"/, '"…"');
+    skippedByReason[key] = (skippedByReason[key] ?? 0) + 1;
+  }
+
   return {
     selected,
     skipped,
+    scanned,
+    skippedCount: skipped.length,
+    skippedByReason,
     limit: cap,
     filters: {
       trackedTreatmentTypes: config.trackedTreatmentTypes,

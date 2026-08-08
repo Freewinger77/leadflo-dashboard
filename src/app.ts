@@ -5,7 +5,11 @@ import { config } from "./config.js";
 import type { Store } from "./db/store.js";
 import { createLeadfloClient, type LeadfloClient } from "./leadflo/index.js";
 import { applyAiNote } from "./services/notes.js";
-import { claimBatch, selectCandidates } from "./services/outbound.js";
+import {
+  claimBatch,
+  selectCandidates,
+  type CandidateSelection,
+} from "./services/outbound.js";
 import type { Poller } from "./services/poller.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +31,15 @@ function requireInboundSecret(req: Request, res: Response): boolean {
     return false;
   }
   return true;
+}
+
+/**
+ * The per-lead skip list is a diagnostic sample. Once most of a practice's
+ * table is ineligible it runs to hundreds of entries, so only a sample goes
+ * over the wire; skippedByReason carries the full breakdown.
+ */
+function forWire(selection: CandidateSelection): CandidateSelection {
+  return { ...selection, skipped: selection.skipped.slice(0, 25) };
 }
 
 /**
@@ -289,7 +302,7 @@ export function createApp(deps: AppDeps): Express {
       preview: true,
       source: "leadflo-dashboard",
       practice: config.practiceName,
-      ...selectCandidates(store, Number.isFinite(limit) ? limit : 1),
+      ...forWire(selectCandidates(store, Number.isFinite(limit) ? limit : 1)),
     });
   });
 
@@ -297,7 +310,9 @@ export function createApp(deps: AppDeps): Express {
     if (!requireOutboundKey(req, res)) return;
     const limit = Number(req.body?.limit ?? config.outbound.maxPerRun);
     const result = claimBatch(store, Number.isFinite(limit) ? limit : 1);
-    res.status(result.ok ? 200 : 409).json(result);
+    res
+      .status(result.ok ? 200 : 409)
+      .json({ ...result, selection: forWire(result.selection) });
   });
 
   app.post("/api/wf1/result", (req, res) => {
