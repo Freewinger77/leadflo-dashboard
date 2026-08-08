@@ -128,10 +128,28 @@ describe("stage tracking", () => {
     assert.equal(history[0]?.detected_by, "refresh");
   });
 
-  it("tracks later-stage leads without dispatching a webhook", async () => {
+  it("ignores later-stage leads entirely by default", async () => {
     client.actions = [action("p2", "consultation")];
     client.stages.set("p2", "consultation");
 
+    await poller.tick();
+
+    assert.equal(
+      store.getLead("p2"),
+      undefined,
+      "patients already past the contact stages should not be pulled in",
+    );
+  });
+
+  it("still refuses to dispatch a later-stage lead if discovery is widened", async () => {
+    // Discovery and contact are separate gates. Widening the first must never
+    // widen the second, so the guard is tested independently of the default.
+    const { config } = await import("../src/config.js");
+    const previous = config.scrapeStages;
+    config.scrapeStages = [...previous, "consultation"];
+
+    client.actions = [action("p2", "consultation")];
+    client.stages.set("p2", "consultation");
     await poller.tick();
 
     const lead = store.getLead("p2");
@@ -141,6 +159,8 @@ describe("stage tracking", () => {
       "discovered",
       "leads discovered past the contact stages must not be dispatched",
     );
+
+    config.scrapeStages = previous;
   });
 
   it("does not overwrite known contact details with an empty action scrape", async () => {
