@@ -134,14 +134,22 @@ Live (UK residential proxy → Leadflo):
 
 DNS: GoDaddy CNAME `dental-asthetica` → `dental-asthetica.azurewebsites.net` + Azure managed TLS.
 
-## Azure deploy
+## Azure deploy (auto)
+
+**Pushing / merging to `main` deploys automatically** via GitHub Actions → Azure App Service `dental-asthetica` (OIDC, no publish-profile secret).
+
+- Workflow: [`.github/workflows/deploy-azure.yml`](.github/workflows/deploy-azure.yml)
+- Runs: https://github.com/Freewinger77/leadflo-dashboard/actions
+- Live: https://dental-asthetica.wasup.co
+
+Your developer does **not** need Azure portal access for routine deploys — merge to `main` (or run **Actions → Deploy to Azure → Run workflow**).
+
+Manual zip-deploy (operators with Azure access only):
 
 ```bash
 az login
-export LEADFLO_EMAIL=arslan@tryrapidscreen.com
-export LEADFLO_PASSWORD='…'
-export LEADFLO_HTTP_PROXY='http://USER:PASS@HOST:PORT'   # UK residential required for WAF
-export WEBHOOK_URL='https://…'
+export RESOURCE_GROUP=rapidspec-rg APP_NAME=dental-asthetica
+# App settings (Leadflo creds, proxy, etc.) already live on the App Service — do not overwrite blindly.
 ./scripts/deploy-azure.sh
 ```
 

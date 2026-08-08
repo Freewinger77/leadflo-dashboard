@@ -1,0 +1,97 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-azure-production
+  cancel-in-progress: false
+
+env:
+  AZURE_CLIENT_ID: 4e59105d-0bf3-4ca0-a3ba-3158480da603
+  AZURE_TENANT_ID: d2190b52-443e-4ff1-9c5e-088aecce41f9
+  AZURE_SUBSCRIPTION_ID: 84e85ed8-74a4-461a-a958-6aaeeb95f2cc
+  AZURE_WEBAPP_NAME: dental-asthetica
+  AZURE_RESOURCE_GROUP: rapidspec-rg
+  NODE_VERSION: "22"
+
+jobs:
+  test:
+    name: Typecheck + test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  deploy:
+    name: Zip deploy to Azure App Service
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package app (Oryx installs deps on Azure)
+        run: |
+          set -euo pipefail
+          STAGE=$(mktemp -d)
+          rsync -a \
+            --exclude node_modules \
+            --exclude .git \
+            --exclude .github \
+            --exclude data \
+            --exclude '*.db' \
+            --exclude '*.db-journal' \
+            --exclude .env \
+            --exclude .azure \
+            --exclude coverage \
+            --exclude dist \
+            ./ "$STAGE/"
+          (cd "$STAGE" && zip -qr "$GITHUB_WORKSPACE/leadflo-deploy.zip" .)
+          ls -lh leadflo-deploy.zip
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to dental-asthetica
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          resource-group-name: ${{ env.AZURE_RESOURCE_GROUP }}
+          package: leadflo-deploy.zip
+
+      - name: Smoke check
+        run: |
+          set -euo pipefail
+          for url in \
+            "https://dental-asthetica.azurewebsites.net/api/health" \
+            "https://dental-asthetica.wasup.co/api/health"
+          do
+            echo "GET $url"
+            for i in 1 2 3 4 5 6; do
+              code=$(curl -sS -o /tmp/health.json -w '%{http_code}' --max-time 30 "$url" || true)
+              echo "  attempt $i -> HTTP $code"
+              if [ "$code" = "200" ]; then
+                cat /tmp/health.json
+                echo
+                break
+              fi
+              sleep 10
+            done
+            test "$code" = "200"
+          done
