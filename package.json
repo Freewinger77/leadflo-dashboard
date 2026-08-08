@@ -8,12 +8,12 @@
     "dev": "tsx watch src/index.ts",
     "start": "bash startup.sh",
     "build": "node -e \"console.log('build ok')\"",
-    "test": "tsx --test tests/**/*.test.ts",
+    "test": "tsx --test tests/*.test.ts",
     "scrape:once": "tsx src/cli/scrape-once.ts",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <24"
   },
   "dependencies": {
     "better-sqlite3": "^11.9.1",

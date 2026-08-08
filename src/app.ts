@@ -5,6 +5,7 @@ import { config } from "./config.js";
 import type { Store } from "./db/store.js";
 import { createLeadfloClient, type LeadfloClient } from "./leadflo/index.js";
 import { applyAiNote } from "./services/notes.js";
+import { claimBatch, selectCandidates } from "./services/outbound.js";
 import type { Poller } from "./services/poller.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,6 +29,27 @@ function requireInboundSecret(req: Request, res: Response): boolean {
   return true;
 }
 
+/**
+ * Claiming and reporting change who gets messaged, so they are key-gated.
+ *
+ * A missing key refuses the request rather than waving it through: these
+ * routes expose patient names and mobile numbers, and the app is deployed to a
+ * public URL, so an unset environment variable must not silently publish them.
+ */
+function requireOutboundKey(req: Request, res: Response): boolean {
+  if (!config.outbound.apiKey) {
+    res.status(503).json({ error: "WF1_API_KEY is not configured" });
+    return false;
+  }
+  const provided =
+    req.get("x-wf1-key") || req.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (provided !== config.outbound.apiKey) {
+    res.status(401).json({ error: "Invalid WF-1 key" });
+    return false;
+  }
+  return true;
+}
+
 export function createApp(deps: AppDeps): Express {
   const app = express();
   const client = deps.client ?? createLeadfloClient();
@@ -45,6 +67,14 @@ export function createApp(deps: AppDeps): Express {
       webhookConfigured: Boolean(config.webhookUrl),
       practiceName: config.practiceName,
       publicBaseUrl: config.publicBaseUrl || null,
+      outbound: {
+        enabled: config.outbound.enabled,
+        allowlistOnly: config.outbound.allowlistOnly,
+        allowlistCount: config.outbound.allowlist.length,
+        maxPerRun: config.outbound.maxPerRun,
+        maxPerDay: config.outbound.maxPerDay,
+        keyConfigured: Boolean(config.outbound.apiKey),
+      },
     });
   });
 
@@ -94,6 +124,7 @@ export function createApp(deps: AppDeps): Express {
     res.json({
       lead: serializeLead(row),
       events: store.listEventsForLead(row.patient_id, 80),
+      stageHistory: store.listStageHistory(row.patient_id),
       leadfloUrl: `${config.leadflo.appOrigin}/`,
     });
   });
@@ -148,6 +179,7 @@ export function createApp(deps: AppDeps): Express {
         oldNotes,
         activity,
         localEvents: store.listEventsForLead(patientId, 80),
+        stageHistory: store.listStageHistory(patientId),
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -244,6 +276,85 @@ export function createApp(deps: AppDeps): Express {
     }
   });
 
+  /**
+   * WF-1 outbound feeder.
+   *
+   * Preview is free; claiming a batch is the only way to get sendable
+   * recipients, and it stays refused until OUTBOUND_ENABLED is set.
+   */
+  app.get("/api/wf1/candidates", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const limit = Number(req.query.limit ?? config.outbound.maxPerRun);
+    res.json({
+      preview: true,
+      source: "leadflo-dashboard",
+      practice: config.practiceName,
+      ...selectCandidates(store, Number.isFinite(limit) ? limit : 1),
+    });
+  });
+
+  app.post("/api/wf1/claim", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const limit = Number(req.body?.limit ?? config.outbound.maxPerRun);
+    const result = claimBatch(store, Number.isFinite(limit) ? limit : 1);
+    res.status(result.ok ? 200 : 409).json(result);
+  });
+
+  app.post("/api/wf1/result", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const batchId = String(req.body?.batchId ?? "");
+    const patientId = String(req.body?.patientId ?? "");
+    const status = String(req.body?.status ?? "");
+
+    if (!batchId || !patientId) {
+      res.status(400).json({ ok: false, error: "batchId and patientId are required" });
+      return;
+    }
+    if (status !== "sent" && status !== "failed") {
+      res.status(400).json({ ok: false, error: 'status must be "sent" or "failed"' });
+      return;
+    }
+    if (!store.getLead(patientId)) {
+      res.status(404).json({ ok: false, error: "Lead not found" });
+      return;
+    }
+
+    store.recordOutboundResult(patientId, {
+      batchId,
+      status,
+      msisdn: req.body?.msisdn ? String(req.body.msisdn) : undefined,
+      message: req.body?.message ? String(req.body.message) : null,
+      providerMessageId: req.body?.providerMessageId
+        ? String(req.body.providerMessageId)
+        : null,
+      error: req.body?.error ? String(req.body.error) : null,
+    });
+    store.logEvent(
+      status === "sent" ? "outbound.sent" : "outbound.failed",
+      `WF-1 ${status} for ${patientId} (batch ${batchId})`,
+      patientId,
+      { batchId, providerMessageId: req.body?.providerMessageId ?? null },
+    );
+    res.json({ ok: true, lead: serializeLead(store.getLead(patientId)!) });
+  });
+
+  app.post("/api/wf1/release", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const batchId = String(req.body?.batchId ?? "");
+    if (!batchId) {
+      res.status(400).json({ ok: false, error: "batchId is required" });
+      return;
+    }
+    const released = store.releaseOutboundBatch(batchId);
+    store.logEvent("outbound.released", `Released batch ${batchId}`, null, { released });
+    res.json({ ok: true, released });
+  });
+
+  app.get("/api/wf1/dispatches", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    res.json({ dispatches: store.listOutboundDispatches(100) });
+  });
+
   /** Inbound: AI / n8n / agent posts the note to write back into Leadflo */
   app.post("/api/webhooks/ai-response", async (req, res) => {
     if (!requireInboundSecret(req, res)) return;
@@ -310,6 +421,13 @@ function serializeLead(row: ReturnType<Store["listLeads"]>[number]) {
     noteWrittenAt: row.note_written_at,
     lastError: row.last_error,
     aiNote: row.ai_note,
+    stageCheckedAt: row.stage_checked_at,
+    detailFetchedAt: row.detail_fetched_at,
+    outboundStatus: row.outbound_status,
+    outboundSentAt: row.outbound_sent_at,
+    outboundMessage: row.outbound_message,
+    outboundError: row.outbound_error,
+    outboundAttempts: row.outbound_attempts,
   };
 }
 

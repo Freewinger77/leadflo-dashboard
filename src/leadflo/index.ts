@@ -1,6 +1,7 @@
 import { config } from "../config.js";
 import { LiveLeadfloClient } from "./liveClient.js";
 import { MockLeadfloClient } from "./mockClient.js";
+import { isTestName } from "./testName.js";
 import type { LeadfloClient, LeadfloPatient, NormalizedLead } from "./types.js";
 import type { LeadfloAction } from "./types.js";
 
@@ -19,8 +20,11 @@ export function isTrackedTreatment(type: string | null | undefined): boolean {
   );
 }
 
-export function isTestName(fullName: string): boolean {
-  return /\btest\b/i.test(fullName) || /test/i.test(fullName);
+export { isTestName };
+
+export function isWebhookStage(stage: string | null | undefined): boolean {
+  if (!stage) return false;
+  return config.webhookStages.includes(stage);
 }
 
 export function normalizeLead(
