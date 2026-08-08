@@ -37,19 +37,22 @@ export const config = {
     t.toLowerCase(),
   ),
   pollIntervalMs: Number(process.env.POLL_INTERVAL_MS ?? 60_000),
+  /**
+   * Only enquiries early enough to be worth contacting. Discovering later
+   * stages pulled in ~570 patients we will never message, and every one of
+   * them then sat in the refresh queue costing Leadflo reads indefinitely.
+   * Leads already known are followed into later stages regardless of this
+   * list, so progression to consultation is still tracked.
+   */
   scrapeStages: list(process.env.SCRAPE_STAGES, [
     "newLead",
     "callback1",
     "callback2",
     "callback3",
     "working",
-    "thinking",
-    "consultation",
-    "txPlanConsult",
-    "inTx",
   ]),
-  /** Discovery is wider than dispatch: later stages are tracked for funnel
-   *  reporting but must not trigger outbound contact. */
+  /** Kept separate from discovery: if discovery is ever widened again, this is
+   *  what still prevents later-stage patients being contacted. */
   webhookStages: list(process.env.WEBHOOK_STAGES, [
     "newLead",
     "callback1",
