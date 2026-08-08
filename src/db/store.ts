@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 import { config } from "../config.js";
+import { isTestName } from "../leadflo/testName.js";
 import type { NormalizedLead } from "../leadflo/types.js";
 
 export type LeadStatus =
@@ -36,6 +37,44 @@ export interface TrackedLeadRow {
   last_error: string | null;
   ai_note: string | null;
   payload_json: string;
+  stage_checked_at: string | null;
+  detail_fetched_at: string | null;
+  outbound_status: OutboundStatus | null;
+  outbound_batch_id: string | null;
+  outbound_locked_at: string | null;
+  outbound_sent_at: string | null;
+  outbound_message: string | null;
+  outbound_error: string | null;
+  outbound_attempts: number;
+}
+
+/**
+ * Outbound state is tracked separately from `status`, which only ever meant
+ * "did we hand this lead to a webhook". A lead can be webhook_sent and still
+ * never have been messaged.
+ */
+export type OutboundStatus = "locked" | "sent" | "failed" | "opted_out";
+
+export interface OutboundDispatchRow {
+  id: number;
+  batch_id: string;
+  patient_id: string;
+  msisdn: string;
+  status: string;
+  message: string | null;
+  provider_message_id: string | null;
+  error: string | null;
+  claimed_at: string;
+  completed_at: string | null;
+}
+
+export interface StageChangeRow {
+  id: number;
+  patient_id: string;
+  from_stage: string | null;
+  to_stage: string;
+  changed_at: string;
+  detected_by: string;
 }
 
 export interface EventRow {
@@ -119,7 +158,56 @@ export class Store {
 
       CREATE INDEX IF NOT EXISTS idx_lead_notes_patient
         ON lead_notes(patient_id);
+
+      CREATE TABLE IF NOT EXISTS lead_stage_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        patient_id TEXT NOT NULL,
+        from_stage TEXT,
+        to_stage TEXT NOT NULL,
+        changed_at TEXT NOT NULL,
+        detected_by TEXT NOT NULL DEFAULT 'scrape'
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_lead_stage_history_patient
+        ON lead_stage_history(patient_id);
+
+      CREATE TABLE IF NOT EXISTS outbound_dispatches (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        batch_id TEXT NOT NULL,
+        patient_id TEXT NOT NULL,
+        msisdn TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL,
+        message TEXT,
+        provider_message_id TEXT,
+        error TEXT,
+        claimed_at TEXT NOT NULL,
+        completed_at TEXT
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_outbound_dispatches_batch
+        ON outbound_dispatches(batch_id);
+      CREATE INDEX IF NOT EXISTS idx_outbound_dispatches_patient
+        ON outbound_dispatches(patient_id);
     `);
+
+    this.addColumnIfMissing("leads", "stage_checked_at", "TEXT");
+    this.addColumnIfMissing("leads", "detail_fetched_at", "TEXT");
+    this.addColumnIfMissing("leads", "outbound_status", "TEXT");
+    this.addColumnIfMissing("leads", "outbound_batch_id", "TEXT");
+    this.addColumnIfMissing("leads", "outbound_locked_at", "TEXT");
+    this.addColumnIfMissing("leads", "outbound_sent_at", "TEXT");
+    this.addColumnIfMissing("leads", "outbound_message", "TEXT");
+    this.addColumnIfMissing("leads", "outbound_error", "TEXT");
+    this.addColumnIfMissing("leads", "outbound_attempts", "INTEGER NOT NULL DEFAULT 0");
+  }
+
+  private addColumnIfMissing(table: string, column: string, ddl: string): void {
+    const columns = this.db.prepare(`PRAGMA table_info(${table})`).all() as Array<{
+      name: string;
+    }>;
+    if (!columns.some((c) => c.name === column)) {
+      this.db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
+    }
   }
 
   logEvent(
@@ -170,18 +258,28 @@ export class Store {
       .all(patientId, limit) as EventRow[];
   }
 
-  /** Upsert scrape snapshot. Returns true if this patient is brand new. */
-  upsertScrapedLead(lead: NormalizedLead): { isNew: boolean; row: TrackedLeadRow } {
+  /**
+   * Upsert a scrape snapshot. Returns true if this patient is brand new.
+   * Action-only scrapes carry fewer fields than patient detail fetches, so
+   * empty incoming values must never overwrite what we already know.
+   */
+  upsertScrapedLead(
+    lead: NormalizedLead,
+    opts: { detailFetched?: boolean } = {},
+  ): { isNew: boolean; row: TrackedLeadRow } {
     const existing = this.getLead(lead.patientId);
     const now = lead.scrapedAt;
+    const detailAt = opts.detailFetched ? now : null;
+
     if (!existing) {
       this.db
         .prepare(
           `INSERT INTO leads (
             patient_id, first_name, last_name, full_name, phone, email,
             treatment_type, source, stage, due_date, labels_json, is_test_name,
-            status, first_seen_at, last_seen_at, payload_json
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'discovered', ?, ?, ?)`,
+            status, first_seen_at, last_seen_at, payload_json,
+            stage_checked_at, detail_fetched_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'discovered', ?, ?, ?, ?, ?)`,
         )
         .run(
           lead.patientId,
@@ -199,9 +297,44 @@ export class Store {
           now,
           now,
           JSON.stringify(lead.raw ?? lead),
+          now,
+          detailAt,
         );
-      this.logEvent("lead.discovered", `New implant lead: ${lead.fullName}`, lead.patientId);
+      this.recordStageChange(lead.patientId, null, lead.stage, "scrape", now);
+      this.logEvent(
+        "lead.discovered",
+        `New ${lead.treatmentType || "unknown"} lead: ${lead.fullName}`,
+        lead.patientId,
+      );
       return { isNew: true, row: this.getLead(lead.patientId)! };
+    }
+
+    const keep = (incoming: string, current: string) => incoming || current;
+    const merged = {
+      firstName: keep(lead.firstName, existing.first_name),
+      lastName: keep(lead.lastName, existing.last_name),
+      fullName: keep(lead.fullName, existing.full_name),
+      phone: keep(lead.phone, existing.phone),
+      email: keep(lead.email, existing.email),
+      treatmentType: keep(lead.treatmentType, existing.treatment_type),
+      source: keep(lead.source, existing.source),
+      stage: keep(lead.stage, existing.stage),
+      labelsJson: lead.labels.length
+        ? JSON.stringify(lead.labels)
+        : existing.labels_json,
+      payloadJson: opts.detailFetched
+        ? JSON.stringify(lead.raw ?? lead)
+        : existing.payload_json,
+    };
+
+    if (merged.stage !== existing.stage) {
+      this.recordStageChange(
+        lead.patientId,
+        existing.stage,
+        merged.stage,
+        "scrape",
+        now,
+      );
     }
 
     this.db
@@ -209,26 +342,244 @@ export class Store {
         `UPDATE leads SET
           first_name = ?, last_name = ?, full_name = ?, phone = ?, email = ?,
           treatment_type = ?, source = ?, stage = ?, due_date = ?, labels_json = ?,
-          is_test_name = ?, last_seen_at = ?, payload_json = ?
+          is_test_name = ?, last_seen_at = ?, payload_json = ?,
+          stage_checked_at = ?,
+          detail_fetched_at = COALESCE(?, detail_fetched_at)
          WHERE patient_id = ?`,
       )
       .run(
-        lead.firstName,
-        lead.lastName,
-        lead.fullName,
-        lead.phone,
-        lead.email,
-        lead.treatmentType,
-        lead.source,
-        lead.stage,
+        merged.firstName,
+        merged.lastName,
+        merged.fullName,
+        merged.phone,
+        merged.email,
+        merged.treatmentType,
+        merged.source,
+        merged.stage,
         lead.dueDate,
-        JSON.stringify(lead.labels),
-        lead.isTestName ? 1 : 0,
+        merged.labelsJson,
+        isTestName(merged.fullName) ? 1 : 0,
         now,
-        JSON.stringify(lead.raw ?? lead),
+        merged.payloadJson,
+        now,
+        detailAt,
         lead.patientId,
       );
     return { isNew: false, row: this.getLead(lead.patientId)! };
+  }
+
+  recordStageChange(
+    patientId: string,
+    fromStage: string | null,
+    toStage: string,
+    detectedBy: string,
+    changedAt = new Date().toISOString(),
+  ): void {
+    this.db
+      .prepare(
+        `INSERT INTO lead_stage_history
+           (patient_id, from_stage, to_stage, changed_at, detected_by)
+         VALUES (?, ?, ?, ?, ?)`,
+      )
+      .run(patientId, fromStage, toStage, changedAt, detectedBy);
+  }
+
+  listStageHistory(patientId: string, limit = 50): StageChangeRow[] {
+    return this.db
+      .prepare(
+        `SELECT * FROM lead_stage_history
+         WHERE patient_id = ? ORDER BY id DESC LIMIT ?`,
+      )
+      .all(patientId, limit) as StageChangeRow[];
+  }
+
+  /**
+   * Leads whose stage has not been verified recently. Leads drop out of the
+   * due-actions feed once they progress, so without this their stage would
+   * stay frozen at whatever we last saw.
+   */
+  listLeadsNeedingRefresh(staleBeforeIso: string, limit: number): TrackedLeadRow[] {
+    // ISO-8601 strings compare correctly lexicographically and, unlike
+    // SQLite's datetime(), keep millisecond precision.
+    return this.db
+      .prepare(
+        `SELECT * FROM leads
+         WHERE stage_checked_at IS NULL OR stage_checked_at < ?
+         ORDER BY COALESCE(stage_checked_at, first_seen_at) ASC
+         LIMIT ?`,
+      )
+      .all(staleBeforeIso, limit) as TrackedLeadRow[];
+  }
+
+  /** Move a lead to the back of the refresh queue without claiming success. */
+  touchStageChecked(patientId: string, checkedAt = new Date().toISOString()): void {
+    this.db
+      .prepare(`UPDATE leads SET stage_checked_at = ? WHERE patient_id = ?`)
+      .run(checkedAt, patientId);
+  }
+
+  /** Apply a patient-detail refresh, recording any stage transition. */
+  markStageChecked(
+    patientId: string,
+    stage: string | null | undefined,
+    checkedAt = new Date().toISOString(),
+  ): { changed: boolean; fromStage: string | null; toStage: string | null } {
+    const existing = this.getLead(patientId);
+    if (!existing) return { changed: false, fromStage: null, toStage: null };
+
+    const nextStage = stage?.trim() || existing.stage;
+    const changed = nextStage !== existing.stage;
+    if (changed) {
+      this.recordStageChange(patientId, existing.stage, nextStage, "refresh", checkedAt);
+    }
+    this.db
+      .prepare(
+        `UPDATE leads SET stage = ?, stage_checked_at = ?, detail_fetched_at = ?
+         WHERE patient_id = ?`,
+      )
+      .run(nextStage, checkedAt, checkedAt, patientId);
+    return { changed, fromStage: existing.stage, toStage: nextStage };
+  }
+
+  /** Reserve leads for one WF-1 run so a concurrent run cannot pick them up. */
+  lockOutboundBatch(patientIds: string[], batchId: string): void {
+    if (!patientIds.length) return;
+    const now = new Date().toISOString();
+    const lockLead = this.db.prepare(
+      `UPDATE leads SET outbound_status = 'locked', outbound_batch_id = ?,
+         outbound_locked_at = ?, outbound_error = NULL
+       WHERE patient_id = ?`,
+    );
+    const logDispatch = this.db.prepare(
+      `INSERT INTO outbound_dispatches
+         (batch_id, patient_id, msisdn, status, claimed_at)
+       VALUES (?, ?, '', 'locked', ?)`,
+    );
+    this.db.transaction(() => {
+      for (const patientId of patientIds) {
+        lockLead.run(batchId, now, patientId);
+        logDispatch.run(batchId, patientId, now);
+      }
+    })();
+  }
+
+  /**
+   * Record what WF-1 actually did with one lead. A send that the provider
+   * accepted but did not deliver must land here as a failure, otherwise the
+   * lead is burned without ever having been messaged.
+   */
+  recordOutboundResult(
+    patientId: string,
+    result: {
+      batchId: string;
+      status: Extract<OutboundStatus, "sent" | "failed">;
+      msisdn?: string;
+      message?: string | null;
+      providerMessageId?: string | null;
+      error?: string | null;
+    },
+  ): void {
+    const now = new Date().toISOString();
+    this.db.transaction(() => {
+      this.db
+        .prepare(
+          `UPDATE leads SET
+             outbound_status = ?,
+             outbound_batch_id = ?,
+             outbound_locked_at = NULL,
+             outbound_sent_at = CASE WHEN ? = 'sent' THEN ? ELSE outbound_sent_at END,
+             outbound_message = COALESCE(?, outbound_message),
+             outbound_error = ?,
+             outbound_attempts = outbound_attempts + 1
+           WHERE patient_id = ?`,
+        )
+        .run(
+          result.status,
+          result.batchId,
+          result.status,
+          now,
+          result.message ?? null,
+          result.error ?? null,
+          patientId,
+        );
+      this.db
+        .prepare(
+          `UPDATE outbound_dispatches SET
+             status = ?, msisdn = ?, message = ?, provider_message_id = ?,
+             error = ?, completed_at = ?
+           WHERE batch_id = ? AND patient_id = ? AND completed_at IS NULL`,
+        )
+        .run(
+          result.status,
+          result.msisdn ?? "",
+          result.message ?? null,
+          result.providerMessageId ?? null,
+          result.error ?? null,
+          now,
+          result.batchId,
+          patientId,
+        );
+    })();
+  }
+
+  /** Put a claimed batch back in the pool when WF-1 rejects or abandons it. */
+  releaseOutboundBatch(batchId: string): number {
+    const now = new Date().toISOString();
+    const info = this.db
+      .prepare(
+        `UPDATE leads SET outbound_status = NULL, outbound_batch_id = NULL,
+           outbound_locked_at = NULL
+         WHERE outbound_batch_id = ? AND outbound_status = 'locked'`,
+      )
+      .run(batchId);
+    this.db
+      .prepare(
+        `UPDATE outbound_dispatches SET status = 'released', completed_at = ?
+         WHERE batch_id = ? AND completed_at IS NULL`,
+      )
+      .run(now, batchId);
+    return info.changes;
+  }
+
+  /** A crashed run must not strand its leads as permanently unsendable. */
+  releaseExpiredOutboundLocks(expiredBeforeIso: string): number {
+    const stale = this.db
+      .prepare(
+        `SELECT DISTINCT outbound_batch_id AS batch_id FROM leads
+         WHERE outbound_status = 'locked' AND outbound_locked_at < ?`,
+      )
+      .all(expiredBeforeIso) as Array<{ batch_id: string | null }>;
+
+    let released = 0;
+    for (const { batch_id } of stale) {
+      if (!batch_id) continue;
+      released += this.releaseOutboundBatch(batch_id);
+      this.logEvent("outbound.lock_expired", `Released stale batch ${batch_id}`);
+    }
+    return released;
+  }
+
+  countOutboundSentSince(sinceIso: string): number {
+    return (
+      this.db
+        .prepare(
+          `SELECT COUNT(*) AS c FROM leads
+           WHERE outbound_status = 'sent' AND outbound_sent_at >= ?`,
+        )
+        .get(sinceIso) as { c: number }
+    ).c;
+  }
+
+  listOutboundDispatches(limit = 100): OutboundDispatchRow[] {
+    return this.db
+      .prepare(`SELECT * FROM outbound_dispatches ORDER BY id DESC LIMIT ?`)
+      .all(limit) as OutboundDispatchRow[];
+  }
+
+  getOutboundBatch(batchId: string): OutboundDispatchRow[] {
+    return this.db
+      .prepare(`SELECT * FROM outbound_dispatches WHERE batch_id = ? ORDER BY id ASC`)
+      .all(batchId) as OutboundDispatchRow[];
   }
 
   setStatus(

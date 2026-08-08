@@ -3,6 +3,7 @@ import type { Store } from "../db/store.js";
 import {
   createLeadfloClient,
   isTrackedTreatment,
+  isWebhookStage,
   normalizeLead,
   type LeadfloClient,
   type NormalizedLead,
@@ -47,10 +48,11 @@ export class Poller {
   async tick(): Promise<{
     discovered: number;
     newLeads: number;
+    refreshed: number;
     leads: NormalizedLead[];
   }> {
     if (this.running) {
-      return { discovered: 0, newLeads: 0, leads: [] };
+      return { discovered: 0, newLeads: 0, refreshed: 0, leads: [] };
     }
     this.running = true;
     const runId = this.store.startPollRun();
@@ -58,40 +60,57 @@ export class Poller {
       const actions = await this.client.getDueActions(config.scrapeStages);
 
       const leads: NormalizedLead[] = [];
+      const seen = new Set<string>();
       let newLeads = 0;
       let webhooked = 0;
 
       for (const action of actions) {
+        seen.add(action.patient_id);
+        const existing = this.store.getLead(action.patient_id);
+
+        // Patient detail is only needed once per lead; the due-action payload
+        // is enough to keep an already-enriched row current.
         let patient = null;
-        try {
-          patient = await this.client.getPatient(action.patient_id);
-        } catch (err) {
-          this.store.logEvent(
-            "patient.fetch_failed",
-            err instanceof Error ? err.message : String(err),
-            action.patient_id,
-          );
+        if (!existing || !existing.detail_fetched_at) {
+          try {
+            patient = await this.client.getPatient(action.patient_id);
+          } catch (err) {
+            this.store.logEvent(
+              "patient.fetch_failed",
+              err instanceof Error ? err.message : String(err),
+              action.patient_id,
+            );
+          }
         }
 
         const lead = normalizeLead(action, patient);
-        const { isNew } = this.store.upsertScrapedLead(lead);
+        const { isNew } = this.store.upsertScrapedLead(lead, {
+          detailFetched: Boolean(patient),
+        });
         leads.push(lead);
 
         if (isNew) {
           newLeads += 1;
-          // Only auto-webhook configured treatment types (default: Implant)
-          if (isTrackedTreatment(lead.treatmentType)) {
-            webhooked += 1;
-            await this.dispatchNewLead(lead);
-          } else {
+          if (!isTrackedTreatment(lead.treatmentType)) {
             this.store.logEvent(
               "lead.tracked",
               `Tracked ${lead.fullName} (${lead.treatmentType}) — no webhook (not in TRACKED_TREATMENT_TYPES)`,
               lead.patientId,
             );
+          } else if (!isWebhookStage(lead.stage)) {
+            this.store.logEvent(
+              "lead.tracked",
+              `Tracked ${lead.fullName} at stage ${lead.stage} — no webhook (not in WEBHOOK_STAGES)`,
+              lead.patientId,
+            );
+          } else {
+            webhooked += 1;
+            await this.dispatchNewLead(lead);
           }
         }
       }
+
+      const refreshed = await this.refreshKnownLeads(seen);
 
       this.lastError = null;
       this.store.finishPollRun(runId, {
@@ -101,9 +120,9 @@ export class Poller {
       });
       this.store.logEvent(
         "poll.ok",
-        `Scraped ${leads.length} lead(s), ${newLeads} new, ${webhooked} webhooked`,
+        `Scraped ${leads.length} lead(s), ${newLeads} new, ${webhooked} webhooked, ${refreshed} refreshed`,
       );
-      return { discovered: leads.length, newLeads, leads };
+      return { discovered: leads.length, newLeads, refreshed, leads };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.lastError = message;
@@ -114,10 +133,54 @@ export class Poller {
         error: message,
       });
       this.store.logEvent("poll.error", message);
-      return { discovered: 0, newLeads: 0, leads: [] };
+      return { discovered: 0, newLeads: 0, refreshed: 0, leads: [] };
     } finally {
       this.running = false;
     }
+  }
+
+  /**
+   * Leads disappear from /actions/due once they progress, so their stage would
+   * otherwise stay frozen forever. Re-read a bounded batch of the least
+   * recently checked leads each tick to pick up downstream movement.
+   */
+  private async refreshKnownLeads(skip: Set<string>): Promise<number> {
+    const batchSize = config.stageRefreshBatchSize;
+    if (batchSize <= 0) return 0;
+
+    const staleBefore = new Date(
+      Date.now() - config.stageRefreshIntervalMs,
+    ).toISOString();
+    const candidates = this.store
+      .listLeadsNeedingRefresh(staleBefore, batchSize + skip.size)
+      .filter((row) => !skip.has(row.patient_id))
+      .slice(0, batchSize);
+
+    let refreshed = 0;
+    for (const row of candidates) {
+      try {
+        const patient = await this.client.getPatient(row.patient_id);
+        const result = this.store.markStageChecked(row.patient_id, patient.stage);
+        refreshed += 1;
+        if (result.changed) {
+          this.store.logEvent(
+            "lead.stage_changed",
+            `${row.full_name}: ${result.fromStage} → ${result.toStage}`,
+            row.patient_id,
+            result,
+          );
+        }
+      } catch (err) {
+        // Still mark it checked so one broken record cannot stall the queue.
+        this.store.touchStageChecked(row.patient_id);
+        this.store.logEvent(
+          "patient.refresh_failed",
+          err instanceof Error ? err.message : String(err),
+          row.patient_id,
+        );
+      }
+    }
+    return refreshed;
   }
 
   private async dispatchNewLead(lead: NormalizedLead): Promise<void> {

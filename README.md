@@ -94,6 +94,26 @@ Open `http://localhost:8788`.
 | POST | `/api/webhooks/ai-response` | Apply AI note |
 | POST | `/api/leads/:id/notes` | Manual note (dashboard) |
 | POST | `/api/leads/:id/webhook` | Resend outbound webhook |
+| GET | `/api/wf1/candidates` | Preview who WF-1 would contact, and why others were skipped |
+| POST | `/api/wf1/claim` | Lock a batch for WF-1 (refused unless `OUTBOUND_ENABLED`) |
+| POST | `/api/wf1/result` | WF-1 reports `sent` / `failed` per lead |
+| POST | `/api/wf1/release` | Return a rejected batch to the pool |
+| GET | `/api/wf1/dispatches` | Outbound dispatch audit log |
+
+## WF-1 outbound feeder
+
+The dashboard decides *who may be contacted*; n8n WF-1 does the sending. A lead
+is only offered to WF-1 when it is an implant enquiry in an early stage, has a
+resolvable UK mobile, has never been contacted, and is not locked by another
+run. Per-run and per-day caps and an allowlist apply on top.
+
+Nothing can be sent until `OUTBOUND_ENABLED=true`; until then `/api/wf1/claim`
+refuses and only the preview endpoint works. Claimed batches are locked and
+auto-released after `OUTBOUND_LOCK_TTL_MS` so a crashed run cannot strand leads.
+
+`sessionKey` in the candidate payload must stay identical to WF-2's Postgres
+chat-memory key, otherwise a lead's reply starts a blank conversation instead of
+continuing the one WF-1 opened.
 
 ## Leadflo API surface used
 
