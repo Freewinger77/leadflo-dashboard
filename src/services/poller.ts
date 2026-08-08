@@ -160,12 +160,23 @@ export class Poller {
     for (const row of candidates) {
       try {
         const patient = await this.client.getPatient(row.patient_id);
-        const result = this.store.markStageChecked(row.patient_id, patient.stage);
+        const result = this.store.markLeadRefreshed(row.patient_id, {
+          stage: patient.stage,
+          treatmentType: patient.type,
+        });
         refreshed += 1;
         if (result.changed) {
           this.store.logEvent(
             "lead.stage_changed",
             `${row.full_name}: ${result.fromStage} → ${result.toStage}`,
+            row.patient_id,
+            result,
+          );
+        }
+        if (result.treatmentChanged) {
+          this.store.logEvent(
+            "lead.treatment_changed",
+            `${row.full_name}: ${result.fromTreatment} → ${result.toTreatment}`,
             row.patient_id,
             result,
           );

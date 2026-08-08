@@ -418,27 +418,63 @@ export class Store {
       .run(checkedAt, patientId);
   }
 
-  /** Apply a patient-detail refresh, recording any stage transition. */
-  markStageChecked(
+  /**
+   * Apply a patient-detail refresh, recording any stage transition.
+   *
+   * Treatment type is refreshed alongside the stage because it decides who may
+   * be messaged. A lead reclassified in Leadflo after discovery only ever
+   * returns through this path, so ignoring it here would pin the lead to a
+   * stale type indefinitely.
+   */
+  markLeadRefreshed(
     patientId: string,
-    stage: string | null | undefined,
+    patient: { stage?: string | null; treatmentType?: string | null },
     checkedAt = new Date().toISOString(),
-  ): { changed: boolean; fromStage: string | null; toStage: string | null } {
+  ): {
+    changed: boolean;
+    fromStage: string | null;
+    toStage: string | null;
+    treatmentChanged: boolean;
+    fromTreatment: string | null;
+    toTreatment: string | null;
+  } {
     const existing = this.getLead(patientId);
-    if (!existing) return { changed: false, fromStage: null, toStage: null };
+    if (!existing) {
+      return {
+        changed: false,
+        fromStage: null,
+        toStage: null,
+        treatmentChanged: false,
+        fromTreatment: null,
+        toTreatment: null,
+      };
+    }
 
-    const nextStage = stage?.trim() || existing.stage;
+    const nextStage = patient.stage?.trim() || existing.stage;
     const changed = nextStage !== existing.stage;
     if (changed) {
       this.recordStageChange(patientId, existing.stage, nextStage, "refresh", checkedAt);
     }
+
+    const nextTreatment = patient.treatmentType?.trim() || existing.treatment_type;
+    const treatmentChanged = nextTreatment !== existing.treatment_type;
+
     this.db
       .prepare(
-        `UPDATE leads SET stage = ?, stage_checked_at = ?, detail_fetched_at = ?
+        `UPDATE leads SET stage = ?, treatment_type = ?, stage_checked_at = ?,
+           detail_fetched_at = ?
          WHERE patient_id = ?`,
       )
-      .run(nextStage, checkedAt, checkedAt, patientId);
-    return { changed, fromStage: existing.stage, toStage: nextStage };
+      .run(nextStage, nextTreatment, checkedAt, checkedAt, patientId);
+
+    return {
+      changed,
+      fromStage: existing.stage,
+      toStage: nextStage,
+      treatmentChanged,
+      fromTreatment: existing.treatment_type,
+      toTreatment: nextTreatment,
+    };
   }
 
   /** Reserve leads for one WF-1 run so a concurrent run cannot pick them up. */

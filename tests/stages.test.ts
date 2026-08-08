@@ -39,6 +39,7 @@ function action(patientId: string, stage: string, type = "Implant"): LeadfloActi
 class FakeClient implements LeadfloClient {
   actions: LeadfloAction[] = [];
   stages = new Map<string, string>();
+  types = new Map<string, string>();
   patientCalls = 0;
 
   async login(): Promise<void> {}
@@ -56,7 +57,7 @@ class FakeClient implements LeadfloClient {
       last_name: patientId,
       email: `${patientId}@example.com`,
       phone: "07700 900000",
-      type: "Implant",
+      type: this.types.get(patientId) ?? "Implant",
       source: "Practice Website",
       labels: [],
       stage: this.stages.get(patientId) ?? "newLead",
@@ -115,6 +116,7 @@ describe("stage tracking", () => {
     // The lead progresses, so Leadflo stops returning it as a due action.
     client.actions = [];
     client.stages.set("p1", "consultation");
+    store.touchStageChecked("p1", new Date(Date.now() - 60_000).toISOString());
 
     const result = await poller.tick();
     assert.equal(result.refreshed, 1);
@@ -153,6 +155,29 @@ describe("stage tracking", () => {
     const after = store.getLead("p1");
     assert.equal(after?.email, "p1@example.com");
     assert.equal(after?.treatment_type, "Implant");
+  });
+
+  it("picks up a treatment reclassified in Leadflo after discovery", async () => {
+    client.actions = [action("p3", "newLead", "General")];
+    client.stages.set("p3", "newLead");
+    client.types.set("p3", "General");
+    await poller.tick();
+    assert.equal(store.getLead("p3")?.treatment_type, "General");
+
+    // The lead leaves the due feed, so refresh is the only path back in.
+    client.actions = [];
+    client.types.set("p3", "Implant");
+    // Age it past the staleness cutoff explicitly: back-to-back ticks can land
+    // in the same millisecond, which would leave the refresh queue empty.
+    client.stages.set("p3", "newLead");
+    store.touchStageChecked("p3", new Date(Date.now() - 60_000).toISOString());
+    await poller.tick();
+
+    assert.equal(
+      store.getLead("p3")?.treatment_type,
+      "Implant",
+      "treatment type gates who WF-1 may contact, so it must not go stale",
+    );
   });
 
   it("treats test names as whole words only", () => {
