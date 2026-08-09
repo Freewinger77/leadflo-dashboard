@@ -207,6 +207,35 @@ export class Store {
     this.addColumnIfMissing("leads", "outbound_attempts", "INTEGER NOT NULL DEFAULT 0");
   }
 
+  /** Every stored runtime override, for loading the overlay at startup. */
+  allSettings(): Record<string, string> {
+    const rows = this.db.prepare(`SELECT key, value FROM settings`).all() as Array<{
+      key: string;
+      value: string;
+    }>;
+    return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+  }
+
+  getSetting(key: string): string | undefined {
+    const row = this.db.prepare(`SELECT value FROM settings WHERE key = ?`).get(key) as
+      | { value: string }
+      | undefined;
+    return row?.value;
+  }
+
+  setSetting(key: string, value: string): void {
+    this.db
+      .prepare(
+        `INSERT INTO settings (key, value) VALUES (?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+      )
+      .run(key, value);
+  }
+
+  deleteSetting(key: string): void {
+    this.db.prepare(`DELETE FROM settings WHERE key = ?`).run(key);
+  }
+
   /**
    * Make sure the enquiry-date columns exist before anything queries them.
    *

@@ -102,9 +102,8 @@ describe("outbound candidate selection", () => {
   });
 
   it("lets an allowlisted foreign number through the country policy", async () => {
-    const { config } = await import("../src/config.js");
-    const previous = config.outbound.allowlist;
-    config.outbound.allowlist = ["2347012345678"];
+    const { setOverride, clearOverride } = await import("../src/runtime-settings.js");
+    setOverride("OUTBOUND_ALLOWLIST", "2347012345678");
 
     const { selected, skipped } = selectCandidates(store, 10);
     const stillBlocked = skipped.find((s) => s.patientId === "foreign")?.reason;
@@ -114,7 +113,7 @@ describe("outbound candidate selection", () => {
       `an allowlisted tester abroad must be reachable, got: ${stillBlocked}`,
     );
 
-    config.outbound.allowlist = previous;
+    clearOverride("OUTBOUND_ALLOWLIST");
   });
 
   it("caps the batch and reports who was held back", () => {
@@ -245,8 +244,9 @@ describe("outbound kill switch", () => {
 
   it("refuses to hand out a batch when the allowlist excludes everyone", async () => {
     const { config } = await import("../src/config.js");
+    const { setOverride, clearOverride } = await import("../src/runtime-settings.js");
     config.outbound.allowlistOnly = true;
-    config.outbound.allowlist = ["447700900999"];
+    setOverride("OUTBOUND_ALLOWLIST", "447700900999");
 
     const result = claimBatch(store, 1);
     assert.equal(result.ok, false);
@@ -257,12 +257,12 @@ describe("outbound kill switch", () => {
     );
 
     config.outbound.allowlistOnly = false;
-    config.outbound.allowlist = [];
+    clearOverride("OUTBOUND_ALLOWLIST");
   });
 
   it("previews but never claims while OUTBOUND_ENABLED is false", async () => {
-    const { config } = await import("../src/config.js");
-    config.outbound.enabled = false;
+    const { setOverride } = await import("../src/runtime-settings.js");
+    setOverride("OUTBOUND_ENABLED", "false");
 
     const preview = selectCandidates(store, 1);
     assert.equal(preview.selected.length, 1, "preview still shows who would be sent");
@@ -272,6 +272,6 @@ describe("outbound kill switch", () => {
     assert.match(result.reason ?? "", /OUTBOUND_ENABLED is false/);
     assert.equal(store.getLead("off1")?.outbound_status, null, "nothing locked");
 
-    config.outbound.enabled = true;
+    setOverride("OUTBOUND_ENABLED", "true");
   });
 });
