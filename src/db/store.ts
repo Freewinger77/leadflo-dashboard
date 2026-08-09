@@ -5,6 +5,20 @@ import { config } from "../config.js";
 import { isTestName } from "../leadflo/testName.js";
 import type { NormalizedLead } from "../leadflo/types.js";
 
+/**
+ * Rows have appeared in `leads` that are not leads: their patient_id is one of
+ * our own table names, first_name holds that table's row count, and both seen
+ * timestamps are null despite being declared NOT NULL. Nothing that writes a
+ * lead can produce that, so a null first_seen_at identifies the debris without
+ * assuming anything about the shape of a Leadflo id.
+ *
+ * They matter because Leadflo can never resolve them: each one fails its
+ * patient and timeline lookup on every poll, and a lead that never refreshes
+ * keeps a null stage_checked_at, which sorts it to the front of the queue to
+ * fail again a minute later.
+ */
+const IS_REAL_LEAD = `first_seen_at IS NOT NULL`;
+
 export type LeadStatus =
   | "discovered"
   | "webhook_pending"
@@ -205,6 +219,21 @@ export class Store {
     this.addColumnIfMissing("leads", "outbound_message", "TEXT");
     this.addColumnIfMissing("leads", "outbound_error", "TEXT");
     this.addColumnIfMissing("leads", "outbound_attempts", "INTEGER NOT NULL DEFAULT 0");
+    this.purgePhantomLeads();
+  }
+
+  /** Drop rows that are not leads. Returns how many were removed. */
+  private purgePhantomLeads(): number {
+    const ids = (
+      this.db
+        .prepare(`SELECT patient_id FROM leads WHERE NOT (${IS_REAL_LEAD})`)
+        .all() as Array<{ patient_id: string }>
+    ).map((row) => row.patient_id);
+    if (!ids.length) return 0;
+
+    this.db.prepare(`DELETE FROM leads WHERE NOT (${IS_REAL_LEAD})`).run();
+    console.warn(`[store] removed ${ids.length} non-lead row(s): ${ids.join(", ")}`);
+    return ids.length;
   }
 
   /** Every stored runtime override, for loading the overlay at startup. */
@@ -486,7 +515,8 @@ export class Store {
     return this.db
       .prepare(
         `SELECT * FROM leads
-         WHERE stage_checked_at IS NULL OR stage_checked_at < ?
+         WHERE (stage_checked_at IS NULL OR stage_checked_at < ?)
+           AND ${IS_REAL_LEAD}
          ORDER BY COALESCE(stage_checked_at, first_seen_at) ASC
          LIMIT ?`,
       )
@@ -510,6 +540,7 @@ export class Store {
       .prepare(
         `SELECT * FROM leads
          WHERE timeline_fetched_at IS NULL
+           AND ${IS_REAL_LEAD}
          ORDER BY first_seen_at DESC
          LIMIT ?`,
       )
