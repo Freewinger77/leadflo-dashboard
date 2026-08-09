@@ -207,6 +207,19 @@ export class Store {
     this.addColumnIfMissing("leads", "outbound_attempts", "INTEGER NOT NULL DEFAULT 0");
   }
 
+  /**
+   * Make sure the enquiry-date columns exist before anything queries them.
+   *
+   * migrate() adds them when a Store is constructed, but a deploy can leave code
+   * running against a database that predates the columns, and a missing column
+   * throws on every single poll. One PRAGMA read per poll buys a schema that
+   * repairs itself instead of depending on a clean restart.
+   */
+  ensureEnquiryColumns(): void {
+    this.addColumnIfMissing("leads", "enquired_at", "TEXT");
+    this.addColumnIfMissing("leads", "timeline_fetched_at", "TEXT");
+  }
+
   private addColumnIfMissing(table: string, column: string, ddl: string): void {
     const columns = this.db.prepare(`PRAGMA table_info(${table})`).all() as Array<{
       name: string;
