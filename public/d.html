@@ -2565,7 +2565,7 @@ a:hover{color:rgb(0,0,0);text-decoration:underline}
 
             <div style="background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:20px 24px">
               <div style="font:600 14px/20px 'Inter',sans-serif;color:#000">Poll frequency</div>
-              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">How often the scraper hits Leadflo /actions/due.</div>
+              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">How often the scraper hits Leadflo /actions/due. Read-only — POLL_INTERVAL_MS.</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <sc-for list="{{ intervals }}" as="iv" hint-placeholder-count="4">
                   <span sc-camel-on-click="{{ iv.go }}" style="--bg: {{ iv.bg }}; --fc: {{ iv.fc }};background:var(--bg,#fff);color:var(--fc,rgba(0,0,0,0.7));box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:500 14px/20px 'Inter',sans-serif;padding:8px 18px;border-radius:20px;cursor:pointer">{{ iv.label }}</span>
@@ -2576,7 +2576,7 @@ a:hover{color:rgb(0,0,0);text-decoration:underline}
 
             <div style="background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:20px 24px">
               <div style="font:600 14px/20px 'Inter',sans-serif;color:#000">Tracked treatment types</div>
-              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">Leads outside this list are logged but never sent to your webhook.</div>
+              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">Leads outside this list are logged but never sent to your webhook. Read-only — SCRAPE_TREATMENTS.</div>
               <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px 20px">
                 <sc-for list="{{ typeToggles }}" as="t" hint-placeholder-count="6">
                   <div sc-camel-on-click="{{ t.go }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;cursor:pointer" style-hover="background:rgba(0,0,0,0.04)">
@@ -2590,7 +2590,7 @@ a:hover{color:rgb(0,0,0);text-decoration:underline}
 
             <div style="background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:20px 24px">
               <div style="font:600 14px/20px 'Inter',sans-serif;color:#000">Write-back rules</div>
-              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">Controls when an AI response becomes a Leadflo note.</div>
+              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">Controls when an AI response becomes a Leadflo note. Read-only — set on the service.</div>
               <sc-for list="{{ switches }}" as="s" hint-placeholder-count="3">
                 <div style="display:flex;align-items:center;gap:16px;padding:12px 0;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04)">
                   <span style="flex:1;min-width:0">
@@ -2605,24 +2605,54 @@ a:hover{color:rgb(0,0,0);text-decoration:underline}
             </div>
 
             <div style="background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);padding:20px 24px">
-              <div style="font:600 14px/20px 'Inter',sans-serif;color:#000">Webhooks</div>
-              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">Outbound lead.created target and the inbound note endpoint.</div>
-              <div style="display:flex;flex-direction:column;gap:14px">
-                <label style="display:block">
-                  <span style="display:block;font:500 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.6);margin-bottom:6px">WEBHOOK_URL</span>
-                  <input value="{{ webhookUrl }}" sc-camel-on-change="{{ setWebhook }}" style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:400 14px/20px 'Inter',ui-monospace,monospace;color:#000;background:#fff;outline:none">
-                </label>
-                <label style="display:block">
-                  <span style="display:block;font:500 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.6);margin-bottom:6px">INBOUND_WEBHOOK_SECRET</span>
-                  <input value="••••••••••••••••" readonly="readonly" style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:400 14px/20px 'Inter',ui-monospace,monospace;color:rgba(0,0,0,0.5);background:rgb(249,249,250);outline:none">
-                </label>
-                <div style="font:400 12px/18px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">Outbound calls are signed with <span style="font-family:ui-monospace,monospace">X-Signature</span> (HMAC-SHA256 of body).</div>
-              </div>
-            </div>
+              <div style="font:600 14px/20px 'Inter',sans-serif;color:#000">Outbound messaging</div>
+              <div style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-bottom:14px">Who WF-1 may message. Saved on the service and applied at once — no restart, no redeploy.</div>
 
-            <div style="display:flex;align-items:center;gap:12px">
-              <span sc-camel-on-click="{{ saveSettings }}" style="padding:10px 22px;border-radius:20px;background:rgb(28,28,30);color:#fff;font:500 14px/20px 'Inter',sans-serif;cursor:pointer" style-hover="background:#000">Save changes</span>
-              <span style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">Applied on the next poll run.</span>
+              <label style="display:block;margin-bottom:16px">
+                <span style="display:block;font:500 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.6);margin-bottom:6px">WF-1 key</span>
+                <input type="password" placeholder="wf1_…" value="{{ wf1Key }}" sc-camel-on-change="{{ setWf1Key }}" style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:400 14px/20px 'Inter',ui-monospace,monospace;color:#000;background:#fff;outline:none">
+                <span style="display:block;font:400 12px/18px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-top:6px">Needed to read or change these. Held in this browser tab only, never saved to the page.</span>
+              </label>
+
+              <sc-if value="{{ settingsLocked }}">
+                <div style="padding:14px;border-radius:12px;background:rgb(249,249,250);font:400 13px/20px 'Inter',sans-serif;color:rgba(0,0,0,0.55)">{{ settingsLockedNote }}</div>
+              </sc-if>
+
+              <sc-if value="{{ settingsUnlocked }}">
+                <div>
+                  <div style="display:flex;align-items:center;gap:16px;padding:12px 0;box-shadow:inset 0 1px 0 rgba(0,0,0,0.04)">
+                    <span style="flex:1;min-width:0">
+                      <span style="display:block;font:500 14px/20px 'Inter',sans-serif;color:#000">Outbound enabled</span>
+                      <span style="display:block;font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">OUTBOUND_ENABLED — while off, WF-1 can claim leads but never sends.</span>
+                    </span>
+                    <span sc-camel-on-click="{{ toggleOutbound }}" style="--bg: {{ outboundTrackBg }};background:var(--bg,rgba(0,0,0,0.1));width:40px;height:24px;border-radius:80px;flex:none;cursor:pointer;display:flex;align-items:center;padding:2px;box-sizing:border-box">
+                      <span style="--ml: {{ outboundKnobLeft }};margin-left:var(--ml,0px);width:20px;height:20px;border-radius:80px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.2);transition:margin-left 160ms cubic-bezier(0.2,0,0.2,1)"></span>
+                    </span>
+                  </div>
+
+                  <label style="display:block;margin-top:14px">
+                    <span style="display:block;font:500 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.6);margin-bottom:6px">OUTBOUND_ALLOWLIST</span>
+                    <input placeholder="447700900123, 2347067131336" value="{{ allowlistDraft }}" sc-camel-on-change="{{ setAllowlist }}" style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:400 14px/20px 'Inter',ui-monospace,monospace;color:#000;background:#fff;outline:none">
+                    <span style="display:block;font:400 12px/18px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-top:6px">Digits only, comma separated. Empty means nobody, because ALLOWLIST_ONLY is on.</span>
+                  </label>
+
+                  <label style="display:block;margin-top:14px">
+                    <span style="display:block;font:500 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.6);margin-bottom:6px">WEBHOOK_URL</span>
+                    <input placeholder="https://…/webhook/leadflo-implant" value="{{ webhookDraft }}" sc-camel-on-change="{{ setWebhook }}" style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);font:400 14px/20px 'Inter',ui-monospace,monospace;color:#000;background:#fff;outline:none">
+                    <span style="display:block;font:400 12px/18px 'Inter',sans-serif;color:rgba(0,0,0,0.4);margin-top:6px">Where a newly discovered lead is announced. Signed with X-Signature when WEBHOOK_SECRET is set.</span>
+                  </label>
+
+                  <div style="margin-top:16px;padding:14px;border-radius:12px;background:rgb(249,249,250)">
+                    <div style="font:500 12px/18px 'Inter',sans-serif;color:rgba(0,0,0,0.6);margin-bottom:4px">In force right now</div>
+                    <div style="font:400 12px/20px ui-monospace,Menlo,monospace;color:rgba(0,0,0,0.7);white-space:pre-wrap">{{ inForceText }}</div>
+                  </div>
+
+                  <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
+                    <span sc-camel-on-click="{{ saveSettings }}" style="padding:10px 22px;border-radius:20px;background:rgb(28,28,30);color:#fff;font:500 14px/20px 'Inter',sans-serif;cursor:pointer" style-hover="background:#000">{{ saveLabel }}</span>
+                    <span style="font:400 12px/16px 'Inter',sans-serif;color:rgba(0,0,0,0.4)">{{ saveHint }}</span>
+                  </div>
+                </div>
+              </sc-if>
             </div>
           </div>
 
@@ -2832,6 +2862,16 @@ class Component extends DCLogic {
       signWebhooks: true,
       dedupe: true,
       webhookUrl: '',
+      // Outbound settings. The key lives in the tab, not the page: this
+      // dashboard is reachable without logging in, so a key kept anywhere
+      // more permanent would be a key anyone at this machine can lift.
+      wf1Key: (() => { try { return sessionStorage.getItem('lf_wf1_key') || ''; } catch (e) { return ''; } })(),
+      outbound: null,
+      outboundEnabledDraft: false,
+      allowlistDraft: '',
+      webhookDraft: '',
+      settingsBusy: false,
+      settingsNote: '',
       typeMix: [],
       timelines: {},
       kpi: null,
@@ -3081,6 +3121,79 @@ class Component extends DCLogic {
   }
 
   set(k, v) { this.setState({ [k]: v }); }
+
+  setWf1Key = (e) => {
+    const wf1Key = e.target.value.trim();
+    try { sessionStorage.setItem('lf_wf1_key', wf1Key); } catch (err) { /* private mode */ }
+    this.setState({ wf1Key, outbound: null, settingsNote: '' });
+    clearTimeout(this._k);
+    // Typing a key is how you unlock the panel, so load as soon as it settles.
+    this._k = setTimeout(() => this.loadOutbound(), 400);
+  };
+
+  async loadOutbound() {
+    const key = this.state.wf1Key;
+    if (!key) return;
+    this.setState({ settingsBusy: true, settingsNote: '' });
+    try {
+      const res = await fetch('/api/settings/outbound', { headers: { 'x-wf1-key': key } });
+      if (!res.ok) {
+        const note = res.status === 401
+          ? 'That key was rejected.'
+          : (res.status === 503
+            ? 'The service has no WF1_API_KEY configured, so these cannot be changed here.'
+            : 'Could not read the settings (' + res.status + ').');
+        this.setState({ settingsBusy: false, settingsNote: note, outbound: null });
+        return;
+      }
+      const data = await res.json();
+      const f = data.inForce || {};
+      this.setState({
+        outbound: data,
+        outboundEnabledDraft: !!f.outboundEnabled,
+        allowlistDraft: (f.allowlist || []).join(', '),
+        webhookDraft: f.webhookUrl || '',
+        settingsBusy: false,
+        settingsNote: ''
+      });
+    } catch (err) {
+      console.error(err);
+      this.setState({ settingsBusy: false, settingsNote: 'Could not reach the service.' });
+    }
+  }
+
+  saveOutbound = async () => {
+    const S = this.state;
+    if (!S.wf1Key || S.settingsBusy) return;
+    this.setState({ settingsBusy: true });
+    try {
+      const res = await fetch('/api/settings/outbound', {
+        method: 'PUT',
+        headers: { 'x-wf1-key': S.wf1Key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          OUTBOUND_ENABLED: S.outboundEnabledDraft ? 'true' : 'false',
+          OUTBOUND_ALLOWLIST: (S.allowlistDraft || '').trim(),
+          WEBHOOK_URL: (S.webhookDraft || '').trim()
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      this.setState({ settingsBusy: false });
+      if (!res.ok) {
+        this.flash(data.error || ('Save failed (' + res.status + ')'));
+        return;
+      }
+      const f = data.inForce || {};
+      const who = (f.allowlist || []).join(', ');
+      this.flash(f.outboundEnabled
+        ? ('Saved — outbound on for ' + (who || 'nobody, the allowlist is empty'))
+        : 'Saved — outbound off');
+      this.loadOutbound();
+    } catch (err) {
+      console.error(err);
+      this.setState({ settingsBusy: false });
+      this.flash('Save failed');
+    }
+  };
 
   flash(msg) {
     this.setState({ toast: msg });
@@ -3340,7 +3453,9 @@ class Component extends DCLogic {
       label: o[0],
       bg: S.intervalMs === o[1] ? 'rgb(28,28,30)' : '',
       fc: S.intervalMs === o[1] ? '#fff' : '',
-      go: () => this.setState({ intervalMs: o[1] })
+      // Env-only settings. They were clickable and saved nothing, which is
+      // worse than being plainly read-only.
+      go: () => this.flash('Poll interval is set by POLL_INTERVAL_MS on the service')
     }));
     const typeCounts = {};
     donut.forEach(d => { typeCounts[d.name] = d.value; });
@@ -3349,19 +3464,37 @@ class Component extends DCLogic {
       tick: S.tracked[name] ? '✓' : '',
       boxBg: S.tracked[name] ? 'rgb(28,28,30)' : '',
       boxRing: S.tracked[name] ? 'none' : '',
-      go: () => this.setState(s => ({ tracked: { ...s.tracked, [name]: !s.tracked[name] } }))
+      go: () => this.flash('Tracked types are set by SCRAPE_TREATMENTS on the service')
     }));
     const sw = (key, label, hint) => ({
       key, label, hint,
       trackBg: S[key] ? 'rgb(28,28,30)' : '',
       knobLeft: S[key] ? '16px' : '0px',
-      go: () => this.setState(s => ({ [key]: !s[key] }))
+      go: () => this.flash('This one is environment-only — ask for it to be added here if you need it')
     });
     const switches = [
       sw('notesOnlyTest', 'Only write notes for test names', 'NOTES_ONLY_TEST_NAMES — non-test leads are stored here but never written to Leadflo.'),
       sw('signWebhooks', 'Sign outbound webhooks', 'Adds X-Signature (HMAC-SHA256 of body) using WEBHOOK_SECRET.'),
       sw('dedupe', 'Send each lead once', 'Unknown patientId triggers lead.created. Known ids are skipped.')
     ];
+    const force = (S.outbound && S.outbound.inForce) || null;
+    const sourceOf = (key) => ((S.outbound && S.outbound.settings && S.outbound.settings[key] || {}).source) || 'default';
+    const inForceText = force
+      ? [
+        'outbound  ' + (force.outboundEnabled ? 'on' : 'off') + '   (' + sourceOf('OUTBOUND_ENABLED') + ')',
+        'allowlist ' + ((force.allowlist || []).join(', ') || 'empty') + '   (' + sourceOf('OUTBOUND_ALLOWLIST') + ')',
+        'caps      ' + force.maxPerRun + ' per run, ' + force.maxPerDay + ' per day',
+        'webhook   ' + (force.webhookUrl || 'none') + '   (' + sourceOf('WEBHOOK_URL') + ')'
+      ].join('\n')
+      : '';
+    // Say plainly whether the boxes still match the service, so a half-typed
+    // change is never mistaken for a saved one.
+    const unsaved = !!force && (
+      !!force.outboundEnabled !== !!S.outboundEnabledDraft
+      || (force.allowlist || []).join(', ') !== (S.allowlistDraft || '').trim()
+      || (force.webhookUrl || '') !== (S.webhookDraft || '').trim()
+    );
+
     const trackedList = Object.keys(S.tracked).filter(k => S.tracked[k]).map(k => k.toLowerCase());
     const configJson = JSON.stringify({ ok: true, mode: S.mode || 'live', trackedTypes: trackedList, pollIntervalMs: S.intervalMs, notesOnlyTestNames: S.notesOnlyTest, webhookConfigured: !!S.webhookUrl }, null, 2);
 
@@ -3431,9 +3564,25 @@ class Component extends DCLogic {
       intervals, intervalMs: S.intervalMs,
       runsPerDay: Math.round(86400000 / S.intervalMs),
       typeToggles, switches, configJson,
-      webhookUrl: S.webhookUrl,
-      setWebhook: e => this.setState({ webhookUrl: e.target.value }),
-      saveSettings: () => this.flash('Scraper settings saved'),
+
+      wf1Key: S.wf1Key,
+      setWf1Key: this.setWf1Key,
+      settingsLocked: !S.outbound,
+      settingsLockedNote: S.settingsNote
+        || (S.settingsBusy ? 'Reading the current settings…'
+          : (S.wf1Key ? 'Reading the current settings…' : 'Enter the WF-1 key to see and change these.')),
+      settingsUnlocked: !!S.outbound,
+      outboundTrackBg: S.outboundEnabledDraft ? 'rgb(28,28,30)' : '',
+      outboundKnobLeft: S.outboundEnabledDraft ? '16px' : '0px',
+      toggleOutbound: () => this.setState(s => ({ outboundEnabledDraft: !s.outboundEnabledDraft })),
+      allowlistDraft: S.allowlistDraft,
+      setAllowlist: e => this.setState({ allowlistDraft: e.target.value }),
+      webhookDraft: S.webhookDraft,
+      setWebhook: e => this.setState({ webhookDraft: e.target.value }),
+      inForceText: inForceText,
+      saveLabel: S.settingsBusy ? 'Saving…' : 'Save changes',
+      saveHint: unsaved ? 'Not saved yet.' : 'Matches the service.',
+      saveSettings: this.saveOutbound,
 
       endpoints, flowSteps, toc,
 
