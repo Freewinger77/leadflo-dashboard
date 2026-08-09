@@ -131,7 +131,19 @@ export class Poller {
       }
 
       const refreshed = await this.refreshKnownLeads(seen);
-      const dated = await this.backfillEnquiryDates();
+
+      // An enquiry date is enrichment; discovery is the job. This step failing
+      // must never abandon the poll, or leads that should be found and contacted
+      // are silently lost to a problem with a display field.
+      let dated = 0;
+      try {
+        dated = await this.backfillEnquiryDates();
+      } catch (err) {
+        this.store.logEvent(
+          "enquiry.backfill_failed",
+          err instanceof Error ? err.message : String(err),
+        );
+      }
 
       this.lastError = null;
       this.store.finishPollRun(runId, {
@@ -225,6 +237,7 @@ export class Poller {
     const batchSize = config.enquiryBackfillBatchSize;
     if (batchSize <= 0) return 0;
 
+    this.store.ensureEnquiryColumns();
     const pending = this.store.listLeadsMissingEnquiryDate(batchSize);
     let dated = 0;
 
