@@ -2895,7 +2895,7 @@ class Component extends DCLogic {
       patientId: 'lf_' + (742100 + i * 37) + 'a' + (i + 3) + 'e',
       name: r[0], firstName: r[0].split(' ')[0],
       phone: r[1], email: r[2], type: r[3], source: r[4], stage: r[5],
-      status: r[6], isTest: r[7], seen: r[8], aiNote: r[9],
+      status: r[6], isTest: r[7], seen: r[8], firstSeen: r[8], aiNote: r[9],
       labels: labels[r[3]] || [],
       tracked: r[3] === 'Implant'
     }));
@@ -2982,11 +2982,13 @@ class Component extends DCLogic {
       stage: l.stage || 'newLead',
       status,
       isTest: !!l.isTestName,
-      // firstSeenAt, not lastSeenAt: this value is shown as "First seen" and as the
-      // time the lead was discovered. lastSeenAt is rewritten every time the poller
-      // re-reads a lead, so preferring it made every lead — including enquiries from
-      // years ago — read as "a few seconds ago".
-      seen: this.ago(l.firstSeenAt || l.lastSeenAt),
+      // How old the lead is. enquiredAt comes from the patient's Leadflo timeline
+      // and is the only true answer; firstSeenAt is a fallback that says when our
+      // scraper found them, which for anything discovered in a backfill is the
+      // backfill rather than the enquiry.
+      seen: this.ago(l.enquiredAt || l.firstSeenAt || l.lastSeenAt),
+      enquiredAt: l.enquiredAt,
+      firstSeen: this.ago(l.firstSeenAt || l.lastSeenAt),
       firstSeenAt: l.firstSeenAt,
       aiNote: l.aiNote || '',
       labels: l.labels || [],
@@ -3296,7 +3298,8 @@ class Component extends DCLogic {
       { label: 'Status', value: this.statusMeta(sel.status)[0] },
       { label: 'Phone', value: sel.phone },
       { label: 'Email', value: sel.email },
-      { label: 'First seen', value: sel.seen },
+      { label: 'Enquired', value: sel.enquiredAt ? sel.seen : 'Not known yet' },
+      { label: 'First seen', value: sel.firstSeen },
       { label: 'Tracked', value: sel.tracked ? 'Yes — Implant is in trackedTypes' : 'No — type not tracked' }
     ] : [];
     const selLabels = sel ? sel.labels.map(n => ({ name: n })) : [];
@@ -3321,7 +3324,7 @@ class Component extends DCLogic {
         selTimeline = notes.concat(activity, local).sort((a, b) => String(b.time).localeCompare(String(a.time)));
         if (!selTimeline.length) selTimeline.push({ id: 'empty', title: 'No notes yet', time: '—', color: 'rgba(0,0,0,0.2)', lineOpacity: '0', detail: 'Timeline is empty for this patient.', body: '', code: '' });
       } else {
-        selTimeline.push({ id: 't1', title: 'Lead discovered', time: sel.seen, color: 'rgb(28,28,30)', lineOpacity: '1', detail: 'Scraped from Leadflo /actions/due · stage ' + sel.stage + ' · ' + sel.source, code: '', body: '' });
+        selTimeline.push({ id: 't1', title: 'Lead discovered', time: sel.firstSeen, color: 'rgb(28,28,30)', lineOpacity: '1', detail: 'Scraped from Leadflo /actions/due · stage ' + sel.stage + ' · ' + sel.source, code: '', body: '' });
         selTimeline.push({ id: 'loading', title: 'Loading Leadflo notes…', time: '…', color: 'rgba(0,0,0,0.3)', lineOpacity: '0', detail: 'Fetching /api/leads/' + sel.patientId + '/timeline', body: '', code: '' });
       }
     }
