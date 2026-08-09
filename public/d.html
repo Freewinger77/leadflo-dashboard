@@ -2982,7 +2982,11 @@ class Component extends DCLogic {
       stage: l.stage || 'newLead',
       status,
       isTest: !!l.isTestName,
-      seen: this.ago(l.lastSeenAt || l.firstSeenAt),
+      // firstSeenAt, not lastSeenAt: this value is shown as "First seen" and as the
+      // time the lead was discovered. lastSeenAt is rewritten every time the poller
+      // re-reads a lead, so preferring it made every lead — including enquiries from
+      // years ago — read as "a few seconds ago".
+      seen: this.ago(l.firstSeenAt || l.lastSeenAt),
       firstSeenAt: l.firstSeenAt,
       aiNote: l.aiNote || '',
       labels: l.labels || [],
