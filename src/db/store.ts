@@ -39,6 +39,10 @@ export interface TrackedLeadRow {
   payload_json: string;
   stage_checked_at: string | null;
   detail_fetched_at: string | null;
+  /** When the patient enquired, per their Leadflo timeline. Null until fetched. */
+  enquired_at: string | null;
+  /** Set once the timeline has been read, whether or not a date was found. */
+  timeline_fetched_at: string | null;
   outbound_status: OutboundStatus | null;
   outbound_batch_id: string | null;
   outbound_locked_at: string | null;
@@ -192,6 +196,8 @@ export class Store {
 
     this.addColumnIfMissing("leads", "stage_checked_at", "TEXT");
     this.addColumnIfMissing("leads", "detail_fetched_at", "TEXT");
+    this.addColumnIfMissing("leads", "enquired_at", "TEXT");
+    this.addColumnIfMissing("leads", "timeline_fetched_at", "TEXT");
     this.addColumnIfMissing("leads", "outbound_status", "TEXT");
     this.addColumnIfMissing("leads", "outbound_batch_id", "TEXT");
     this.addColumnIfMissing("leads", "outbound_locked_at", "TEXT");
@@ -450,6 +456,43 @@ export class Store {
     this.db
       .prepare(`UPDATE leads SET stage_checked_at = ? WHERE patient_id = ?`)
       .run(checkedAt, patientId);
+  }
+
+  /**
+   * Leads whose enquiry date has never been looked up. Newest first, so a lead
+   * that has just arrived is dated within a minute rather than queueing behind
+   * a backlog of historical patients.
+   */
+  listLeadsMissingEnquiryDate(limit: number): TrackedLeadRow[] {
+    return this.db
+      .prepare(
+        `SELECT * FROM leads
+         WHERE timeline_fetched_at IS NULL
+         ORDER BY first_seen_at DESC
+         LIMIT ?`,
+      )
+      .all(limit) as TrackedLeadRow[];
+  }
+
+  /**
+   * Record the outcome of reading a lead's timeline. Marking the attempt even
+   * when no date was found is what stops a patient with an empty timeline being
+   * retried on every tick forever.
+   */
+  setEnquiryDate(
+    patientId: string,
+    enquiredAt: string | null,
+    fetchedAt = new Date().toISOString(),
+  ): void {
+    this.db
+      .prepare(
+        // COALESCE so a later failed or empty read cannot erase a date we already have.
+        `UPDATE leads SET
+           enquired_at = COALESCE(?, enquired_at),
+           timeline_fetched_at = ?
+         WHERE patient_id = ?`,
+      )
+      .run(enquiredAt, fetchedAt, patientId);
   }
 
   /**

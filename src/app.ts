@@ -437,6 +437,8 @@ function serializeLead(row: ReturnType<Store["listLeads"]>[number]) {
     labels: JSON.parse(row.labels_json || "[]"),
     isTestName: row.is_test_name === 1,
     status: row.status,
+    /** When the patient enquired. firstSeenAt is only when we discovered them. */
+    enquiredAt: row.enquired_at,
     firstSeenAt: row.first_seen_at,
     lastSeenAt: row.last_seen_at,
     webhookSentAt: row.webhook_sent_at,

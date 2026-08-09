@@ -1,5 +1,6 @@
 import { config } from "../config.js";
 import type { Store } from "../db/store.js";
+import { enquiryDateFromTimeline } from "../leadflo/enquiryDate.js";
 import {
   createLeadfloClient,
   isTrackedTreatment,
@@ -49,10 +50,11 @@ export class Poller {
     discovered: number;
     newLeads: number;
     refreshed: number;
+    dated: number;
     leads: NormalizedLead[];
   }> {
     if (this.running) {
-      return { discovered: 0, newLeads: 0, refreshed: 0, leads: [] };
+      return { discovered: 0, newLeads: 0, refreshed: 0, dated: 0, leads: [] };
     }
     this.running = true;
     const runId = this.store.startPollRun();
@@ -129,6 +131,7 @@ export class Poller {
       }
 
       const refreshed = await this.refreshKnownLeads(seen);
+      const dated = await this.backfillEnquiryDates();
 
       this.lastError = null;
       this.store.finishPollRun(runId, {
@@ -138,9 +141,9 @@ export class Poller {
       });
       this.store.logEvent(
         "poll.ok",
-        `Scraped ${leads.length} lead(s), ${newLeads} new, ${webhooked} webhooked, ${drained} drained, ${deferred} deferred, ${refreshed} refreshed`,
+        `Scraped ${leads.length} lead(s), ${newLeads} new, ${webhooked} webhooked, ${drained} drained, ${deferred} deferred, ${refreshed} refreshed, ${dated} dated`,
       );
-      return { discovered: leads.length, newLeads, refreshed, leads };
+      return { discovered: leads.length, newLeads, refreshed, dated, leads };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.lastError = message;
@@ -151,7 +154,7 @@ export class Poller {
         error: message,
       });
       this.store.logEvent("poll.error", message);
-      return { discovered: 0, newLeads: 0, refreshed: 0, leads: [] };
+      return { discovered: 0, newLeads: 0, refreshed: 0, dated: 0, leads: [] };
     } finally {
       this.running = false;
     }
@@ -210,6 +213,39 @@ export class Poller {
       }
     }
     return refreshed;
+  }
+
+  /**
+   * Establish when each lead actually enquired, which only the patient timeline
+   * knows. Runs as a bounded queue rather than at discovery because the leads
+   * that need it most are the ones already in the database, dated by whenever
+   * the backfill happened to run.
+   */
+  private async backfillEnquiryDates(): Promise<number> {
+    const batchSize = config.enquiryBackfillBatchSize;
+    if (batchSize <= 0) return 0;
+
+    const pending = this.store.listLeadsMissingEnquiryDate(batchSize);
+    let dated = 0;
+
+    for (const row of pending) {
+      try {
+        const timeline = await this.client.getTimeline(row.patient_id);
+        const enquiredAt = enquiryDateFromTimeline(timeline);
+        this.store.setEnquiryDate(row.patient_id, enquiredAt);
+        if (enquiredAt) dated += 1;
+      } catch (err) {
+        // Mark it attempted anyway: one unreadable timeline must not park itself
+        // at the head of the queue and block every remaining lead.
+        this.store.setEnquiryDate(row.patient_id, null);
+        this.store.logEvent(
+          "enquiry.date_failed",
+          err instanceof Error ? err.message : String(err),
+          row.patient_id,
+        );
+      }
+    }
+    return dated;
   }
 
   /**

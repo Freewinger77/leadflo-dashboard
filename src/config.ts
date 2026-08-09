@@ -64,6 +64,12 @@ export const config = {
   stageRefreshIntervalMs: Number(process.env.STAGE_REFRESH_INTERVAL_MS ?? 15 * 60_000),
   /** Cap patient refreshes per tick to bound API volume. */
   stageRefreshBatchSize: Number(process.env.STAGE_REFRESH_BATCH_SIZE ?? 25),
+  /**
+   * Timelines read per tick to establish enquiry dates. One extra Leadflo call
+   * per lead, needed once only, so this exists to spread the one-off backfill of
+   * already-known leads over time instead of hammering the API in one burst.
+   */
+  enquiryBackfillBatchSize: Number(process.env.ENQUIRY_BACKFILL_BATCH_SIZE ?? 20),
   webhookUrl: process.env.WEBHOOK_URL ?? "",
   webhookSecret: process.env.WEBHOOK_SECRET ?? "",
   /**
