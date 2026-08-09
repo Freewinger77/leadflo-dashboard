@@ -2,11 +2,15 @@ import { assertLiveConfig, config } from "./config.js";
 import { createApp } from "./app.js";
 import { Store } from "./db/store.js";
 import { createLeadfloClient } from "./leadflo/index.js";
+import { loadOverrides } from "./runtime-settings.js";
 import { Poller } from "./services/poller.js";
 
 assertLiveConfig();
 
 const store = new Store();
+// Before anything reads config: a stored override only takes effect once loaded.
+loadOverrides(store.allSettings());
+
 const client = createLeadfloClient();
 const poller = new Poller({ store, client });
 const app = createApp({ store, poller, client });

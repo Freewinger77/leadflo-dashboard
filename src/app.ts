@@ -4,6 +4,13 @@ import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
 import type { Store } from "./db/store.js";
 import { createLeadfloClient, type LeadfloClient } from "./leadflo/index.js";
+import {
+  clearOverride,
+  effective,
+  isOverridableKey,
+  OVERRIDABLE_KEYS,
+  setOverride,
+} from "./runtime-settings.js";
 import { applyAiNote } from "./services/notes.js";
 import {
   claimBatch,
@@ -304,6 +311,69 @@ export function createApp(deps: AppDeps): Express {
       source: "leadflo-dashboard",
       practice: config.practiceName,
       ...forWire(selectCandidates(store, Number.isFinite(limit) ? limit : 1)),
+    });
+  });
+
+  /**
+   * Runtime settings. Key-gated in both directions: this decides whether the
+   * service may message patients at all, so an open write here would let anyone
+   * switch on sending, and an open read would disclose the tester allowlist.
+   */
+  app.get("/api/settings/outbound", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    res.json({
+      settings: Object.fromEntries(
+        OVERRIDABLE_KEYS.map((key) => [key, effective(key)]),
+      ),
+      inForce: {
+        outboundEnabled: config.outbound.enabled,
+        allowlistOnly: config.outbound.allowlistOnly,
+        allowlist: config.outbound.allowlist,
+        maxPerRun: config.outbound.maxPerRun,
+        maxPerDay: config.outbound.maxPerDay,
+        webhookUrl: config.webhookUrl,
+      },
+    });
+  });
+
+  app.put("/api/settings/outbound", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const unknown = Object.keys(body).filter((key) => !isOverridableKey(key));
+    if (unknown.length) {
+      res.status(400).json({ error: `not overridable: ${unknown.join(", ")}` });
+      return;
+    }
+
+    for (const key of Object.keys(body)) {
+      if (!isOverridableKey(key)) continue;
+      const value = body[key];
+      // null clears the override, handing the setting back to the environment.
+      if (value === null) {
+        store.deleteSetting(key);
+        clearOverride(key);
+        continue;
+      }
+      const asString = String(value);
+      store.setSetting(key, asString);
+      setOverride(key, asString);
+    }
+
+    store.logEvent(
+      "settings.changed",
+      `Runtime settings updated: ${Object.keys(body).join(", ")}`,
+      null,
+      { keys: Object.keys(body), outboundEnabled: config.outbound.enabled },
+    );
+
+    res.json({
+      ok: true,
+      inForce: {
+        outboundEnabled: config.outbound.enabled,
+        allowlist: config.outbound.allowlist,
+        webhookUrl: config.webhookUrl,
+      },
     });
   });
 

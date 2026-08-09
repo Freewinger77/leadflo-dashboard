@@ -1,5 +1,11 @@
 import "dotenv/config";
 import path from "node:path";
+import { readOverride } from "./runtime-settings.js";
+
+/** A runtime override if one is stored, otherwise the environment. */
+function setting(key: "OUTBOUND_ENABLED" | "OUTBOUND_ALLOWLIST" | "WEBHOOK_URL") {
+  return readOverride(key) ?? process.env[key];
+}
 
 function bool(value: string | undefined, fallback: boolean): boolean {
   if (value === undefined || value === "") return fallback;
@@ -70,7 +76,9 @@ export const config = {
    * already-known leads over time instead of hammering the API in one burst.
    */
   enquiryBackfillBatchSize: Number(process.env.ENQUIRY_BACKFILL_BATCH_SIZE ?? 20),
-  webhookUrl: process.env.WEBHOOK_URL ?? "",
+  get webhookUrl() {
+    return setting("WEBHOOK_URL") ?? "";
+  },
   webhookSecret: process.env.WEBHOOK_SECRET ?? "",
   /**
    * Most webhooks one tick may dispatch. A new lead's webhook can end in a
@@ -85,10 +93,16 @@ export const config = {
    *  feeder previews but refuses to hand out a sendable batch until it is
    *  deliberately switched on. */
   outbound: {
-    enabled: bool(process.env.OUTBOUND_ENABLED, false),
+    // Getters, not values: these two are settable at runtime, so reading them
+    // once at import would pin the process to whatever was true at boot.
+    get enabled() {
+      return bool(setting("OUTBOUND_ENABLED"), false);
+    },
     /** Restrict live sends to known testers until the first run is signed off. */
     allowlistOnly: bool(process.env.OUTBOUND_ALLOWLIST_ONLY, true),
-    allowlist: list(process.env.OUTBOUND_ALLOWLIST, []).map(digitsOnly).filter(Boolean),
+    get allowlist() {
+      return list(setting("OUTBOUND_ALLOWLIST"), []).map(digitsOnly).filter(Boolean);
+    },
     maxPerRun: Number(process.env.OUTBOUND_MAX_PER_RUN ?? 1),
     maxPerDay: Number(process.env.OUTBOUND_MAX_PER_DAY ?? 5),
     /** A claimed batch that never reports back is reclaimable after this. */
