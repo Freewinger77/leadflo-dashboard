@@ -8,7 +8,7 @@ import {
   type LeadfloClient,
   type NormalizedLead,
 } from "../leadflo/index.js";
-import { sendLeadWebhook } from "./webhook.js";
+import { leadFromRow, sendLeadWebhook } from "./webhook.js";
 
 export interface PollerOptions {
   store: Store;
@@ -63,6 +63,14 @@ export class Poller {
       const seen = new Set<string>();
       let newLeads = 0;
       let webhooked = 0;
+      let deferred = 0;
+
+      // A backlog is drained before new discoveries get any of the budget, so
+      // leads are webhooked in the order they arrived rather than the newest
+      // starving whatever an earlier burst deferred.
+      let budget = Math.max(0, config.webhookDispatchCapPerTick);
+      const drained = await this.drainDeferredWebhooks(budget);
+      budget -= drained;
 
       for (const action of actions) {
         seen.add(action.patient_id);
@@ -103,9 +111,19 @@ export class Poller {
               `Tracked ${lead.fullName} at stage ${lead.stage} — no webhook (not in WEBHOOK_STAGES)`,
               lead.patientId,
             );
-          } else {
+          } else if (budget > 0) {
+            budget -= 1;
             webhooked += 1;
             await this.dispatchNewLead(lead);
+          } else {
+            // Held, not dropped: webhook_pending is what the drain looks for.
+            deferred += 1;
+            this.store.setStatus(lead.patientId, "webhook_pending");
+            this.store.logEvent(
+              "webhook.deferred",
+              `Held ${lead.fullName} — per-tick dispatch cap of ${config.webhookDispatchCapPerTick} reached`,
+              lead.patientId,
+            );
           }
         }
       }
@@ -120,7 +138,7 @@ export class Poller {
       });
       this.store.logEvent(
         "poll.ok",
-        `Scraped ${leads.length} lead(s), ${newLeads} new, ${webhooked} webhooked, ${refreshed} refreshed`,
+        `Scraped ${leads.length} lead(s), ${newLeads} new, ${webhooked} webhooked, ${drained} drained, ${deferred} deferred, ${refreshed} refreshed`,
       );
       return { discovered: leads.length, newLeads, refreshed, leads };
     } catch (err) {
@@ -192,6 +210,22 @@ export class Poller {
       }
     }
     return refreshed;
+  }
+
+  /**
+   * Dispatch leads a previous tick held back, or that a crash left mid-flight.
+   * Returns how much of the budget was spent.
+   */
+  private async drainDeferredWebhooks(budget: number): Promise<number> {
+    if (budget <= 0) return 0;
+    const waiting = this.store.listLeadsAwaitingWebhook(budget);
+
+    let sent = 0;
+    for (const row of waiting) {
+      await this.dispatchNewLead(leadFromRow(row));
+      sent += 1;
+    }
+    return sent;
   }
 
   private async dispatchNewLead(lead: NormalizedLead): Promise<void> {

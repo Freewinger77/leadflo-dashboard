@@ -1,6 +1,29 @@
 import { createHmac } from "node:crypto";
 import { config } from "../config.js";
+import type { TrackedLeadRow } from "../db/store.js";
 import type { NormalizedLead } from "../leadflo/types.js";
+
+/**
+ * Rebuild the webhook's view of a lead from its stored row, for dispatches that
+ * happen after discovery — a manual resend, or one the per-tick cap deferred.
+ */
+export function leadFromRow(row: TrackedLeadRow): NormalizedLead {
+  return {
+    patientId: row.patient_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    fullName: row.full_name,
+    phone: row.phone,
+    email: row.email,
+    treatmentType: row.treatment_type,
+    source: row.source,
+    stage: row.stage,
+    dueDate: row.due_date,
+    labels: JSON.parse(row.labels_json || "[]") as string[],
+    isTestName: row.is_test_name === 1,
+    scrapedAt: row.last_seen_at,
+  };
+}
 
 export interface WebhookPayload {
   event: "lead.created";

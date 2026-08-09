@@ -142,4 +142,46 @@ describe("implant tracking flow", () => {
       config.outbound.apiKey = previous;
     });
   });
+
+  describe("lead list paging", () => {
+    it("leaves the default page as-is but gates a whole-table export", async () => {
+      const { config } = await import("../src/config.js");
+      const previous = config.outbound.apiKey;
+
+      // The dashboard UI reads this unauthenticated, so the default must not change.
+      const page = await request(app).get("/api/leads").expect(200);
+      assert.equal(page.body.limit, 200);
+      assert.equal(page.body.count, page.body.leads.length);
+
+      // Asking for more than a page returns every patient's name, mobile and
+      // treatment in one response, so it needs the key — and refuses outright
+      // when no key is configured rather than serving the lot.
+      config.outbound.apiKey = "";
+      await request(app).get("/api/leads?limit=1000").expect(503);
+
+      config.outbound.apiKey = "test-key";
+      await request(app).get("/api/leads?limit=1000").expect(401);
+      await request(app)
+        .get("/api/leads?limit=1000")
+        .set("x-wf1-key", "test-key")
+        .expect(200);
+
+      config.outbound.apiKey = previous;
+    });
+
+    it("resolves each number once so anything mirroring this shares one format", async () => {
+      const leads = await request(app).get("/api/leads").expect(200);
+      const resolved = leads.body.leads.filter(
+        (lead: { phoneE164: string | null }) => lead.phoneE164,
+      );
+
+      // Fixtures are local-format 07… numbers; a mirror storing them raw would
+      // never match the number WhatsApp reports for the same patient.
+      assert.ok(resolved.length >= 1);
+      for (const lead of resolved) {
+        assert.match(lead.phoneE164, /^\+447\d{9}$/);
+        assert.equal(lead.msisdn, lead.phoneE164.slice(1));
+      }
+    });
+  });
 });

@@ -66,6 +66,15 @@ export const config = {
   stageRefreshBatchSize: Number(process.env.STAGE_REFRESH_BATCH_SIZE ?? 25),
   webhookUrl: process.env.WEBHOOK_URL ?? "",
   webhookSecret: process.env.WEBHOOK_SECRET ?? "",
+  /**
+   * Most webhooks one tick may dispatch. A new lead's webhook can end in a
+   * WhatsApp message, so a burst of "new" leads is a burst of messages: losing
+   * the database, restoring it empty, or widening SCRAPE_STAGES would make every
+   * lead look new at once and fan out hundreds of sends in a minute — enough to
+   * get the number banned. Leads over the cap are held as webhook_pending and
+   * drained on later ticks, so nothing is dropped, only paced.
+   */
+  webhookDispatchCapPerTick: Number(process.env.WEBHOOK_DISPATCH_CAP_PER_TICK ?? 25),
   /** WF-1 outbound feeder. Every gate here defaults to the safe value: the
    *  feeder previews but refuses to hand out a sendable batch until it is
    *  deliberately switched on. */

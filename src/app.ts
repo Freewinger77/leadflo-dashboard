@@ -7,12 +7,21 @@ import { createLeadfloClient, type LeadfloClient } from "./leadflo/index.js";
 import { applyAiNote } from "./services/notes.js";
 import {
   claimBatch,
+  normalizePhone,
   selectCandidates,
   type CandidateSelection,
 } from "./services/outbound.js";
 import type { Poller } from "./services/poller.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * A full read returns every tracked patient's name, mobile and treatment in one
+ * response, so the unauthenticated default stays a single page and anything
+ * larger has to present the WF-1 key.
+ */
+const DEFAULT_LEAD_PAGE = 200;
+const MAX_LEAD_PAGE = 5000;
 
 export interface AppDeps {
   store: Store;
@@ -113,9 +122,15 @@ export function createApp(deps: AppDeps): Express {
     });
   });
 
-  app.get("/api/leads", (_req, res) => {
-    const leads = store.listLeads().map((row) => serializeLead(row));
-    res.json({ leads });
+  app.get("/api/leads", (req, res) => {
+    const requested = Number(req.query.limit ?? DEFAULT_LEAD_PAGE);
+    const limit = Number.isFinite(requested)
+      ? Math.min(Math.max(Math.trunc(requested), 1), MAX_LEAD_PAGE)
+      : DEFAULT_LEAD_PAGE;
+    if (limit > DEFAULT_LEAD_PAGE && !requireOutboundKey(req, res)) return;
+
+    const leads = store.listLeads(limit).map((row) => serializeLead(row));
+    res.json({ leads, limit, count: leads.length });
   });
 
   app.get("/api/analytics", (_req, res) => {
@@ -217,22 +232,8 @@ export function createApp(deps: AppDeps): Express {
       res.status(404).json({ error: "Lead not found" });
       return;
     }
-    const { sendLeadWebhook } = await import("./services/webhook.js");
-    const lead = {
-      patientId: row.patient_id,
-      firstName: row.first_name,
-      lastName: row.last_name,
-      fullName: row.full_name,
-      phone: row.phone,
-      email: row.email,
-      treatmentType: row.treatment_type,
-      source: row.source,
-      stage: row.stage,
-      dueDate: row.due_date,
-      labels: JSON.parse(row.labels_json || "[]") as string[],
-      isTestName: row.is_test_name === 1,
-      scrapedAt: row.last_seen_at,
-    };
+    const { sendLeadWebhook, leadFromRow } = await import("./services/webhook.js");
+    const lead = leadFromRow(row);
     const base =
       config.publicBaseUrl ||
       `${req.protocol}://${req.get("host")}`;
@@ -415,12 +416,19 @@ export function createApp(deps: AppDeps): Express {
 }
 
 function serializeLead(row: ReturnType<Store["listLeads"]>[number]) {
+  // Leadflo stores numbers inconsistently (+44…, 07…, spaces). Resolving them
+  // here means consumers mirroring this data share one implementation instead of
+  // each re-deriving it, which is what keeps the dashboard's stored number
+  // matching the one WhatsApp reports for the same patient.
+  const phone = normalizePhone(row.phone);
   return {
     patientId: row.patient_id,
     firstName: row.first_name,
     lastName: row.last_name,
     fullName: row.full_name,
     phone: row.phone,
+    phoneE164: phone.ok ? phone.e164 : null,
+    msisdn: phone.ok ? phone.msisdn : null,
     email: row.email,
     treatmentType: row.treatment_type,
     source: row.source,

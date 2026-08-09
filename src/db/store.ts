@@ -262,6 +262,22 @@ export class Store {
       .all() as TrackedLeadRow[];
   }
 
+  /**
+   * Leads whose webhook was started but never confirmed sent: deferred by the
+   * per-tick dispatch cap, or left mid-flight by a crash. Oldest first, so a
+   * backlog drains in the order the leads arrived.
+   */
+  listLeadsAwaitingWebhook(limit: number): TrackedLeadRow[] {
+    return this.db
+      .prepare(
+        `SELECT * FROM leads
+          WHERE status = 'webhook_pending' AND webhook_sent_at IS NULL
+          ORDER BY first_seen_at ASC, patient_id ASC
+          LIMIT ?`,
+      )
+      .all(limit) as TrackedLeadRow[];
+  }
+
   listEvents(limit = 100): EventRow[] {
     return this.db
       .prepare(`SELECT * FROM events ORDER BY id DESC LIMIT ?`)
