@@ -4,6 +4,13 @@ import path from "node:path";
 import { config } from "../config.js";
 import { isTestName } from "../leadflo/testName.js";
 import type { NormalizedLead } from "../leadflo/types.js";
+import {
+  integrityProblem,
+  openDatabase,
+  salvageState,
+  setDamagedFileAside,
+  type SalvagedState,
+} from "./recover.js";
 
 /**
  * Rows have appeared in `leads` that are not leads: their patient_id is one of
@@ -105,13 +112,73 @@ export interface EventRow {
 }
 
 export class Store {
-  readonly db: Database.Database;
+  db: Database.Database;
 
+  /**
+   * Opening the database is deliberately not just an open.
+   *
+   * The file lives on an Azure Files share, where it ran in WAL mode until we
+   * learned that SQLite does not support that: WAL coordinates readers and
+   * writers through a shared-memory index the share cannot provide. It
+   * corrupted in production — table pages cross-linked, so `leads` returned
+   * rows belonging to other tables and its primary key stopped being unique.
+   * Dropping WAL prevents that happening again but does nothing for a file
+   * already damaged, so a damaged one is rebuilt here instead of being served.
+   */
   constructor(dbPath = config.databasePath) {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    this.db = new Database(dbPath);
-    this.db.pragma("journal_mode = WAL");
+    this.db = openDatabase(dbPath);
+
+    let salvaged: SalvagedState | null = null;
+    const problem = integrityProblem(this.db);
+    if (problem) {
+      console.error(`[store] database failed its integrity check: ${problem}`);
+      salvaged = salvageState(this.db, problem);
+      this.db.close();
+      const kept = setDamagedFileAside(dbPath);
+      console.error(`[store] damaged database kept at ${kept}; rebuilding empty`);
+      this.db = openDatabase(dbPath);
+    }
+
     this.migrate();
+    if (salvaged) this.restoreSalvaged(salvaged);
+  }
+
+  /**
+   * Put back the state the poller cannot regenerate. The leads themselves are
+   * left out on purpose: Leadflo is their source, and copying them across from
+   * a file SQLite has just declared corrupt would copy the corruption with them.
+   */
+  private restoreSalvaged(salvaged: SalvagedState): void {
+    const setting = this.db.prepare(
+      `INSERT INTO settings (key, value) VALUES (?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+    );
+    for (const row of salvaged.settings) setting.run(row.key, row.value);
+
+    const dispatch = this.db.prepare(
+      `INSERT INTO outbound_dispatches
+         (batch_id, patient_id, msisdn, status, message, provider_message_id,
+          error, claimed_at, completed_at)
+       VALUES (@batch_id, @patient_id, @msisdn, @status, @message,
+               @provider_message_id, @error, @claimed_at, @completed_at)`,
+    );
+    for (const row of salvaged.dispatches) dispatch.run(row);
+
+    this.logEvent(
+      "db.rebuilt",
+      `Database failed its integrity check and was rebuilt: ${salvaged.problem}`,
+      null,
+      {
+        problem: salvaged.problem,
+        settingsRestored: salvaged.settings.length,
+        dispatchesRestored: salvaged.dispatches.length,
+      },
+    );
+    console.warn(
+      `[store] rebuilt: restored ${salvaged.settings.length} setting(s) and ` +
+        `${salvaged.dispatches.length} outbound dispatch record(s)`,
+    );
   }
 
   private migrate(): void {
@@ -754,6 +821,21 @@ export class Store {
         )
         .get(sinceIso) as { c: number }
     ).c;
+  }
+
+  /**
+   * Everyone the dispatch log says has been sent a message.
+   *
+   * The lead row carries the same fact in `outbound_status`, but a lead row is
+   * a cache of Leadflo and is thrown away whenever the database is rebuilt,
+   * whereas the dispatch log is kept. Asking the log is what stops a rebuild
+   * turning already-contacted patients back into candidates.
+   */
+  listContactedPatientIds(): Set<string> {
+    const rows = this.db
+      .prepare(`SELECT DISTINCT patient_id FROM outbound_dispatches WHERE status = 'sent'`)
+      .all() as Array<{ patient_id: string }>;
+    return new Set(rows.map((row) => row.patient_id));
   }
 
   listOutboundDispatches(limit = 100): OutboundDispatchRow[] {

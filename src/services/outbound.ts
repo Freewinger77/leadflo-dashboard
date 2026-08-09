@@ -144,7 +144,11 @@ function toCandidate(row: TrackedLeadRow, msisdn: string): Candidate {
 }
 
 /** Reason this lead may not be contacted, or null if it may. */
-function ineligibleReason(row: TrackedLeadRow, phone: PhoneResult): string | null {
+function ineligibleReason(
+  row: TrackedLeadRow,
+  phone: PhoneResult,
+  contacted: ReadonlySet<string>,
+): string | null {
   if (!isTrackedTreatment(row.treatment_type)) {
     return `treatment "${row.treatment_type || "unknown"}" is not tracked`;
   }
@@ -152,7 +156,9 @@ function ineligibleReason(row: TrackedLeadRow, phone: PhoneResult): string | nul
     return `stage "${row.stage}" is past the contact stages`;
   }
   if (!phone.ok) return phone.reason ?? "unusable phone number";
-  if (row.outbound_status === "sent") return "already contacted";
+  if (row.outbound_status === "sent" || contacted.has(row.patient_id)) {
+    return "already contacted";
+  }
   if (row.outbound_status === "opted_out") return "opted out";
   if (row.outbound_status === "locked") return "already claimed by a running batch";
 
@@ -184,11 +190,12 @@ export function selectCandidates(store: Store, limit: number): CandidateSelectio
   const selected: Candidate[] = [];
   const skipped: SkippedCandidate[] = [];
   let scanned = 0;
+  const contacted = store.listContactedPatientIds();
 
   for (const row of store.listAllLeads()) {
     scanned += 1;
     const phone = normalizePhone(row.phone);
-    const reason = ineligibleReason(row, phone);
+    const reason = ineligibleReason(row, phone, contacted);
     if (reason) {
       skipped.push({ patientId: row.patient_id, fullName: row.full_name, reason });
       continue;
