@@ -838,6 +838,51 @@ export class Store {
     return new Set(rows.map((row) => row.patient_id));
   }
 
+  /**
+   * Make one already-contacted lead sendable again.
+   *
+   * A successful send is permanent by design, so this is the deliberate way
+   * back: for a demo, or for a lead that has to be approached again. It is
+   * per-patient on purpose — there is no way to ask this for everyone, because
+   * the same call across the table would re-open every lead at once and the
+   * next WF-1 run would cold-message people who have already heard from us.
+   *
+   * Both records have to move. The lead row is what the selector reads first,
+   * and the dispatch log is what it falls back to; clearing only one leaves the
+   * lead looking sendable in one place and contacted in the other. The log rows
+   * are marked rather than deleted, so what was actually sent stays auditable.
+   */
+  resetOutbound(patientId: string): { lead: boolean; dispatches: number } {
+    let dispatches = 0;
+    let lead = false;
+
+    this.db.transaction(() => {
+      lead =
+        this.db
+          .prepare(
+            `UPDATE leads SET
+               outbound_status = NULL,
+               outbound_batch_id = NULL,
+               outbound_locked_at = NULL,
+               outbound_sent_at = NULL,
+               outbound_error = NULL
+             WHERE patient_id = ?`,
+          )
+          .run(patientId).changes > 0;
+
+      dispatches = this.db
+        .prepare(
+          // 'reset' rather than deleted: listContactedPatientIds only counts
+          // 'sent', so this stops blocking without losing the history.
+          `UPDATE outbound_dispatches SET status = 'reset'
+           WHERE patient_id = ? AND status = 'sent'`,
+        )
+        .run(patientId).changes;
+    })();
+
+    return { lead, dispatches };
+  }
+
   listOutboundDispatches(limit = 100): OutboundDispatchRow[] {
     return this.db
       .prepare(`SELECT * FROM outbound_dispatches ORDER BY id DESC LIMIT ?`)

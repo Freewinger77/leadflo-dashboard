@@ -441,6 +441,41 @@ export function createApp(deps: AppDeps): Express {
     res.json({ dispatches: store.listOutboundDispatches(100) });
   });
 
+  /**
+   * Let one already-contacted lead be messaged again.
+   *
+   * Key-gated because it removes a safety rule: everything else in the outbound
+   * path exists to stop a patient hearing the opener twice, and this is the
+   * single deliberate way past it. Named per patient with no bulk form, so the
+   * cost of a mistake is one message rather than the whole table.
+   */
+  app.post("/api/leads/:patientId/outbound/reset", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+
+    const patientId = req.params.patientId;
+    const row = store.getLead(patientId);
+    if (!row) {
+      res.status(404).json({ ok: false, error: "Lead not found" });
+      return;
+    }
+
+    const previousStatus = row.outbound_status;
+    const result = store.resetOutbound(patientId);
+    store.logEvent(
+      "outbound.reset",
+      `Outbound reset for ${row.full_name} (was ${previousStatus ?? "never contacted"})`,
+      patientId,
+      { previousStatus, dispatchesReset: result.dispatches },
+    );
+
+    res.json({
+      ok: true,
+      previousStatus,
+      dispatchesReset: result.dispatches,
+      lead: serializeLead(store.getLead(patientId)!),
+    });
+  });
+
   /** Inbound: AI / n8n / agent posts the note to write back into Leadflo */
   app.post("/api/webhooks/ai-response", async (req, res) => {
     if (!requireInboundSecret(req, res)) return;
