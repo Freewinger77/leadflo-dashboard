@@ -12,7 +12,7 @@ Designed like a Boxly-style integration agent: scrape → detect new → webhook
 4. On first sight of a patient id → `POST` outbound webhook.
 5. Your AI / n8n agent replies to `POST /api/webhooks/ai-response`.
 6. Writes the note via `POST /v3/patients/:id/notes`.
-7. **Safety:** with `NOTES_ONLY_TEST_NAMES=true` (default), notes are only written when the lead name contains `test` (e.g. `asif test`).
+7. **Notes:** by default notes are written for all tracked Implant leads. Set `NOTES_ONLY_TEST_NAMES=true` to restrict writes to names containing `test`.
 
 ## Quick start
 
@@ -39,7 +39,7 @@ Open `http://localhost:8788`.
 | `TRACKED_TREATMENT_TYPES` | Default `Implant` |
 | `POLL_INTERVAL_MS` | Default `60000` |
 | `WEBHOOK_URL` | Outbound new-lead webhook |
-| `NOTES_ONLY_TEST_NAMES` | Default `true` — only write notes for test names |
+| `NOTES_ONLY_TEST_NAMES` | Default `false` — set `true` to only write notes for test names |
 | `INBOUND_WEBHOOK_SECRET` | Optional shared secret for AI callback |
 
 ## Webhooks

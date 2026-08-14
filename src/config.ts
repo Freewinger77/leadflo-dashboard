@@ -98,8 +98,8 @@ export const config = {
     get enabled() {
       return bool(setting("OUTBOUND_ENABLED"), false);
     },
-    /** Restrict live sends to known testers until the first run is signed off. */
-    allowlistOnly: bool(process.env.OUTBOUND_ALLOWLIST_ONLY, true),
+    /** When true, only allowlisted numbers may be messaged. Live default: off. */
+    allowlistOnly: bool(process.env.OUTBOUND_ALLOWLIST_ONLY, false),
     get allowlist() {
       return list(setting("OUTBOUND_ALLOWLIST"), []).map(digitsOnly).filter(Boolean);
     },
@@ -119,7 +119,8 @@ export const config = {
       digitsOnly,
     ),
   },
-  notesOnlyTestNames: bool(process.env.NOTES_ONLY_TEST_NAMES, true),
+  /** When true, only write Leadflo notes for names containing "test". Live default: off. */
+  notesOnlyTestNames: bool(process.env.NOTES_ONLY_TEST_NAMES, false),
   inboundWebhookSecret: process.env.INBOUND_WEBHOOK_SECRET ?? "",
   databasePath: path.resolve(process.env.DATABASE_PATH ?? "./data/leadflo.db"),
   practiceName: process.env.PRACTICE_NAME ?? "Dental Asthetica",
