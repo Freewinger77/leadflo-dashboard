@@ -80,7 +80,7 @@ export async function sendLeadWebhook(
     callback: {
       noteWebhook: `${publicBaseUrl.replace(/\/$/, "")}/api/webhooks/ai-response`,
       description:
-        "POST JSON { patientId, note, title? } when AI has a response. Notes are only written to Leadflo for test-named leads when NOTES_ONLY_TEST_NAMES=true.",
+        "POST JSON { patientId, note, title? } when AI has a response. When NOTES_ONLY_TEST_NAMES=true, notes are only written for test-named leads.",
     },
   };
 

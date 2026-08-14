@@ -78,6 +78,24 @@ jobs:
           resource-group-name: ${{ env.AZURE_RESOURCE_GROUP }}
           package: leadflo-deploy.zip
 
+      # Production is live for all Implant leads (notes + outbound allowlist off).
+      # App settings win over code defaults — keep these explicit on every deploy.
+      - name: Go-live app settings (ungate Implant notes + outbound)
+        run: |
+          set -euo pipefail
+          az webapp config appsettings set \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --settings \
+              NOTES_ONLY_TEST_NAMES=false \
+              OUTBOUND_ALLOWLIST_ONLY=false \
+              TRACKED_TREATMENT_TYPES=Implant \
+            --output none
+          az webapp restart \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --output none
+
       - name: Smoke check
         run: |
           set -euo pipefail
