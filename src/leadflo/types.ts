@@ -82,10 +82,51 @@ export interface LeadfloNote {
   datetime: string;
 }
 
+/** Every stage Leadflo's action board knows about. */
+export const ALL_LEADFLO_STAGES: LeadfloStage[] = [
+  "newLead",
+  "callback1",
+  "callback2",
+  "callback3",
+  "working",
+  "thinking",
+  "consultation",
+  "txPlanConsult",
+  "inTx",
+];
+
+export interface ListPatientsQuery {
+  /** Leadflo reporting window start (YYYY-MM-DD or ISO). */
+  from: string;
+  /** Leadflo reporting window end (YYYY-MM-DD or ISO). */
+  to: string;
+  /** SPA uses `pipeline` for the main patient table. */
+  report?: string;
+  types?: string[];
+  stages?: string[];
+  sources?: string[];
+  labels?: string[];
+  page?: number;
+  limit?: number;
+}
+
+export interface ListPatientsResult {
+  patients: LeadfloPatient[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface LeadfloClient {
   login(): Promise<void>;
   ensureSession(): Promise<void>;
   getDueActions(stages: string[]): Promise<LeadfloAction[]>;
+  /**
+   * Paginated patient table used by Leadflo's Pipeline reporting screen.
+   * This is the only bulk path that can reach past / late-stage patients
+   * that no longer appear on `/actions/due`.
+   */
+  listPatients(query: ListPatientsQuery): Promise<ListPatientsResult>;
   getPatient(patientId: string): Promise<LeadfloPatient>;
   getTimeline(patientId: string): Promise<LeadfloTimelineItem[]>;
   addNote(patientId: string, content: string, title?: string): Promise<void>;

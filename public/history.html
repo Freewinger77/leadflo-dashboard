@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Lead archive — LEADFLO.WASUP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --ink: #1a1a1a;
+      --muted: #5c574e;
+      --line: rgba(26, 26, 26, 0.12);
+      --panel: #fffdf8;
+      --accent: #0f5c4c;
+      --accent-soft: #d8ebe4;
+      --warn: #8a3b12;
+      --danger: #9b1c1c;
+      --chip: #ebe4d6;
+      --shadow: 0 18px 50px rgba(40, 30, 10, 0.08);
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --sans: "DM Sans", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background:
+      radial-gradient(1200px 500px at 10% -10%, #e7f2ec 0%, transparent 55%),
+      radial-gradient(900px 400px at 100% 0%, #f6e7d4 0%, transparent 50%),
+      var(--bg);
+      color: var(--ink); font: 400 15px/1.45 var(--sans); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .shell { max-width: 1280px; margin: 0 auto; padding: 24px 20px 64px; }
+    header.top {
+      display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end;
+      justify-content: space-between; margin-bottom: 28px;
+    }
+    .brand { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    h1 { margin: 4px 0 0; font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.03em; }
+    .sub { margin: 8px 0 0; color: var(--muted); max-width: 52ch; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    button, .btn {
+      appearance: none; border: 1px solid var(--line); background: var(--panel);
+      color: var(--ink); border-radius: 999px; padding: 10px 16px; font: 500 13px/1 var(--sans);
+      cursor: pointer; box-shadow: none;
+    }
+    button.primary { background: var(--accent); color: #f7fffb; border-color: transparent; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .panel {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .toolbar {
+      display: grid; gap: 10px; padding: 16px;
+      grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)) auto;
+      border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.55);
+    }
+    @media (max-width: 980px) {
+      .toolbar { grid-template-columns: 1fr 1fr; }
+    }
+    label { display: grid; gap: 6px; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    input, select {
+      width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+      font: 400 14px/1.2 var(--sans); background: #fff; color: var(--ink);
+    }
+    .stats {
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line);
+      color: var(--muted); font-size: 13px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+      background: var(--chip); color: var(--ink); font-size: 12px;
+    }
+    .chip strong { font-weight: 600; }
+    .table-wrap { overflow: auto; max-height: min(70vh, 820px); }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th {
+      position: sticky; top: 0; background: #faf6ee; z-index: 1;
+      font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); font-weight: 600;
+    }
+    tr:hover td { background: rgba(15, 92, 76, 0.04); }
+    tr.selected td { background: var(--accent-soft); }
+    .name { font-weight: 600; }
+    .muted { color: var(--muted); }
+    .mono { font-family: var(--mono); font-size: 12px; }
+    .pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--chip);
+      font-size: 11px; font-weight: 500; white-space: nowrap;
+    }
+    .pill.implant { background: #d8ebe4; color: var(--accent); }
+    .pill.test { background: #f3e0c8; color: var(--warn); }
+    .empty { padding: 48px 20px; text-align: center; color: var(--muted); }
+    .drawer {
+      position: fixed; inset: 0 0 0 auto; width: min(440px, 100%); background: var(--panel);
+      border-left: 1px solid var(--line); box-shadow: var(--shadow); transform: translateX(105%);
+      transition: transform 0.28s ease; z-index: 20; display: flex; flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer header {
+      padding: 18px 18px 12px; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; gap: 12px; align-items: start;
+    }
+    .drawer h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+    .drawer .body { padding: 16px 18px; overflow: auto; flex: 1; }
+    .kv { display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; margin: 0 0 18px; font-size: 13px; }
+    .kv dt { color: var(--muted); }
+    .kv dd { margin: 0; word-break: break-word; }
+    .timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    .timeline li {
+      padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff;
+    }
+    .timeline .when { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .banner {
+      margin-bottom: 16px; padding: 12px 14px; border-radius: 12px; background: #fff8e8;
+      border: 1px solid rgba(138, 59, 18, 0.2); color: var(--warn); font-size: 13px;
+    }
+    .banner.ok { background: var(--accent-soft); border-color: rgba(15,92,76,0.2); color: var(--accent); }
+    .banner.err { background: #f8e4e4; border-color: rgba(155,28,28,0.25); color: var(--danger); }
+    .key-row { display: flex; gap: 8px; align-items: end; }
+    .key-row input { min-width: 220px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <div>
+        <div class="brand">LEADFLO.WASUP</div>
+        <h1>Lead archive</h1>
+        <p class="sub">Every patient scraped from Leadflo — all treatments, all stages, past and present. Pull a fresh dump from Pipeline, then filter everything stored here.</p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/">Dashboard</a>
+        <a class="btn" href="/docs.html">API</a>
+        <div class="key-row">
+          <label>WF-1 key
+            <input id="wf1Key" type="password" placeholder="needed to scrape / load all" autocomplete="off" />
+          </label>
+        </div>
+        <button type="button" class="primary" id="scrapeBtn">Scrape all from Leadflo</button>
+      </div>
+    </header>
+
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="panel">
+      <div class="toolbar">
+        <label>Search
+          <input id="q" type="search" placeholder="Name, phone, email, id…" />
+        </label>
+        <label>Stage
+          <select id="stage"><option value="">All stages</option></select>
+        </label>
+        <label>Treatment
+          <select id="type"><option value="">All types</option></select>
+        </label>
+        <label>From
+          <input id="from" type="date" />
+        </label>
+        <label>To
+          <input id="to" type="date" />
+        </label>
+        <label>&nbsp;
+          <button type="button" id="applyBtn">Apply</button>
+        </label>
+      </div>
+      <div class="stats" id="stats">Loading…</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Treatment</th>
+              <th>Stage</th>
+              <th>Phone</th>
+              <th>Source</th>
+              <th>Enquired</th>
+              <th>Seen</th>
+              <th>Outbound</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden>No leads match.</div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <header>
+      <div>
+        <h2 id="dName">—</h2>
+        <div class="muted" id="dMeta"></div>
+      </div>
+      <button type="button" id="closeDrawer">Close</button>
+    </header>
+    <div class="body">
+      <dl class="kv" id="dKv"></dl>
+      <h3 style="margin:0 0 10px;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted)">Timeline</h3>
+      <ul class="timeline" id="dTimeline"></ul>
+    </div>
+  </aside>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const state = { leads: [], selected: null, facets: { byStage: {}, byType: {} }, stages: [] };
+
+    function key() {
+      const v = $('wf1Key').value.trim();
+      if (v) localStorage.setItem('wf1Key', v);
+      return v || localStorage.getItem('wf1Key') || '';
+    }
+    $('wf1Key').value = localStorage.getItem('wf1Key') || '';
+
+    function banner(msg, kind) {
+      const el = $('banner');
+      if (!msg) { el.hidden = true; return; }
+      el.hidden = false;
+      el.className = 'banner' + (kind ? ' ' + kind : '');
+      el.textContent = msg;
+    }
+
+    function headers() {
+      const h = {};
+      const k = key();
+      if (k) h['X-WF1-Key'] = k;
+      return h;
+    }
+
+    function fmt(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return String(iso).slice(0, 19);
+      return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    function fillFacets() {
+      const stageSel = $('stage');
+      const typeSel = $('type');
+      const curStage = stageSel.value;
+      const curType = typeSel.value;
+      stageSel.innerHTML = '<option value="">All stages</option>';
+      const stages = [...new Set([...(state.stages || []), ...Object.keys(state.facets.byStage || {})])];
+      for (const s of stages.sort()) {
+        const n = state.facets.byStage?.[s];
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = n != null ? s + ' (' + n + ')' : s;
+        stageSel.appendChild(opt);
+      }
+      stageSel.value = curStage;
+      typeSel.innerHTML = '<option value="">All types</option>';
+      for (const [t, n] of Object.entries(state.facets.byType || {}).sort((a,b)=>b[1]-a[1])) {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t + ' (' + n + ')';
+        typeSel.appendChild(opt);
+      }
+      typeSel.value = curType;
+    }
+
+    function render() {
+      const tbody = $('rows');
+      tbody.innerHTML = '';
+      $('empty').hidden = state.leads.length > 0;
+      for (const lead of state.leads) {
+        const tr = document.createElement('tr');
+        if (state.selected === lead.patientId) tr.classList.add('selected');
+        tr.innerHTML =
+          '<td><div class="name"></div><div class="muted mono" style="font-size:11px"></div></td>' +
+          '<td></td><td></td><td class="mono"></td><td></td><td></td><td></td><td></td>';
+        const tds = tr.children;
+        tds[0].querySelector('.name').textContent = lead.fullName || '—';
+        tds[0].querySelector('.mono').textContent = lead.patientId;
+        const typePill = document.createElement('span');
+        typePill.className = 'pill' + (/implant/i.test(lead.treatmentType || '') ? ' implant' : '');
+        typePill.textContent = lead.treatmentType || '—';
+        tds[1].appendChild(typePill);
+        if (lead.isTestName) {
+          const t = document.createElement('span');
+          t.className = 'pill test';
+          t.style.marginLeft = '6px';
+          t.textContent = 'test';
+          tds[1].appendChild(t);
+        }
+        tds[2].textContent = lead.stage || '—';
+        tds[3].textContent = lead.phoneE164 || lead.phone || '—';
+        tds[4].textContent = lead.source || '—';
+        tds[5].textContent = fmt(lead.enquiredAt);
+        tds[6].textContent = fmt(lead.firstSeenAt);
+        tds[7].textContent = lead.outboundStatus || lead.status || '—';
+        tr.addEventListener('click', () => openLead(lead.patientId));
+        tbody.appendChild(tr);
+      }
+    }
+
+    async function loadLeads() {
+      const params = new URLSearchParams();
+      params.set('limit', '2000');
+      const q = $('q').value.trim();
+      const stage = $('stage').value;
+      const type = $('type').value;
+      const from = $('from').value;
+      const to = $('to').value;
+      if (q) params.set('q', q);
+      if (stage) params.set('stage', stage);
+      if (type) params.set('type', type);
+      if (from) params.set('from', from);
+      if (to) params.set('to', to + 'T23:59:59.999Z');
+
+      $('stats').textContent = 'Loading…';
+      const res = await fetch('/api/archive/leads?' + params.toString(), { headers: headers() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        banner(data.error || ('Failed to load leads (' + res.status + ')'), 'err');
+        if (res.status === 401) banner('Enter the WF-1 key above to load the full archive (limit > 200).', 'err');
+        state.leads = [];
+        render();
+        return;
+      }
+      banner('');
+      state.leads = data.leads || [];
+      state.facets = data.facets || { byStage: {}, byType: {} };
+      state.stages = data.stages || [];
+      fillFacets();
+      const typeBits = Object.entries(state.facets.byType || {})
+        .sort((a,b)=>b[1]-a[1]).slice(0,6)
+        .map(([k,v]) => '<span class="chip"><strong>' + v + '</strong> ' + k + '</span>')
+        .join('');
+      $('stats').innerHTML =
+        '<span class="chip"><strong>' + (data.total ?? state.leads.length) + '</strong> matching</span>' +
+        '<span class="chip">showing <strong>' + state.leads.length + '</strong></span>' +
+        typeBits;
+      render();
+    }
+
+    async function scrape() {
+      const k = key();
+      if (!k) {
+        banner('Paste the WF-1 API key first — scrape is key-gated.', 'err');
+        return;
+      }
+      const btn = $('scrapeBtn');
+      btn.disabled = true;
+      btn.textContent = 'Scraping…';
+      banner('Pulling Pipeline patients from Leadflo (all stages / types). This can take a minute…');
+      try {
+        const res = await fetch('/api/archive/scrape', {
+          method: 'POST',
+          headers: { ...headers(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          banner(data.error || ('Scrape failed (' + res.status + ')'), 'err');
+        } else {
+          banner(
+            'Done — fetched ' + data.fetched + '/' + data.reportedTotal +
+            ', created ' + data.created + ', updated ' + data.updated +
+            ' across ' + data.pages + ' page(s).',
+            'ok',
+          );
+          await loadLeads();
+        }
+      } catch (err) {
+        banner(String(err), 'err');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Scrape all from Leadflo';
+      }
+    }
+
+    async function openLead(id) {
+      state.selected = id;
+      render();
+      const drawer = $('drawer');
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      $('dName').textContent = 'Loading…';
+      $('dMeta').textContent = id;
+      $('dKv').innerHTML = '';
+      $('dTimeline').innerHTML = '<li class="muted">Loading timeline…</li>';
+
+      const [detailRes, tlRes] = await Promise.all([
+        fetch('/api/leads/' + encodeURIComponent(id)),
+        fetch('/api/leads/' + encodeURIComponent(id) + '/timeline'),
+      ]);
+      const detail = await detailRes.json().catch(() => ({}));
+      const tl = await tlRes.json().catch(() => ({}));
+      const lead = detail.lead || state.leads.find((l) => l.patientId === id) || {};
+      $('dName').textContent = lead.fullName || id;
+      $('dMeta').textContent = (lead.treatmentType || '—') + ' · ' + (lead.stage || '—');
+
+      const rows = [
+        ['Patient ID', lead.patientId],
+        ['Phone', lead.phoneE164 || lead.phone],
+        ['Email', lead.email],
+        ['Source', lead.source],
+        ['Labels', (lead.labels || []).join(', ') || '—'],
+        ['Enquired', fmt(lead.enquiredAt)],
+        ['First seen', fmt(lead.firstSeenAt)],
+        ['Last seen', fmt(lead.lastSeenAt)],
+        ['Status', lead.status],
+        ['Outbound', lead.outboundStatus || '—'],
+        ['Outbound msg', lead.outboundMessage || '—'],
+      ];
+      $('dKv').innerHTML = rows.map(([k,v]) => '<dt>' + k + '</dt><dd>' + (v || '—') + '</dd>').join('');
+
+      const items = tl.activity || [];
+      const notes = [...(tl.newNotes || []), ...(tl.oldNotes || [])];
+      const all = [
+        ...notes.map((n) => ({ when: n.datetime, title: 'Note', body: n.content || n.title || '' })),
+        ...items.map((a) => ({ when: a.datetime, title: a.summary || a.type, body: '' })),
+      ].sort((a,b) => String(b.when).localeCompare(String(a.when)));
+
+      $('dTimeline').innerHTML = all.length
+        ? all.map((a) =>
+            '<li><div class="when">' + fmt(a.when) + '</div><div><strong>' +
+            escapeHtml(a.title || '') + '</strong></div>' +
+            (a.body ? '<div class="muted">' + escapeHtml(a.body) + '</div>' : '') +
+            '</li>'
+          ).join('')
+        : '<li class="muted">No timeline items.</li>';
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    $('closeDrawer').addEventListener('click', () => {
+      $('drawer').classList.remove('open');
+      $('drawer').setAttribute('aria-hidden', 'true');
+      state.selected = null;
+      render();
+    });
+    $('applyBtn').addEventListener('click', () => loadLeads());
+    $('scrapeBtn').addEventListener('click', () => scrape());
+    $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') loadLeads(); });
+
+    loadLeads();
+  </script>
+</body>
+</html>

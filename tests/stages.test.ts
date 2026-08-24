@@ -49,6 +49,15 @@ class FakeClient implements LeadfloClient {
     return this.actions.filter((a) => stages.includes(a.stage));
   }
 
+  async listPatients(): Promise<{
+    patients: LeadfloPatient[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    return { patients: [], total: 0, page: 1, limit: 50 };
+  }
+
   async getPatient(patientId: string): Promise<LeadfloPatient> {
     this.patientCalls += 1;
     return {
