@@ -407,6 +407,88 @@ export class Store {
   }
 
   /**
+   * Filtered full-table read for the history page. Empty filters return
+   * every real lead; q matches name / phone / email / patient id.
+   */
+  queryLeads(filters: {
+    q?: string;
+    stage?: string;
+    type?: string;
+    from?: string;
+    to?: string;
+    limit?: number;
+    offset?: number;
+  } = {}): { leads: TrackedLeadRow[]; total: number } {
+    const where: string[] = [`(${IS_REAL_LEAD})`];
+    const params: unknown[] = [];
+
+    if (filters.stage?.trim()) {
+      where.push(`stage = ?`);
+      params.push(filters.stage.trim());
+    }
+    if (filters.type?.trim()) {
+      where.push(`lower(treatment_type) = lower(?)`);
+      params.push(filters.type.trim());
+    }
+    if (filters.from?.trim()) {
+      where.push(`COALESCE(enquired_at, first_seen_at) >= ?`);
+      params.push(filters.from.trim());
+    }
+    if (filters.to?.trim()) {
+      where.push(`COALESCE(enquired_at, first_seen_at) <= ?`);
+      params.push(filters.to.trim());
+    }
+    if (filters.q?.trim()) {
+      const like = `%${filters.q.trim().toLowerCase()}%`;
+      where.push(
+        `(lower(full_name) LIKE ? OR lower(phone) LIKE ? OR lower(email) LIKE ? OR lower(patient_id) LIKE ? OR lower(treatment_type) LIKE ? OR lower(source) LIKE ?)`,
+      );
+      params.push(like, like, like, like, like, like);
+    }
+
+    const whereSql = where.join(" AND ");
+    const total = (
+      this.db.prepare(`SELECT COUNT(*) AS c FROM leads WHERE ${whereSql}`).get(
+        ...params,
+      ) as { c: number }
+    ).c;
+
+    const limit = Math.min(Math.max(filters.limit ?? 500, 1), 5000);
+    const offset = Math.max(filters.offset ?? 0, 0);
+    const leads = this.db
+      .prepare(
+        `SELECT * FROM leads
+          WHERE ${whereSql}
+          ORDER BY COALESCE(enquired_at, first_seen_at) DESC, patient_id ASC
+          LIMIT ? OFFSET ?`,
+      )
+      .all(...params, limit, offset) as TrackedLeadRow[];
+
+    return { leads, total };
+  }
+
+  /** Stage / treatment counts across every real lead (for history filters). */
+  leadFacets(): { byStage: Record<string, number>; byType: Record<string, number> } {
+    const byStage: Record<string, number> = {};
+    const byType: Record<string, number> = {};
+    const stageRows = this.db
+      .prepare(
+        `SELECT COALESCE(NULLIF(stage, ''), 'unknown') AS k, COUNT(*) AS c
+           FROM leads WHERE ${IS_REAL_LEAD} GROUP BY k`,
+      )
+      .all() as Array<{ k: string; c: number }>;
+    for (const row of stageRows) byStage[row.k] = row.c;
+    const typeRows = this.db
+      .prepare(
+        `SELECT COALESCE(NULLIF(treatment_type, ''), 'unknown') AS k, COUNT(*) AS c
+           FROM leads WHERE ${IS_REAL_LEAD} GROUP BY k`,
+      )
+      .all() as Array<{ k: string; c: number }>;
+    for (const row of typeRows) byType[row.k] = row.c;
+    return { byStage, byType };
+  }
+
+  /**
    * Leads whose webhook was started but never confirmed sent: deferred by the
    * per-tick dispatch cap, or left mid-flight by a crash. Oldest first, so a
    * backlog drains in the order the leads arrived.

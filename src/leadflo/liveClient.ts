@@ -6,6 +6,8 @@ import type {
   LeadfloClient,
   LeadfloPatient,
   LeadfloTimelineItem,
+  ListPatientsQuery,
+  ListPatientsResult,
 } from "./types.js";
 
 type FetchFn = (input: string, init?: UndiciRequestInit) => Promise<Response>;
@@ -173,6 +175,38 @@ export class LiveLeadfloClient implements LeadfloClient {
     return normalizeActions(res.data);
   }
 
+  async listPatients(query: ListPatientsQuery): Promise<ListPatientsResult> {
+    await this.ensureSession();
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(Math.max(query.limit ?? 50, 1), 200);
+    const params = new URLSearchParams();
+    params.set("report", query.report ?? "pipeline");
+    params.set("from", query.from);
+    params.set("to", query.to);
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+    for (const [key, values] of [
+      ["types", query.types],
+      ["stages", query.stages],
+      ["sources", query.sources],
+      ["labels", query.labels],
+    ] as const) {
+      if (!values?.length) continue;
+      for (const value of values) params.append(`${key}[]`, value);
+    }
+
+    const path = (query.report ?? "pipeline").startsWith("overview/")
+      ? `/v3/patients/overview?${params}`
+      : `/v3/patients?${params}`;
+    const res = await this.request<unknown>("GET", path);
+    if (res.status < 200 || res.status >= 300) {
+      throw new Error(
+        `listPatients failed (${res.status}): ${res.rawText.slice(0, 300)}`,
+      );
+    }
+    return normalizePatientList(res.data, page, limit);
+  }
+
   async getPatient(patientId: string): Promise<LeadfloPatient> {
     await this.ensureSession();
     const res = await this.request<LeadfloPatient>(
@@ -241,6 +275,66 @@ export class LiveLeadfloClient implements LeadfloClient {
       return { ok: false, detail: err instanceof Error ? err.message : String(err) };
     }
   }
+}
+
+function normalizePatientList(
+  data: unknown,
+  page: number,
+  limit: number,
+): ListPatientsResult {
+  if (!data) return { patients: [], total: 0, page, limit };
+  if (Array.isArray(data)) {
+    return {
+      patients: data.map(coercePatient).filter(Boolean) as LeadfloPatient[],
+      total: data.length,
+      page,
+      limit,
+    };
+  }
+  if (typeof data !== "object") {
+    return { patients: [], total: 0, page, limit };
+  }
+  const obj = data as Record<string, unknown>;
+  const meta =
+    obj.metadata && typeof obj.metadata === "object"
+      ? (obj.metadata as Record<string, unknown>)
+      : {};
+  const rawList =
+    (Array.isArray(obj.data) && obj.data) ||
+    (Array.isArray(obj.patients) && obj.patients) ||
+    (Array.isArray(obj.results) && obj.results) ||
+    [];
+  const patients = rawList
+    .map(coercePatient)
+    .filter(Boolean) as LeadfloPatient[];
+  const totalRaw = meta.total ?? obj.total ?? patients.length;
+  const total = Number(totalRaw);
+  return {
+    patients,
+    total: Number.isFinite(total) ? total : patients.length,
+    page,
+    limit,
+  };
+}
+
+function coercePatient(raw: unknown): LeadfloPatient | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Record<string, unknown>;
+  const id = String(p.id ?? p.patient_id ?? p.patientId ?? "");
+  if (!id) return null;
+  return {
+    id,
+    first_name: String(p.first_name ?? p.firstName ?? ""),
+    last_name: String(p.last_name ?? p.lastName ?? ""),
+    email: (p.email as string | null | undefined) ?? null,
+    phone: (p.phone ?? p.phone_number ?? null) as string | null,
+    type: (p.type ?? p.tx_type ?? null) as string | null,
+    source: (p.source as string | null | undefined) ?? null,
+    labels: Array.isArray(p.labels) ? p.labels.map(String) : [],
+    stage: (p.stage as string | null | undefined) ?? null,
+    gdpr: (p.gdpr as boolean | null | undefined) ?? null,
+    ...p,
+  };
 }
 
 function normalizeActions(data: unknown): LeadfloAction[] {

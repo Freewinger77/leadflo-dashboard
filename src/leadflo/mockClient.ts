@@ -4,6 +4,8 @@ import type {
   LeadfloClient,
   LeadfloPatient,
   LeadfloTimelineItem,
+  ListPatientsQuery,
+  ListPatientsResult,
 } from "./types.js";
 
 const day = (offset: number) => {
@@ -140,6 +142,28 @@ export class MockLeadfloClient implements LeadfloClient {
 
   async getDueActions(stages: string[]): Promise<LeadfloAction[]> {
     return FIXTURE_ACTIONS.filter((a) => stages.includes(a.stage));
+  }
+
+  async listPatients(query: ListPatientsQuery): Promise<ListPatientsResult> {
+    const limit = Math.min(Math.max(query.limit ?? 50, 1), 200);
+    const page = Math.max(1, query.page ?? 1);
+    let rows = [...patients.values()];
+    if (query.types?.length) {
+      const wanted = new Set(query.types.map((t) => t.toLowerCase()));
+      rows = rows.filter((p) => wanted.has(String(p.type || "").toLowerCase()));
+    }
+    if (query.stages?.length) {
+      const wanted = new Set(query.stages);
+      rows = rows.filter((p) => wanted.has(String(p.stage || "")));
+    }
+    const total = rows.length;
+    const start = (page - 1) * limit;
+    return {
+      patients: rows.slice(start, start + limit).map((p) => ({ ...p })),
+      total,
+      page,
+      limit,
+    };
   }
 
   async getPatient(patientId: string): Promise<LeadfloPatient> {

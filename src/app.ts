@@ -12,6 +12,7 @@ import {
   setOverride,
 } from "./runtime-settings.js";
 import { applyAiNote } from "./services/notes.js";
+import { ArchiveScraper } from "./services/archive.js";
 import {
   claimBatch,
   normalizePhone,
@@ -19,6 +20,7 @@ import {
   type CandidateSelection,
 } from "./services/outbound.js";
 import type { Poller } from "./services/poller.js";
+import { ALL_LEADFLO_STAGES } from "./leadflo/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -83,6 +85,7 @@ export function createApp(deps: AppDeps): Express {
   const app = express();
   const client = deps.client ?? createLeadfloClient();
   const { store, poller } = deps;
+  const archive = new ArchiveScraper(store, client);
 
   app.use(express.json({ limit: "1mb" }));
 
@@ -138,6 +141,74 @@ export function createApp(deps: AppDeps): Express {
 
     const leads = store.listLeads(limit).map((row) => serializeLead(row));
     res.json({ leads, limit, count: leads.length });
+  });
+
+  /**
+   * Full history view: every lead in SQLite with optional filters.
+   * Larger pages are WF-1 keyed because they expose the whole practice book.
+   */
+  app.get("/api/archive/leads", (req, res) => {
+    const requested = Number(req.query.limit ?? DEFAULT_LEAD_PAGE);
+    const limit = Number.isFinite(requested)
+      ? Math.min(Math.max(Math.trunc(requested), 1), MAX_LEAD_PAGE)
+      : DEFAULT_LEAD_PAGE;
+    if (limit > DEFAULT_LEAD_PAGE && !requireOutboundKey(req, res)) return;
+
+    const offsetRaw = Number(req.query.offset ?? 0);
+    const offset = Number.isFinite(offsetRaw) ? Math.max(Math.trunc(offsetRaw), 0) : 0;
+    const { leads, total } = store.queryLeads({
+      q: typeof req.query.q === "string" ? req.query.q : undefined,
+      stage: typeof req.query.stage === "string" ? req.query.stage : undefined,
+      type: typeof req.query.type === "string" ? req.query.type : undefined,
+      from: typeof req.query.from === "string" ? req.query.from : undefined,
+      to: typeof req.query.to === "string" ? req.query.to : undefined,
+      limit,
+      offset,
+    });
+
+    res.json({
+      leads: leads.map((row) => serializeLead(row)),
+      total,
+      count: leads.length,
+      limit,
+      offset,
+      facets: store.leadFacets(),
+      stages: ALL_LEADFLO_STAGES,
+    });
+  });
+
+  app.get("/api/archive/status", (_req, res) => {
+    res.json(archive.status);
+  });
+
+  /**
+   * Pull every patient from Leadflo's Pipeline report into SQLite.
+   * Key-gated: this hits Leadflo hard and exposes the full book once stored.
+   * Never dispatches webhooks.
+   */
+  app.post("/api/archive/scrape", async (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const types = Array.isArray(body.types)
+      ? body.types.map(String)
+      : typeof body.types === "string"
+        ? body.types.split(",").map((s) => s.trim()).filter(Boolean)
+        : undefined;
+    const stages = Array.isArray(body.stages)
+      ? body.stages.map(String)
+      : typeof body.stages === "string"
+        ? body.stages.split(",").map((s) => s.trim()).filter(Boolean)
+        : undefined;
+
+    const result = await archive.scrape({
+      from: typeof body.from === "string" ? body.from : undefined,
+      to: typeof body.to === "string" ? body.to : undefined,
+      types,
+      stages,
+      pageSize: Number(body.pageSize) || undefined,
+      maxPages: Number(body.maxPages) || undefined,
+    });
+    res.status(result.ok ? 200 : 409).json(result);
   });
 
   app.get("/api/analytics", (_req, res) => {
@@ -508,6 +579,10 @@ export function createApp(deps: AppDeps): Express {
 
   app.get("/docs", (_req, res) => {
     res.sendFile(path.join(__dirname, "..", "public", "docs.html"));
+  });
+
+  app.get("/history", (_req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "history.html"));
   });
 
   app.use(express.static(path.join(__dirname, "..", "public")));

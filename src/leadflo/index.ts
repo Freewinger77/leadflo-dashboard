@@ -4,6 +4,7 @@ import { MockLeadfloClient } from "./mockClient.js";
 import { isTestName } from "./testName.js";
 import type { LeadfloClient, LeadfloPatient, NormalizedLead } from "./types.js";
 import type { LeadfloAction } from "./types.js";
+import type { ListPatientsQuery, ListPatientsResult } from "./types.js";
 
 export function createLeadfloClient(): LeadfloClient {
   if (config.leadflo.mode === "mock") {
@@ -58,4 +59,42 @@ export function normalizeLead(
   };
 }
 
-export type { LeadfloClient, NormalizedLead, LeadfloAction, LeadfloPatient };
+/** Build a NormalizedLead from a Pipeline / patient-table row (no due action). */
+export function normalizePatient(patient: LeadfloPatient): NormalizedLead | null {
+  const patientId = String(patient.id || "").trim();
+  if (!patientId) return null;
+  const firstName = String(patient.first_name || "");
+  const lastName = String(patient.last_name || "");
+  const fullName = `${firstName} ${lastName}`.trim() || patientId;
+  const due =
+    (patient.next_action_at as string | null | undefined) ||
+    (patient.date as string | null | undefined) ||
+    null;
+
+  return {
+    patientId,
+    firstName,
+    lastName,
+    fullName,
+    phone: String(patient.phone || ""),
+    email: String(patient.email || ""),
+    treatmentType: String(patient.type || ""),
+    source: String(patient.source || ""),
+    stage: String(patient.stage || ""),
+    dueDate: due,
+    labels: (patient.labels || []).map(String),
+    isTestName: isTestName(fullName),
+    scrapedAt: new Date().toISOString(),
+    raw: { patient },
+  };
+}
+
+export type {
+  LeadfloClient,
+  NormalizedLead,
+  LeadfloAction,
+  LeadfloPatient,
+  ListPatientsQuery,
+  ListPatientsResult,
+};
+export { ALL_LEADFLO_STAGES } from "./types.js";

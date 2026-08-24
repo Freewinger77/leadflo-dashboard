@@ -155,6 +155,7 @@ Live (UK residential proxy → Leadflo):
 - **App:** https://dental-asthetica.wasup.co  
 - **Azure default:** https://dental-asthetica.azurewebsites.net  
 - **Docs:** https://dental-asthetica.wasup.co/docs.html  
+- **Lead archive:** https://dental-asthetica.wasup.co/history — scrape every Leadflo patient (all treatments/stages) into SQLite and filter the full book  
 - **AI note webhook:** `POST https://dental-asthetica.wasup.co/api/webhooks/ai-response`
 
 DNS: GoDaddy CNAME `dental-asthetica` → `dental-asthetica.azurewebsites.net` + Azure managed TLS.
