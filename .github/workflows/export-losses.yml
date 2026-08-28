@@ -6,11 +6,11 @@ on:
       from:
         description: "ISO start (inclusive)"
         required: true
-        default: "2026-05-30T00:00:00.000Z"
+        default: "2025-08-28T00:00:00.000Z"
       to:
         description: "ISO end (inclusive)"
         required: true
-        default: "2026-08-27T23:59:59.999Z"
+        default: "2026-08-28T23:59:59.999Z"
       report:
         description: "Leadflo report id"
         required: true
@@ -80,8 +80,9 @@ jobs:
       - name: Export Losses CSV
         env:
           REPORT: ${{ inputs.report || 'overview/losses' }}
-          FROM: ${{ inputs.from || '2026-05-30T00:00:00.000Z' }}
-          TO: ${{ inputs.to || '2026-08-27T23:59:59.999Z' }}
+          FROM: ${{ inputs.from || '2025-08-28T00:00:00.000Z' }}
+          TO: ${{ inputs.to || '2026-08-28T23:59:59.999Z' }}
+          OMIT_IDS: "true"
           OUT: ${{ github.workspace }}/artifacts/leadflo-losses.csv
         run: |
           set -euo pipefail

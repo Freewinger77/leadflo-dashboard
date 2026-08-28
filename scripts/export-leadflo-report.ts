@@ -5,19 +5,32 @@
  * Env:
  *   LEADFLO_EMAIL, LEADFLO_PASSWORD, LEADFLO_HTTP_PROXY (optional)
  *   REPORT   default overview/losses
- *   FROM     default 2026-05-30T00:00:00.000Z  (matches Losses UI past-quarter window)
- *   TO       default 2026-08-27T23:59:59.999Z
+ *   FROM     default 2025-08-28T00:00:00.000Z  (past year)
+ *   TO       default 2026-08-28T23:59:59.999Z
  *   OUT      default /tmp/leadflo-losses.csv
+ *   OMIT_IDS default true — drop id / patient_id columns
+ *   EXCLUDE_COLUMNS optional comma-separated extra columns to drop
  */
 import fs from "node:fs";
 import path from "node:path";
 import { LiveLeadfloClient } from "../src/leadflo/liveClient.js";
 
 const REPORT = process.env.REPORT ?? "overview/losses";
-const FROM = process.env.FROM ?? "2026-05-30T00:00:00.000Z";
-const TO = process.env.TO ?? "2026-08-27T23:59:59.999Z";
+const FROM = process.env.FROM ?? "2025-08-28T00:00:00.000Z";
+const TO = process.env.TO ?? "2026-08-28T23:59:59.999Z";
 const OUT = process.env.OUT ?? "/tmp/leadflo-losses.csv";
 const PAGE_SIZE = Number(process.env.PAGE_SIZE ?? 50);
+const OMIT_IDS = (process.env.OMIT_IDS ?? "true").toLowerCase() !== "false";
+
+const EXCLUDE = new Set(
+  [
+    ...(OMIT_IDS ? ["id", "patient_id"] : []),
+    ...(process.env.EXCLUDE_COLUMNS ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+  ].map((s) => s.toLowerCase()),
+);
 
 function csvEscape(value: unknown): string {
   if (value === null || value === undefined) return "";
@@ -34,6 +47,7 @@ function csvEscape(value: unknown): string {
 function flattenPatient(p: Record<string, unknown>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(p)) {
+    if (EXCLUDE.has(k.toLowerCase())) continue;
     if (v === null || v === undefined) {
       out[k] = "";
     } else if (Array.isArray(v) || typeof v === "object") {
@@ -60,9 +74,9 @@ async function main() {
   let page = 1;
   let total = Infinity;
 
-  console.log(`Scraping report=${REPORT} from=${FROM} to=${TO}`);
+  console.log(`Scraping report=${REPORT} from=${FROM} to=${TO} omitIds=${OMIT_IDS}`);
 
-  while (patients.length < total && page <= 100) {
+  while (patients.length < total && page <= 200) {
     const batch = await client.listPatients({
       report: REPORT,
       from: FROM,
@@ -93,9 +107,9 @@ async function main() {
     }, new Set<string>()),
   ).sort((a, b) => {
     const preferred = [
-      "id",
       "first_name",
       "last_name",
+      "name",
       "email",
       "phone",
       "phone_number",
@@ -106,6 +120,8 @@ async function main() {
       "next_action_at",
       "value",
       "gdpr",
+      "created_at",
+      "marketing_consent",
     ];
     const ia = preferred.indexOf(a);
     const ib = preferred.indexOf(b);

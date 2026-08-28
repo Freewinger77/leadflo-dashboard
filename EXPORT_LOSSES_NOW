@@ -1,4 +1,1 @@
-# Touch this file (and push to main) to re-run the Losses CSV export workflow.
-# Date window: 2026-05-30 → 2026-08-27 (Overview / Losses in the UI).
-triggered_at: 2026-08-28T15:47:00Z
-fix: shlex-quoted env load
+one-year-omit-ids 2026-08-28

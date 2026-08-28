@@ -12,3 +12,6 @@ coverage/
 
 .azure/
 agent-credentials.json
+
+# Local Leadflo exports (PII)
+leadflo-losses*.csv
