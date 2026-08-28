@@ -70,8 +70,9 @@ jobs:
           missing = [k for k in need[:2] if not settings.get(k)]
           if missing:
               raise SystemExit(f"missing app settings: {missing}")
-          Path("/tmp/leadflo.env").write_text(
-              "\n".join(f"{k}={settings.get(k,'')}" for k in need) + "\n"
+          # JSON + shlex so passwords with backticks/quotes never break the shell.
+          Path("/tmp/leadflo.env.json").write_text(
+              json.dumps({k: settings.get(k, "") for k in need})
           )
           print("loaded", ", ".join(k for k in need if settings.get(k)))
           PY
@@ -84,10 +85,13 @@ jobs:
           OUT: ${{ github.workspace }}/artifacts/leadflo-losses.csv
         run: |
           set -euo pipefail
-          set -a
-          # shellcheck disable=SC1091
-          source /tmp/leadflo.env
-          set +a
+          eval "$(python3 - <<'PY'
+          import json, shlex
+          env = json.load(open("/tmp/leadflo.env.json"))
+          for k, v in env.items():
+              print(f"export {k}={shlex.quote(v)}")
+          PY
+          )"
           mkdir -p artifacts
           npx tsx scripts/export-leadflo-report.ts
           wc -l artifacts/leadflo-losses.csv
