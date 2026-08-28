@@ -1,0 +1,98 @@
+name: Export Leadflo Losses CSV
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: "ISO start (inclusive)"
+        required: true
+        default: "2026-05-30T00:00:00.000Z"
+      to:
+        description: "ISO end (inclusive)"
+        required: true
+        default: "2026-08-27T23:59:59.999Z"
+      report:
+        description: "Leadflo report id"
+        required: true
+        default: "overview/losses"
+
+permissions:
+  id-token: write
+  contents: read
+
+# Azure Entra app: leadflo-github-deploy
+# Federated subject: repo:Freewinger77@135714302/leadflo-dashboard@1326708531:ref:refs/heads/main
+# workflow_dispatch from a non-main branch needs its own fed subject — run from main after merge,
+# or use the classic subject if present. This workflow is intended to run on main.
+env:
+  AZURE_CLIENT_ID: 4e59105d-0bf3-4ca0-a3ba-3158480da603
+  AZURE_TENANT_ID: d2190b52-443e-4ff1-9c5e-088aecce41f9
+  AZURE_SUBSCRIPTION_ID: 84e85ed8-74a4-461a-a958-6aaeeb95f2cc
+  AZURE_WEBAPP_NAME: dental-asthetica
+  AZURE_RESOURCE_GROUP: rapidspec-rg
+  NODE_VERSION: "22"
+
+jobs:
+  export:
+    name: Scrape Losses → CSV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Pull Leadflo secrets from App Service
+        id: secrets
+        run: |
+          set -euo pipefail
+          az webapp config appsettings list \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --output json > /tmp/settings.json
+          python3 << 'PY'
+          import json, os
+          from pathlib import Path
+          settings = {s["name"]: s.get("value") or "" for s in json.load(open("/tmp/settings.json"))}
+          need = ["LEADFLO_EMAIL", "LEADFLO_PASSWORD", "LEADFLO_HTTP_PROXY"]
+          missing = [k for k in need[:2] if not settings.get(k)]
+          if missing:
+              raise SystemExit(f"missing app settings: {missing}")
+          Path("/tmp/leadflo.env").write_text(
+              "\n".join(f"{k}={settings.get(k,'')}" for k in need) + "\n"
+          )
+          print("loaded", ", ".join(k for k in need if settings.get(k)))
+          PY
+
+      - name: Export Losses CSV
+        env:
+          REPORT: ${{ inputs.report }}
+          FROM: ${{ inputs.from }}
+          TO: ${{ inputs.to }}
+          OUT: ${{ github.workspace }}/artifacts/leadflo-losses.csv
+        run: |
+          set -euo pipefail
+          set -a
+          # shellcheck disable=SC1091
+          source /tmp/leadflo.env
+          set +a
+          mkdir -p artifacts
+          npx tsx scripts/export-leadflo-report.ts
+
+      - name: Upload CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: leadflo-losses-csv
+          path: artifacts/leadflo-losses.csv
+          if-no-files-found: error
