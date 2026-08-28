@@ -15,6 +15,11 @@ on:
         description: "Leadflo report id"
         required: true
         default: "overview/losses"
+  pull_request:
+    paths:
+      - "scripts/export-leadflo-report.ts"
+      - ".github/workflows/export-losses.yml"
+      - "EXPORT_LOSSES_NOW"
   push:
     branches: [main]
     paths:
