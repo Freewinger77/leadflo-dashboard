@@ -15,15 +15,17 @@ on:
         description: "Leadflo report id"
         required: true
         default: "overview/losses"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/export-leadflo-report.ts"
+      - ".github/workflows/export-losses.yml"
+      - "EXPORT_LOSSES_NOW"
 
 permissions:
   id-token: write
   contents: read
 
-# Azure Entra app: leadflo-github-deploy
-# Federated subject: repo:Freewinger77@135714302/leadflo-dashboard@1326708531:ref:refs/heads/main
-# workflow_dispatch from a non-main branch needs its own fed subject — run from main after merge,
-# or use the classic subject if present. This workflow is intended to run on main.
 env:
   AZURE_CLIENT_ID: 4e59105d-0bf3-4ca0-a3ba-3158480da603
   AZURE_TENANT_ID: d2190b52-443e-4ff1-9c5e-088aecce41f9
@@ -54,7 +56,6 @@ jobs:
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Pull Leadflo secrets from App Service
-        id: secrets
         run: |
           set -euo pipefail
           az webapp config appsettings list \
@@ -62,7 +63,7 @@ jobs:
             --name "${AZURE_WEBAPP_NAME}" \
             --output json > /tmp/settings.json
           python3 << 'PY'
-          import json, os
+          import json
           from pathlib import Path
           settings = {s["name"]: s.get("value") or "" for s in json.load(open("/tmp/settings.json"))}
           need = ["LEADFLO_EMAIL", "LEADFLO_PASSWORD", "LEADFLO_HTTP_PROXY"]
@@ -77,9 +78,9 @@ jobs:
 
       - name: Export Losses CSV
         env:
-          REPORT: ${{ inputs.report }}
-          FROM: ${{ inputs.from }}
-          TO: ${{ inputs.to }}
+          REPORT: ${{ inputs.report || 'overview/losses' }}
+          FROM: ${{ inputs.from || '2026-05-30T00:00:00.000Z' }}
+          TO: ${{ inputs.to || '2026-08-27T23:59:59.999Z' }}
           OUT: ${{ github.workspace }}/artifacts/leadflo-losses.csv
         run: |
           set -euo pipefail
@@ -89,6 +90,8 @@ jobs:
           set +a
           mkdir -p artifacts
           npx tsx scripts/export-leadflo-report.ts
+          wc -l artifacts/leadflo-losses.csv
+          head -1 artifacts/leadflo-losses.csv
 
       - name: Upload CSV
         uses: actions/upload-artifact@v4
