@@ -39,9 +39,10 @@ export const config = {
     /** Optional HTTP(S) proxy to bypass datacenter WAF blocks */
     httpProxy: process.env.LEADFLO_HTTP_PROXY ?? process.env.HTTPS_PROXY ?? "",
   },
-  trackedTreatmentTypes: list(process.env.TRACKED_TREATMENT_TYPES, ["Implant"]).map((t) =>
-    t.toLowerCase(),
-  ),
+  trackedTreatmentTypes: list(process.env.TRACKED_TREATMENT_TYPES, [
+    "Implant",
+    "Ortho",
+  ]).map((t) => t.toLowerCase()),
   pollIntervalMs: Number(process.env.POLL_INTERVAL_MS ?? 60_000),
   /**
    * Only enquiries early enough to be worth contacting. Discovering later

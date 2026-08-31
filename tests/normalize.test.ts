@@ -7,9 +7,11 @@ import {
 } from "../src/leadflo/index.js";
 
 describe("lead filters", () => {
-  it("tracks implant types case-insensitively", () => {
+  it("tracks implant and ortho types case-insensitively", () => {
     assert.equal(isTrackedTreatment("Implant"), true);
     assert.equal(isTrackedTreatment("implant"), true);
+    assert.equal(isTrackedTreatment("Ortho"), true);
+    assert.equal(isTrackedTreatment("ortho"), true);
     assert.equal(isTrackedTreatment("Whitening"), false);
   });
 

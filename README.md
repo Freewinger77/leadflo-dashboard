@@ -36,7 +36,7 @@ Open `http://localhost:8788`.
 |----------|---------|
 | `LEADFLO_EMAIL` / `LEADFLO_PASSWORD` | Leadflo login |
 | `LEADFLO_MODE` | `live` or `mock` |
-| `TRACKED_TREATMENT_TYPES` | Default `Implant` |
+| `TRACKED_TREATMENT_TYPES` | Default `Implant,Ortho` |
 | `POLL_INTERVAL_MS` | Default `60000` |
 | `WEBHOOK_URL` | Outbound new-lead webhook |
 | `NOTES_ONLY_TEST_NAMES` | Default `false` — set `true` to only write notes for test names |

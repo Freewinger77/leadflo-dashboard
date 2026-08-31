@@ -89,7 +89,7 @@ jobs:
             --settings \
               NOTES_ONLY_TEST_NAMES=false \
               OUTBOUND_ALLOWLIST_ONLY=false \
-              TRACKED_TREATMENT_TYPES=Implant \
+              TRACKED_TREATMENT_TYPES=Implant,Ortho \
             --output none
           az webapp restart \
             --resource-group "${AZURE_RESOURCE_GROUP}" \
@@ -116,3 +116,70 @@ jobs:
             done
             test "$code" = "200"
           done
+          python3 - <<'PY'
+          import json
+          health = json.load(open("/tmp/health.json"))
+          tracked = [t.lower() for t in health.get("trackedTypes") or []]
+          print("trackedTypes:", tracked)
+          for need in ("implant", "ortho"):
+              if need not in tracked:
+                  raise SystemExit(f"missing tracked type: {need}")
+          print("tracked types ok")
+          PY
+
+          # Preview WF-1 candidates (no claim) — confirm Ortho/Implant appear.
+          az webapp config appsettings list \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --output json > /tmp/settings.json
+          WF1_KEY=$(python3 - <<'PY'
+          import json
+          settings = {s["name"]: s.get("value") or "" for s in json.load(open("/tmp/settings.json"))}
+          key = settings.get("WF1_API_KEY") or ""
+          if not key:
+              raise SystemExit("WF1_API_KEY missing from app settings")
+          print(key)
+          PY
+          )
+          curl -sS --max-time 60 \
+            -H "X-WF1-Key: ${WF1_KEY}" \
+            "https://dental-asthetica.wasup.co/api/wf1/candidates?limit=50" \
+            > /tmp/candidates.json
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          data = json.load(open("/tmp/candidates.json"))
+          filters = (data.get("filters") or {}).get("trackedTreatmentTypes") or []
+          print("candidate filters.trackedTreatmentTypes:", filters)
+          selected = data.get("selected") or []
+          skipped = data.get("skipped") or []
+          print("selected:", len(selected), "skipped sample:", len(skipped), "scanned:", data.get("scanned"))
+          types = Counter((c.get("treatmentType") or "?") for c in selected)
+          print("selected treatment types:", dict(types))
+          # Ortho may not be selected yet if none are in contact stages — still
+          # show skipped reasons that mention Ortho/Invisalign for visibility.
+          interest = [
+              s for s in skipped
+              if "ortho" in (s.get("reason") or "").lower()
+              or "invisalign" in (s.get("reason") or "").lower()
+              or "ortho" in (s.get("fullName") or "").lower()
+          ]
+          ortho_rows = [
+              s for s in skipped + selected
+              if str((s.get("treatmentType") if "treatmentType" in s else "") or "").lower() == "ortho"
+          ]
+          # selected have treatmentType; skipped may not — count from selected + reason strings
+          skipped_ortho = sum(
+              1 for s in skipped
+              if 'treatment "Ortho"' in (s.get("reason") or "")
+              or 'treatment "ortho"' in (s.get("reason") or "").lower()
+          )
+          # Also count leads whose treatment is Ortho among selected
+          selected_ortho = types.get("Ortho", 0) + types.get("ortho", 0)
+          selected_invis = types.get("Invisalign", 0) + types.get("invisalign", 0)
+          print(f"selected Ortho={selected_ortho} Invisalign={selected_invis}")
+          print("skippedByReason:", json.dumps(data.get("skippedByReason") or {}, indent=2)[:2000])
+          if "ortho" not in [t.lower() for t in filters]:
+              raise SystemExit("WF-1 candidates filter missing ortho")
+          print("wf1 candidates preview ok")
+          PY
