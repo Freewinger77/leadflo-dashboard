@@ -147,7 +147,7 @@ jobs:
           '
           curl -sS --max-time 60 \
             -H "X-WF1-Key: $(cat /tmp/wf1.key)" \
-            "https://dental-asthetica.wasup.co/api/wf1/candidates?limit=50" \
+            "https://dental-asthetica.azurewebsites.net/api/wf1/candidates?limit=50" \
             > /tmp/candidates.json
           python3 -c '
           import json,sys
