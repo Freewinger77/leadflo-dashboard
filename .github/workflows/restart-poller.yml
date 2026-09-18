@@ -43,9 +43,10 @@ jobs:
             --name "${AZURE_WEBAPP_NAME}" \
             --output json > /tmp/settings.json
           python3 - <<'PY'
-          import json
+          import json, socket
+          from urllib.parse import urlparse
           settings = {s["name"]: s.get("value") or "" for s in json.load(open("/tmp/settings.json"))}
-          keys = [
+          for k in [
               "LEADFLO_EMAIL",
               "LEADFLO_PASSWORD",
               "LEADFLO_HTTP_PROXY",
@@ -53,21 +54,41 @@ jobs:
               "LEADFLO_API_BASE",
               "TRACKED_TREATMENT_TYPES",
               "WF1_API_KEY",
-          ]
-          for k in keys:
+          ]:
               v = settings.get(k, "")
               if not v:
                   print(f"{k}: MISSING")
                   continue
               if k == "LEADFLO_HTTP_PROXY":
-                  # Host only — never print credentials embedded in the URL.
-                  from urllib.parse import urlparse
+                  u = urlparse(v)
+                  host = u.hostname or "?"
+                  port = u.port or (443 if u.scheme == "https" else 80)
+                  print(f"{k}: set ({u.scheme}://{host}:{port}/…)")
+                  # TCP reachability from Actions runner (not Azure egress, but useful).
                   try:
-                      host = urlparse(v).hostname or "?"
-                      scheme = urlparse(v).scheme or "?"
-                      print(f"{k}: set ({scheme}://{host}/…)")
-                  except Exception:
-                      print(f"{k}: set (unparseable)")
+                      with socket.create_connection((host, port), timeout=8):
+                          print(f"proxy TCP {host}:{port}: OPEN")
+                  except Exception as e:
+                      print(f"proxy TCP {host}:{port}: FAIL ({type(e).__name__}: {e})")
+                  # HTTP CONNECT probe through the proxy to Leadflo (no body logged).
+                  try:
+                      import urllib.request
+                      proxy_handler = urllib.request.ProxyHandler({"http": v, "https": v})
+                      opener = urllib.request.build_opener(proxy_handler)
+                      req = urllib.request.Request(
+                          "https://api.app.leadflo.com/auth/csrf-token",
+                          headers={"User-Agent": "leadflo-proxy-probe"},
+                          method="GET",
+                      )
+                      with opener.open(req, timeout=25) as resp:
+                          print(f"proxy→Leadflo csrf: HTTP {resp.status}")
+                  except Exception as e:
+                      # Avoid dumping proxy URL / credentials if they appear in the error.
+                      msg = str(e)
+                      for secret in filter(None, [v, urlparse(v).password, urlparse(v).username]):
+                          if secret:
+                              msg = msg.replace(secret, "***")
+                      print(f"proxy→Leadflo csrf: FAIL ({type(e).__name__}: {msg[:240]})")
               elif k in ("LEADFLO_PASSWORD", "WF1_API_KEY"):
                   print(f"{k}: set (len={len(v)})")
               else:
