@@ -101,12 +101,17 @@ export class LiveLeadfloClient implements LeadfloClient {
     if (xsrf) headers["X-XSRF-TOKEN"] = xsrf;
     if (body !== undefined) headers["Content-Type"] = "application/json";
 
-    const res = (await this.fetchImpl(`${this.apiBase}${path}`, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-      redirect: "manual",
-    })) as unknown as Response;
+    let res: Response;
+    try {
+      res = (await this.fetchImpl(`${this.apiBase}${path}`, {
+        method,
+        headers,
+        body: body === undefined ? undefined : JSON.stringify(body),
+        redirect: "manual",
+      })) as unknown as Response;
+    } catch (err) {
+      throw new Error(formatNetworkError(err, `${method} ${path}`));
+    }
     this.mergeCookies(res);
     const rawText = await res.text();
     let data: T = undefined as T;
@@ -272,9 +277,33 @@ export class LiveLeadfloClient implements LeadfloClient {
       await this.ensureSession();
       return { ok: true, detail: "authenticated" };
     } catch (err) {
-      return { ok: false, detail: err instanceof Error ? err.message : String(err) };
+      return {
+        ok: false,
+        detail: err instanceof Error ? err.message : String(err),
+      };
     }
   }
+}
+
+/** Undici's TypeError message is just "fetch failed"; the useful bit is in `.cause`. */
+function formatNetworkError(err: unknown, where: string): string {
+  const parts: string[] = [];
+  let cur: unknown = err;
+  for (let i = 0; i < 5 && cur; i += 1) {
+    if (cur instanceof Error) {
+      const bit = cur.message || cur.name;
+      if (bit && !parts.includes(bit)) parts.push(bit);
+      cur = (cur as Error & { cause?: unknown }).cause;
+      continue;
+    }
+    parts.push(String(cur));
+    break;
+  }
+  const detail = parts.filter(Boolean).join(" → ") || "unknown network error";
+  const proxyHint = config.leadflo.httpProxy
+    ? "via LEADFLO_HTTP_PROXY"
+    : "direct (no LEADFLO_HTTP_PROXY)";
+  return `Leadflo ${where} ${proxyHint}: ${detail}`;
 }
 
 function normalizePatientList(
