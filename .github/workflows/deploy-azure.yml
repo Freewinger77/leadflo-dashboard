@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: deploy-azure-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 # Azure Entra app: leadflo-github-deploy
 # Federated subject must match GitHub's claim (includes numeric IDs):
@@ -45,9 +45,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Package app (Oryx installs deps on Azure)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install + package (skip Oryx remote build)
         run: |
           set -euo pipefail
+          # Pre-install deps in the zip so Azure does not run Oryx (hangs / 503s).
           STAGE=$(mktemp -d)
           rsync -a \
             --exclude node_modules \
@@ -61,6 +67,12 @@ jobs:
             --exclude coverage \
             --exclude dist \
             ./ "$STAGE/"
+          printf '%s\n' \
+            'SCM_DO_BUILD_DURING_DEPLOYMENT=false' \
+            'ENABLE_ORYX_BUILD=false' \
+            > "$STAGE/.deployment"
+          # Azure Node startup uses package.json "start" (tsx). Keep tsx available.
+          (cd "$STAGE" && npm ci --include=dev --omit=optional)
           (cd "$STAGE" && zip -qr "$GITHUB_WORKSPACE/leadflo-deploy.zip" .)
           ls -lh leadflo-deploy.zip
 
@@ -70,6 +82,17 @@ jobs:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Disable remote build on App Service
+        run: |
+          set -euo pipefail
+          az webapp config appsettings set \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --settings \
+              SCM_DO_BUILD_DURING_DEPLOYMENT=false \
+              ENABLE_ORYX_BUILD=false \
+            --output none
 
       - name: Deploy to dental-asthetica
         uses: azure/webapps-deploy@v3
