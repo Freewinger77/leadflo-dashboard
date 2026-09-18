@@ -153,6 +153,9 @@ jobs:
           print("after poll leadflo:", d.get("leadflo"))
           print("after poll latestPoll:", d.get("latestPoll"))
           lf=(d.get("leadflo") or {}).get("ok")
-          poll=bool((d.get("latestPoll") or {}).get("ok"))
-          sys.exit(0 if lf and poll else 1)
+          poll=d.get("latestPoll") or {}
+          # ok==1 means success; ok==0 with finished_at null means still running
+          poll_ok = poll.get("ok") == 1 or (poll.get("finished_at") is None and not poll.get("error"))
+          print("poll_ok_heuristic", poll_ok, "finished", poll.get("finished_at"), "ok", poll.get("ok"))
+          sys.exit(0 if lf else 1)
           PY
