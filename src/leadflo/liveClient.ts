@@ -46,9 +46,11 @@ export class LiveLeadfloClient implements LeadfloClient {
     httpProxy = config.leadflo.httpProxy,
   ) {
     if (httpProxy) {
-      const agent = new ProxyAgent(httpProxy);
       this.fetchImpl = (input, init) =>
-        undiciFetch(input, { ...init, dispatcher: agent }) as unknown as Promise<Response>;
+        undiciFetch(input, {
+          ...init,
+          dispatcher: makeProxyAgent(httpProxy),
+        }) as unknown as Promise<Response>;
     } else {
       this.fetchImpl = (input, init) =>
         undiciFetch(input, init) as unknown as Promise<Response>;
@@ -304,6 +306,27 @@ function formatNetworkError(err: unknown, where: string): string {
     ? "via LEADFLO_HTTP_PROXY"
     : "direct (no LEADFLO_HTTP_PROXY)";
   return `Leadflo ${where} ${proxyHint}: ${detail}`;
+}
+
+/**
+ * Build a ProxyAgent with explicit Basic auth so special characters in the
+ * password cannot break URL parsing / CONNECT auth (symptom: 407).
+ */
+function makeProxyAgent(httpProxy: string): ProxyAgent {
+  let parsed: URL;
+  try {
+    parsed = new URL(httpProxy);
+  } catch {
+    return new ProxyAgent(httpProxy);
+  }
+  const uri = `${parsed.protocol}//${parsed.host}`;
+  if (!parsed.username && !parsed.password) {
+    return new ProxyAgent(uri);
+  }
+  const user = decodeURIComponent(parsed.username);
+  const pass = decodeURIComponent(parsed.password);
+  const token = `Basic ${Buffer.from(`${user}:${pass}`, "utf8").toString("base64")}`;
+  return new ProxyAgent({ uri, token });
 }
 
 function normalizePatientList(

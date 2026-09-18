@@ -1,0 +1,158 @@
+name: Set Leadflo HTTP proxy
+
+# Updates Azure App Setting LEADFLO_HTTP_PROXY and restarts the app.
+# Edit the PROXY_* env block below (or pass workflow_dispatch inputs) to swap proxies.
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: "Proxy host"
+        required: true
+        default: "195.40.128.249"
+      port:
+        description: "Proxy port"
+        required: true
+        default: "6969"
+      user:
+        description: "Proxy username"
+        required: true
+        default: "rktwwipc"
+      password:
+        description: "Proxy password"
+        required: true
+        default: "baq3spf64bhx"
+  push:
+    branches: [main]
+    paths:
+      - "SET_LEADFLO_PROXY_NOW"
+      - ".github/workflows/set-leadflo-proxy.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: set-leadflo-proxy
+  cancel-in-progress: true
+
+env:
+  AZURE_CLIENT_ID: 4e59105d-0bf3-4ca0-a3ba-3158480da603
+  AZURE_TENANT_ID: d2190b52-443e-4ff1-9c5e-088aecce41f9
+  AZURE_SUBSCRIPTION_ID: 84e85ed8-74a4-461a-a958-6aaeeb95f2cc
+  AZURE_WEBAPP_NAME: dental-asthetica
+  AZURE_RESOURCE_GROUP: rapidspec-rg
+  # Defaults used on path-push trigger (swap here when rotating proxies).
+  PROXY_HOST: "195.40.128.249"
+  PROXY_PORT: "6969"
+  PROXY_USER: "rktwwipc"
+  PROXY_PASS: "baq3spf64bhx"
+
+jobs:
+  set-proxy:
+    name: Set LEADFLO_HTTP_PROXY + restart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Write proxy + probe + restart
+        env:
+          IN_HOST: ${{ inputs.host || '195.40.128.249' }}
+          IN_PORT: ${{ inputs.port || '6969' }}
+          IN_USER: ${{ inputs.user || 'rktwwipc' }}
+          IN_PASS: ${{ inputs.password || 'baq3spf64bhx' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          from pathlib import Path
+          from urllib.parse import quote
+
+          host = os.environ["IN_HOST"].strip()
+          port = os.environ["IN_PORT"].strip()
+          user = os.environ["IN_USER"].strip()
+          password = os.environ["IN_PASS"].strip()
+          proxy = f"http://{quote(user, safe='')}:{quote(password, safe='')}@{host}:{port}"
+          Path("/tmp/proxy.url").write_text(proxy)
+          print(f"proxy target: http://{host}:{port}/… user={user}")
+
+          # Probe before writing to Azure.
+          handler = urllib.request.ProxyHandler({"http": proxy, "https": proxy})
+          opener = urllib.request.build_opener(handler)
+          req = urllib.request.Request(
+              "https://api.app.leadflo.com/auth/csrf-token",
+              headers={"User-Agent": "Mozilla/5.0 leadflo-proxy-set"},
+              method="GET",
+          )
+          with opener.open(req, timeout=30) as resp:
+              print(f"probe csrf HTTP {resp.status}")
+          PY
+
+          PROXY_URL=$(cat /tmp/proxy.url)
+          az webapp config appsettings set \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --settings "LEADFLO_HTTP_PROXY=${PROXY_URL}" \
+            --output none
+
+          # Confirm stored host/port only.
+          az webapp config appsettings list \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --output json > /tmp/settings.json
+          python3 - <<'PY'
+          import json
+          from urllib.parse import urlparse
+          settings = {s["name"]: s.get("value") or "" for s in json.load(open("/tmp/settings.json"))}
+          raw = settings.get("LEADFLO_HTTP_PROXY") or ""
+          u = urlparse(raw)
+          print(f"Azure LEADFLO_HTTP_PROXY = {u.scheme}://{u.hostname}:{u.port}/…")
+          if not u.hostname:
+              raise SystemExit("proxy not stored")
+          PY
+
+          az webapp restart \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --output none
+          echo "restarted; waiting for boot"
+          sleep 40
+
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            code=$(curl -sS -o /tmp/health.json -w '%{http_code}' --max-time 30 \
+              "https://dental-asthetica.azurewebsites.net/api/health" || true)
+            echo "health $i -> $code"
+            if [ "$code" = "200" ]; then break; fi
+            sleep 10
+          done
+          test "$code" = "200"
+          cat /tmp/health.json; echo
+
+          for i in 1 2 3 4 5 6 7 8; do
+            curl -sS --max-time 60 -o /tmp/status.json \
+              "https://dental-asthetica.azurewebsites.net/api/status" || true
+            if python3 -c 'import json,sys; d=json.load(open("/tmp/status.json")); print("leadflo:", d.get("leadflo")); sys.exit(0 if (d.get("leadflo") or {}).get("ok") else 1)'; then
+              break
+            fi
+            sleep 12
+          done
+          python3 -c 'import json,sys; d=json.load(open("/tmp/status.json")); sys.exit(0 if (d.get("leadflo") or {}).get("ok") else 1)'
+
+          curl -sS --max-time 120 -X POST -o /tmp/poll.json \
+            "https://dental-asthetica.azurewebsites.net/api/poll" || true
+          echo "poll:"; cat /tmp/poll.json; echo
+          curl -sS --max-time 40 -o /tmp/status2.json \
+            "https://dental-asthetica.azurewebsites.net/api/status"
+          python3 - <<'PY'
+          import json,sys
+          d=json.load(open("/tmp/status2.json"))
+          print("after poll leadflo:", d.get("leadflo"))
+          print("after poll latestPoll:", d.get("latestPoll"))
+          lf=(d.get("leadflo") or {}).get("ok")
+          poll=bool((d.get("latestPoll") or {}).get("ok"))
+          sys.exit(0 if lf and poll else 1)
+          PY

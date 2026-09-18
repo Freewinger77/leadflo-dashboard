@@ -1,8 +1,10 @@
 # Leadflo Tracker
 
-Poll [Leadflo](https://app.leadflo.com) every minute for **Implant** leads, send each **new** lead to your webhook, then write the AI response back into Leadflo notes.
+Poll [Leadflo](https://app.leadflo.com) every minute for **Implant** and **Ortho** leads, feed WF-1 for WhatsApp outbound, optionally webhook new leads, then write AI notes back into Leadflo.
 
-Designed like a Boxly-style integration agent: scrape → detect new → webhook → apply AI note.
+**Full developer map (architecture, endpoints, proxy swap):** [docs/DEVELOPER.md](./docs/DEVELOPER.md)
+
+Designed like a Boxly-style integration agent: scrape → detect new → webhook / WF-1 claim → apply AI note.
 
 ## What it does
 
