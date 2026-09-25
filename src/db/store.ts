@@ -1186,7 +1186,9 @@ export class Store {
       this.db
         .prepare(
           `SELECT COUNT(*) AS c FROM leads
-           WHERE reactivation_first_sent_at >= ?`,
+           WHERE reactivation_first_sent_at >= ?
+             AND is_test_name = 0
+             AND patient_id NOT LIKE 'reactivation-test%'`,
         )
         .get(sinceIso) as { c: number }
     ).c;
