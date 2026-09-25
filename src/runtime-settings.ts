@@ -16,6 +16,7 @@ export const OVERRIDABLE_KEYS = [
   "OUTBOUND_ENABLED",
   "OUTBOUND_ALLOWLIST",
   "WEBHOOK_URL",
+  "REACTIVATION_ENABLED",
 ] as const;
 
 export type OverridableKey = (typeof OVERRIDABLE_KEYS)[number];
