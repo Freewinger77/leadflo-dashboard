@@ -41,7 +41,7 @@ function damageDatabaseFile(): void {
 
 before(() => {
   cleanUp();
-  store = new Store();
+  store = new Store(dbPath);
 });
 
 after(() => {
@@ -61,13 +61,14 @@ describe("a database SQLite reports as corrupt", () => {
        VALUES ('batch-1', ?, '447700900123', 'sent', 'Hello', ?, ?)`,
     ).run(PATIENT, now, now);
     db.prepare(
-      `INSERT INTO leads (patient_id, full_name, first_seen_at, last_seen_at)
-       VALUES (?, 'A Patient', ?, ?)`,
-    ).run(PATIENT, now, now);
+      `INSERT INTO leads (patient_id, full_name, first_seen_at, last_seen_at, payload_json)
+       VALUES (?, 'A Patient', ?, ?, ?)`,
+    ).run(PATIENT, now, now, "x".repeat(80_000));
+    // Mid-file overwrite only fails integrity_check if those pages are used.
     store.close();
 
     damageDatabaseFile();
-    const rebuilt = new Store();
+    const rebuilt = new Store(dbPath);
     store = rebuilt;
 
     assert.equal(
@@ -93,7 +94,7 @@ describe("a database SQLite reports as corrupt", () => {
   it("does not touch a healthy database", () => {
     store.close();
     const before = fs.readdirSync(path.dirname(dbPath)).filter((f) => f.includes(".corrupt-"));
-    store = new Store();
+    store = new Store(dbPath);
     const after = fs.readdirSync(path.dirname(dbPath)).filter((f) => f.includes(".corrupt-"));
     assert.equal(after.length, before.length, "a healthy file must be left alone");
   });

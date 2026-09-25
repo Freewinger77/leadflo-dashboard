@@ -59,6 +59,9 @@ export class Poller {
     this.running = true;
     const runId = this.store.startPollRun();
     try {
+      // Upsert now writes enquired_at. Repair an older schema before that
+      // write, not only inside the later backfill step.
+      this.store.ensureEnquiryColumns();
       const actions = await this.client.getDueActions(config.scrapeStages);
 
       const leads: NormalizedLead[] = [];
