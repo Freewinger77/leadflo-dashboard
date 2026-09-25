@@ -20,7 +20,7 @@ const server = app.listen(config.port, config.host, () => {
   poller.publicBaseUrl = process.env.PUBLIC_BASE_URL || base;
   console.log(`Leadflo dashboard listening on ${base}`);
   console.log(
-    `Mode=${config.leadflo.mode} | types=${config.trackedTreatmentTypes.join(",")} | poll=${config.pollIntervalMs}ms | notesOnlyTest=${config.notesOnlyTestNames}`,
+    `Mode=${config.leadflo.mode} | types=${config.trackedTreatmentTypes.join(",")} | poll=${config.pollIntervalMs}ms | notesOnlyTest=${config.notesOnlyTestNames} | reactivation=${config.reactivation.enabled}`,
   );
   poller.start();
 });

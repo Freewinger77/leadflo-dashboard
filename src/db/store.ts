@@ -71,6 +71,16 @@ export interface TrackedLeadRow {
   outbound_message: string | null;
   outbound_error: string | null;
   outbound_attempts: number;
+  /** Staff discard why, filled later from Leadflo/DA. Empty until imported. */
+  discard_reason: string | null;
+  reactivation_status: ReactivationStatus | null;
+  reactivation_batch_id: string | null;
+  reactivation_locked_at: string | null;
+  reactivation_first_sent_at: string | null;
+  reactivation_followup_sent_at: string | null;
+  reactivation_message: string | null;
+  reactivation_error: string | null;
+  reactivation_attempts: number;
 }
 
 /**
@@ -79,6 +89,22 @@ export interface TrackedLeadRow {
  * never have been messaged.
  */
 export type OutboundStatus = "locked" | "sent" | "failed" | "opted_out";
+export type ReactivationStatus = "locked" | "sent" | "failed" | "opted_out";
+export type ReactivationKind = "first" | "followup";
+
+export interface ReactivationDispatchRow {
+  id: number;
+  batch_id: string;
+  patient_id: string;
+  kind: ReactivationKind;
+  msisdn: string;
+  status: string;
+  message: string | null;
+  provider_message_id: string | null;
+  error: string | null;
+  claimed_at: string;
+  completed_at: string | null;
+}
 
 export interface OutboundDispatchRow {
   id: number;
@@ -286,6 +312,34 @@ export class Store {
     this.addColumnIfMissing("leads", "outbound_message", "TEXT");
     this.addColumnIfMissing("leads", "outbound_error", "TEXT");
     this.addColumnIfMissing("leads", "outbound_attempts", "INTEGER NOT NULL DEFAULT 0");
+    this.addColumnIfMissing("leads", "discard_reason", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_status", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_batch_id", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_locked_at", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_first_sent_at", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_followup_sent_at", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_message", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_error", "TEXT");
+    this.addColumnIfMissing("leads", "reactivation_attempts", "INTEGER NOT NULL DEFAULT 0");
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS reactivation_dispatches (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        batch_id TEXT NOT NULL,
+        patient_id TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        msisdn TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL,
+        message TEXT,
+        provider_message_id TEXT,
+        error TEXT,
+        claimed_at TEXT NOT NULL,
+        completed_at TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_reactivation_dispatches_batch
+        ON reactivation_dispatches(batch_id);
+      CREATE INDEX IF NOT EXISTS idx_reactivation_dispatches_patient
+        ON reactivation_dispatches(patient_id);
+    `);
     this.purgePhantomLeads();
   }
 
@@ -538,8 +592,8 @@ export class Store {
             patient_id, first_name, last_name, full_name, phone, email,
             treatment_type, source, stage, due_date, labels_json, is_test_name,
             status, first_seen_at, last_seen_at, payload_json,
-            stage_checked_at, detail_fetched_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'discovered', ?, ?, ?, ?, ?)`,
+            stage_checked_at, detail_fetched_at, enquired_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'discovered', ?, ?, ?, ?, ?, ?)`,
         )
         .run(
           lead.patientId,
@@ -559,6 +613,7 @@ export class Store {
           JSON.stringify(lead.raw ?? lead),
           now,
           detailAt,
+          lead.enquiredAt ?? null,
         );
       this.recordStageChange(lead.patientId, null, lead.stage, "scrape", now);
       this.logEvent(
@@ -604,7 +659,8 @@ export class Store {
           treatment_type = ?, source = ?, stage = ?, due_date = ?, labels_json = ?,
           is_test_name = ?, last_seen_at = ?, payload_json = ?,
           stage_checked_at = ?,
-          detail_fetched_at = COALESCE(?, detail_fetched_at)
+          detail_fetched_at = COALESCE(?, detail_fetched_at),
+          enquired_at = COALESCE(?, enquired_at)
          WHERE patient_id = ?`,
       )
       .run(
@@ -623,6 +679,7 @@ export class Store {
         merged.payloadJson,
         now,
         detailAt,
+        lead.enquiredAt ?? null,
         lead.patientId,
       );
     return { isNew: false, row: this.getLead(lead.patientId)! };
@@ -975,6 +1032,175 @@ export class Store {
     return this.db
       .prepare(`SELECT * FROM outbound_dispatches WHERE batch_id = ? ORDER BY id ASC`)
       .all(batchId) as OutboundDispatchRow[];
+  }
+
+  setDiscardReason(patientId: string, reason: string): boolean {
+    const trimmed = reason.trim();
+    const info = this.db
+      .prepare(`UPDATE leads SET discard_reason = ? WHERE patient_id = ?`)
+      .run(trimmed || null, patientId);
+    return info.changes > 0;
+  }
+
+  findLeadByMsisdn(msisdn: string): TrackedLeadRow | undefined {
+    const digits = msisdn.replace(/\D/g, "");
+    if (!digits) return undefined;
+    const rows = this.listAllLeads();
+    return rows.find((row) => {
+      const phone = String(row.phone || "").replace(/\D/g, "");
+      if (!phone) return false;
+      return phone === digits || phone.endsWith(digits) || digits.endsWith(phone);
+    });
+  }
+
+  lockReactivationBatch(
+    patientIds: string[],
+    batchId: string,
+    kind: ReactivationKind,
+  ): void {
+    if (!patientIds.length) return;
+    const now = new Date().toISOString();
+    const lockLead = this.db.prepare(
+      `UPDATE leads SET reactivation_status = 'locked', reactivation_batch_id = ?,
+         reactivation_locked_at = ?, reactivation_error = NULL
+       WHERE patient_id = ?`,
+    );
+    const logDispatch = this.db.prepare(
+      `INSERT INTO reactivation_dispatches
+         (batch_id, patient_id, kind, msisdn, status, claimed_at)
+       VALUES (?, ?, ?, '', 'locked', ?)`,
+    );
+    this.db.transaction(() => {
+      for (const patientId of patientIds) {
+        lockLead.run(batchId, now, patientId);
+        logDispatch.run(batchId, patientId, kind, now);
+      }
+    })();
+  }
+
+  recordReactivationResult(
+    patientId: string,
+    result: {
+      batchId: string;
+      kind: ReactivationKind;
+      status: Extract<ReactivationStatus, "sent" | "failed">;
+      msisdn?: string;
+      message?: string | null;
+      providerMessageId?: string | null;
+      error?: string | null;
+    },
+  ): void {
+    const now = new Date().toISOString();
+    const firstSent =
+      result.status === "sent" && result.kind === "first" ? now : null;
+    const followupSent =
+      result.status === "sent" && result.kind === "followup" ? now : null;
+    this.db.transaction(() => {
+      this.db
+        .prepare(
+          `UPDATE leads SET
+             reactivation_status = ?,
+             reactivation_batch_id = ?,
+             reactivation_locked_at = NULL,
+             reactivation_first_sent_at = COALESCE(?, reactivation_first_sent_at),
+             reactivation_followup_sent_at = COALESCE(?, reactivation_followup_sent_at),
+             reactivation_message = COALESCE(?, reactivation_message),
+             reactivation_error = ?,
+             reactivation_attempts = reactivation_attempts + 1
+           WHERE patient_id = ?`,
+        )
+        .run(
+          result.status,
+          result.batchId,
+          firstSent,
+          followupSent,
+          result.message ?? null,
+          result.error ?? null,
+          patientId,
+        );
+      this.db
+        .prepare(
+          `UPDATE reactivation_dispatches SET
+             status = ?, msisdn = ?, message = ?, provider_message_id = ?,
+             error = ?, completed_at = ?
+           WHERE batch_id = ? AND patient_id = ? AND completed_at IS NULL`,
+        )
+        .run(
+          result.status,
+          result.msisdn ?? "",
+          result.message ?? null,
+          result.providerMessageId ?? null,
+          result.error ?? null,
+          now,
+          result.batchId,
+          patientId,
+        );
+    })();
+  }
+
+  releaseReactivationBatch(batchId: string): number {
+    const now = new Date().toISOString();
+    const info = this.db
+      .prepare(
+        `UPDATE leads SET
+           reactivation_status = CASE
+             WHEN reactivation_first_sent_at IS NOT NULL THEN 'sent'
+             ELSE NULL
+           END,
+           reactivation_batch_id = NULL,
+           reactivation_locked_at = NULL
+         WHERE reactivation_batch_id = ? AND reactivation_status = 'locked'`,
+      )
+      .run(batchId);
+    this.db
+      .prepare(
+        `UPDATE reactivation_dispatches SET status = 'released', completed_at = ?
+         WHERE batch_id = ? AND completed_at IS NULL`,
+      )
+      .run(now, batchId);
+    return info.changes;
+  }
+
+  releaseExpiredReactivationLocks(expiredBeforeIso: string): number {
+    const stale = this.db
+      .prepare(
+        `SELECT DISTINCT reactivation_batch_id AS batch_id FROM leads
+         WHERE reactivation_status = 'locked' AND reactivation_locked_at < ?`,
+      )
+      .all(expiredBeforeIso) as Array<{ batch_id: string | null }>;
+
+    let released = 0;
+    for (const { batch_id } of stale) {
+      if (!batch_id) continue;
+      released += this.releaseReactivationBatch(batch_id);
+      this.logEvent(
+        "reactivation.lock_expired",
+        `Released stale reactivation batch ${batch_id}`,
+      );
+    }
+    return released;
+  }
+
+  countReactivationFirstSentSince(sinceIso: string): number {
+    return (
+      this.db
+        .prepare(
+          `SELECT COUNT(*) AS c FROM leads
+           WHERE reactivation_first_sent_at >= ?`,
+        )
+        .get(sinceIso) as { c: number }
+    ).c;
+  }
+
+  countReactivationFollowupSentSince(sinceIso: string): number {
+    return (
+      this.db
+        .prepare(
+          `SELECT COUNT(*) AS c FROM leads
+           WHERE reactivation_followup_sent_at >= ?`,
+        )
+        .get(sinceIso) as { c: number }
+    ).c;
   }
 
   setStatus(

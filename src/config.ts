@@ -120,6 +120,32 @@ export const config = {
       digitsOnly,
     ),
   },
+  /**
+   * Implant maybe-future reactivation. Separate from WF-1 first-touch.
+   * Defaults refuse every claim until REACTIVATION_ENABLED is turned on.
+   * Discovery stages are unchanged. DA: all Maybe-future implants, last year,
+   * oldest first.
+   */
+  reactivation: {
+    get enabled() {
+      return bool(process.env.REACTIVATION_ENABLED, false);
+    },
+    allowlistOnly: bool(process.env.REACTIVATION_ALLOWLIST_ONLY, true),
+    requiredStage: "maybeFuture",
+    requiredTreatment: "implant",
+    /** Inclusive enquiry floor (YYYY-MM-DD, Europe/London). */
+    sinceDate: (process.env.REACTIVATION_SINCE ?? "2025-09-25").trim(),
+    /** Oldest eligible first-touch leads we will ever take. */
+    get maxPool() {
+      return Number(process.env.REACTIVATION_MAX_POOL ?? 100);
+    },
+    maxPerRun: Number(process.env.REACTIVATION_MAX_PER_RUN ?? 10),
+    maxNewPerDay: Number(process.env.REACTIVATION_MAX_NEW_PER_DAY ?? 10),
+    maxFollowupsPerDay: Number(process.env.REACTIVATION_MAX_FOLLOWUPS_PER_DAY ?? 10),
+    followupAfterMs: Number(
+      process.env.REACTIVATION_FOLLOWUP_AFTER_MS ?? 7 * 24 * 60 * 60 * 1000,
+    ),
+  },
   /** When true, only write Leadflo notes for names containing "test". Live default: off. */
   notesOnlyTestNames: bool(process.env.NOTES_ONLY_TEST_NAMES, false),
   inboundWebhookSecret: process.env.INBOUND_WEBHOOK_SECRET ?? "",

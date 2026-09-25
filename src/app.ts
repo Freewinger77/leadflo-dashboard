@@ -17,8 +17,13 @@ import {
   claimBatch,
   normalizePhone,
   selectCandidates,
-  type CandidateSelection,
 } from "./services/outbound.js";
+import {
+  claimReactivation,
+  importDiscardReasons,
+  parseKind,
+  selectReactivation,
+} from "./services/reactivation.js";
 import type { Poller } from "./services/poller.js";
 import { ALL_LEADFLO_STAGES } from "./leadflo/index.js";
 
@@ -56,7 +61,7 @@ function requireInboundSecret(req: Request, res: Response): boolean {
  * table is ineligible it runs to hundreds of entries, so only a sample goes
  * over the wire; skippedByReason carries the full breakdown.
  */
-function forWire(selection: CandidateSelection): CandidateSelection {
+function forWire<T extends { skipped: unknown[] }>(selection: T): T {
   return { ...selection, skipped: selection.skipped.slice(0, 25) };
 }
 
@@ -106,6 +111,13 @@ export function createApp(deps: AppDeps): Express {
         maxPerRun: config.outbound.maxPerRun,
         maxPerDay: config.outbound.maxPerDay,
         keyConfigured: Boolean(config.outbound.apiKey),
+      },
+      reactivation: {
+        enabled: config.reactivation.enabled,
+        allowlistOnly: config.reactivation.allowlistOnly,
+        sinceDate: config.reactivation.sinceDate,
+        maxPool: config.reactivation.maxPool,
+        maxNewPerDay: config.reactivation.maxNewPerDay,
       },
     });
   });
@@ -513,6 +525,108 @@ export function createApp(deps: AppDeps): Express {
   });
 
   /**
+   * Implant maybe-future reactivation. Separate from WF-1. Claim stays
+   * refused until REACTIVATION_ENABLED is on and discard_reason is filled.
+   */
+  app.get("/api/reactivation/candidates", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const kind = parseKind(req.query.kind);
+    const limit = Number(req.query.limit ?? config.reactivation.maxPerRun);
+    res.json({
+      preview: true,
+      source: "leadflo-dashboard",
+      practice: config.practiceName,
+      ...forWire(selectReactivation(store, kind, Number.isFinite(limit) ? limit : 10)),
+    });
+  });
+
+  app.post("/api/reactivation/claim", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const kind = parseKind(req.body?.kind ?? req.query.kind);
+    const limit = Number(req.body?.limit ?? config.reactivation.maxPerRun);
+    const result = claimReactivation(store, kind, Number.isFinite(limit) ? limit : 10);
+    res
+      .status(result.ok ? 200 : 409)
+      .json({ ...result, selection: forWire(result.selection) });
+  });
+
+  app.post("/api/reactivation/result", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const batchId = String(req.body?.batchId ?? "");
+    const patientId = String(req.body?.patientId ?? "");
+    const status = String(req.body?.status ?? "");
+    const kind = parseKind(req.body?.kind);
+
+    if (!batchId || !patientId) {
+      res.status(400).json({ ok: false, error: "batchId and patientId are required" });
+      return;
+    }
+    if (status !== "sent" && status !== "failed") {
+      res.status(400).json({ ok: false, error: 'status must be "sent" or "failed"' });
+      return;
+    }
+    if (!store.getLead(patientId)) {
+      res.status(404).json({ ok: false, error: "Lead not found" });
+      return;
+    }
+
+    store.recordReactivationResult(patientId, {
+      batchId,
+      kind,
+      status,
+      msisdn: req.body?.msisdn ? String(req.body.msisdn) : undefined,
+      message: req.body?.message ? String(req.body.message) : null,
+      providerMessageId: req.body?.providerMessageId
+        ? String(req.body.providerMessageId)
+        : null,
+      error: req.body?.error ? String(req.body.error) : null,
+    });
+    store.logEvent(
+      status === "sent" ? "reactivation.sent" : "reactivation.failed",
+      `Reactivation ${kind} ${status} for ${patientId} (batch ${batchId})`,
+      patientId,
+      { batchId, kind },
+    );
+    res.json({ ok: true, lead: serializeLead(store.getLead(patientId)!) });
+  });
+
+  app.post("/api/reactivation/release", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const batchId = String(req.body?.batchId ?? "");
+    if (!batchId) {
+      res.status(400).json({ ok: false, error: "batchId is required" });
+      return;
+    }
+    const released = store.releaseReactivationBatch(batchId);
+    store.logEvent("reactivation.released", `Released reactivation batch ${batchId}`, null, {
+      released,
+    });
+    res.json({ ok: true, released });
+  });
+
+  /** Fill discard_reason from a DA export. Does not send or claim. */
+  app.post("/api/reactivation/reasons", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const rows = Array.isArray(req.body?.reasons)
+      ? req.body.reasons
+      : Array.isArray(req.body)
+        ? req.body
+        : [];
+    if (!rows.length) {
+      res.status(400).json({ ok: false, error: "reasons[] is required" });
+      return;
+    }
+    const result = importDiscardReasons(store, rows);
+    store.logEvent(
+      "reactivation.reasons_imported",
+      `Imported ${result.updated} discard reason(s), ${result.unmatched} unmatched`,
+      null,
+      result,
+    );
+    res.json({ ok: true, ...result });
+  });
+
+  /**
    * Let one already-contacted lead be messaged again.
    *
    * Key-gated because it removes a safety rule: everything else in the outbound
@@ -633,6 +747,10 @@ function serializeLead(row: ReturnType<Store["listLeads"]>[number]) {
     outboundMessage: row.outbound_message,
     outboundError: row.outbound_error,
     outboundAttempts: row.outbound_attempts,
+    discardReason: row.discard_reason,
+    reactivationStatus: row.reactivation_status,
+    reactivationFirstSentAt: row.reactivation_first_sent_at,
+    reactivationFollowupSentAt: row.reactivation_followup_sent_at,
   };
 }
 

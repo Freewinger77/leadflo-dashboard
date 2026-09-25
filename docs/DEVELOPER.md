@@ -187,6 +187,22 @@ All require `X-WF1-Key`.
 
 **Eligibility (simplified):** tracked treatment, contact stage, usable UK mobile, not already sent/opted-out/locked, country allowlist (allowlist overrides), daily/run caps.
 
+### Reactivation (implant maybe-future)
+
+Separate from WF-1. Same `X-WF1-Key`. Off until `REACTIVATION_ENABLED=true`. Does not widen scrape stages.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/reactivation/candidates?kind=first\|followup&limit=N` | Preview. Empty until reasons are set |
+| `POST` | `/api/reactivation/claim` | Lock a batch (`{ kind, limit }`) — requires `REACTIVATION_ENABLED` |
+| `POST` | `/api/reactivation/result` | Report per-lead `sent` / `failed` |
+| `POST` | `/api/reactivation/release` | Unlock a rejected batch |
+| `POST` | `/api/reactivation/reasons` | Set `discard_reason` from `{ reasons: [{ patientId, phone?, reason? }] }` |
+
+**First message:** implant + `maybeFuture` + enquired on/after `REACTIVATION_SINCE` (default 2025-09-25) + never WF-1 messaged. Oldest **100** only (`REACTIVATION_MAX_POOL`). 10 new/day (UK day).  
+**Follow-up:** 7 days later if still maybe-future and no reply. Extra to the 10.  
+Copy is composed on the feeder so the workflow sends it verbatim.
+
 `sessionKey` for chat memory: `da_<msisdn>` (phone-only — must stay stable for WF-2).
 
 ### Outbound settings (runtime overrides)
