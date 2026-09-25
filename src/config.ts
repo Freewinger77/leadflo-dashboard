@@ -4,7 +4,12 @@ import { readOverride } from "./runtime-settings.js";
 
 /** A runtime override if one is stored, otherwise the environment. */
 function setting(
-  key: "OUTBOUND_ENABLED" | "OUTBOUND_ALLOWLIST" | "WEBHOOK_URL" | "REACTIVATION_ENABLED",
+  key:
+    | "OUTBOUND_ENABLED"
+    | "OUTBOUND_ALLOWLIST"
+    | "WEBHOOK_URL"
+    | "REACTIVATION_ENABLED"
+    | "REACTIVATION_ALLOWLIST_ONLY",
 ) {
   return readOverride(key) ?? process.env[key];
 }
@@ -132,7 +137,9 @@ export const config = {
     get enabled() {
       return bool(setting("REACTIVATION_ENABLED"), false);
     },
-    allowlistOnly: bool(process.env.REACTIVATION_ALLOWLIST_ONLY, true),
+    get allowlistOnly() {
+      return bool(setting("REACTIVATION_ALLOWLIST_ONLY"), true);
+    },
     requiredStage: "maybeFuture",
     requiredTreatment: "implant",
     /** Inclusive enquiry floor (YYYY-MM-DD, Europe/London). */
