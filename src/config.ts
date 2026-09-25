@@ -3,7 +3,9 @@ import path from "node:path";
 import { readOverride } from "./runtime-settings.js";
 
 /** A runtime override if one is stored, otherwise the environment. */
-function setting(key: "OUTBOUND_ENABLED" | "OUTBOUND_ALLOWLIST" | "WEBHOOK_URL") {
+function setting(
+  key: "OUTBOUND_ENABLED" | "OUTBOUND_ALLOWLIST" | "WEBHOOK_URL" | "REACTIVATION_ENABLED",
+) {
   return readOverride(key) ?? process.env[key];
 }
 
@@ -128,7 +130,7 @@ export const config = {
    */
   reactivation: {
     get enabled() {
-      return bool(process.env.REACTIVATION_ENABLED, false);
+      return bool(setting("REACTIVATION_ENABLED"), false);
     },
     allowlistOnly: bool(process.env.REACTIVATION_ALLOWLIST_ONLY, true),
     requiredStage: "maybeFuture",
