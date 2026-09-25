@@ -85,6 +85,7 @@ export function normalizePatient(patient: LeadfloPatient): NormalizedLead | null
     labels: (patient.labels || []).map(String),
     isTestName: isTestName(fullName),
     scrapedAt: new Date().toISOString(),
+    enquiredAt: patient.created_at ? String(patient.created_at) : null,
     raw: { patient },
   };
 }

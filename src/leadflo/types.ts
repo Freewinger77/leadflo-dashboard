@@ -35,6 +35,7 @@ export interface LeadfloPatient {
   labels?: string[];
   stage?: string | null;
   gdpr?: boolean | null;
+  created_at?: string | null;
   [key: string]: unknown;
 }
 
@@ -52,6 +53,8 @@ export interface NormalizedLead {
   labels: string[];
   isTestName: boolean;
   scrapedAt: string;
+  /** Leadflo created_at / enquiry date when we already have it. */
+  enquiredAt?: string | null;
   raw?: unknown;
 }
 

@@ -1,0 +1,164 @@
+{
+  "name": "Dental Aesthetica — Implant reactivation (INACTIVE)",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/London"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Do not activate. Claims from /api/reactivation/* only. Feeder must have REACTIVATION_ENABLED and discard_reason filled. Replies stay on existing WF-2. Does not change Leadflo stage."
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Implant reactivation — INACTIVE\n\nDo not turn this on until DA confirms the discard-reason list and a test to our number has been approved.\n\nFeeder: `https://dental-asthetica.wasup.co/api/reactivation/*`\nWindow: 18:00–21:00 UK, every day including weekends.\n10 new people/day. One follow-up after 7 days (extra to the 10).\nCopy is on the feeder — send `message` verbatim.\nReplies: existing inbound Poppy (WF-2). Do not change Leadflo stage.\nCurrent WF-1 is not used by this workflow.",
+        "height": 320,
+        "width": 560
+      },
+      "id": "rx-note",
+      "name": "Read me",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-720, -200]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18-20 * * *"
+            }
+          ]
+        }
+      },
+      "id": "rx-schedule",
+      "name": "18:00–21:00 UK",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-720, 160],
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "rx-manual",
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-720, 360]
+    },
+    {
+      "parameters": {
+        "jsCode": "const DRY_RUN = true;\nconst SEND_ENABLED = false;\nconst KIND = 'first';\nreturn [{\n  json: {\n    dryRun: DRY_RUN,\n    sendEnabled: SEND_ENABLED,\n    kind: KIND,\n    limit: 10,\n    feederBase: 'https://dental-asthetica.wasup.co',\n    wasupSendUrl: 'https://wasup01.northeurope.cloudapp.azure.com/api/send',\n    practiceNumber: '447305336846'\n  }\n}];"
+      },
+      "id": "rx-config",
+      "name": "Run config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-480, 260]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.feederBase }}/api/reactivation/candidates?kind={{ $json.kind }}&limit={{ $json.limit }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-WF1-Key", "value": "SET_ON_IMPORT" }
+          ]
+        },
+        "options": {
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "id": "rx-preview",
+      "name": "Preview candidates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-240, 160]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dry-1",
+              "leftValue": "={{ $json.dryRun === true || $json.sendEnabled !== true }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "rx-is-dry",
+      "name": "Is dry run?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-240, 360]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Run config').first().json.feederBase }}/api/reactivation/claim",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-WF1-Key", "value": "SET_ON_IMPORT" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ kind: $json.kind, limit: $json.limit }) }}",
+        "options": {
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "id": "rx-claim",
+      "name": "Claim batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Run config').first().json;\nconst payload = $input.first().json || {};\nconst selection = payload.selection || payload;\nconst selected = selection.selected || [];\nif (!selected.length) {\n  return [{ json: { empty: true, reason: payload.reason || 'no eligible candidates', batchId: payload.batchId || null } }];\n}\nreturn selected.map((lead) => ({\n  json: {\n    ...lead,\n    message: lead.message,\n    batchId: payload.batchId,\n    kind: lead.kind || cfg.kind,\n    dryRun: cfg.dryRun,\n    sendEnabled: cfg.sendEnabled,\n    feederBase: cfg.feederBase,\n    wasupSendUrl: cfg.wasupSendUrl,\n    practiceNumber: cfg.practiceNumber\n  }\n}));"
+      },
+      "id": "rx-normalize",
+      "name": "Normalize batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 260]
+    }
+  ],
+  "connections": {
+    "18:00–21:00 UK": {
+      "main": [[{ "node": "Run config", "type": "main", "index": 0 }]]
+    },
+    "Run manually": {
+      "main": [[{ "node": "Run config", "type": "main", "index": 0 }]]
+    },
+    "Run config": {
+      "main": [[{ "node": "Is dry run?", "type": "main", "index": 0 }]]
+    },
+    "Is dry run?": {
+      "main": [
+        [{ "node": "Preview candidates", "type": "main", "index": 0 }],
+        [{ "node": "Claim batch", "type": "main", "index": 0 }]
+      ]
+    },
+    "Preview candidates": {
+      "main": [[{ "node": "Normalize batch", "type": "main", "index": 0 }]]
+    },
+    "Claim batch": {
+      "main": [[{ "node": "Normalize batch", "type": "main", "index": 0 }]]
+    }
+  }
+}
