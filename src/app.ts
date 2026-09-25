@@ -21,6 +21,7 @@ import {
 import {
   claimReactivation,
   importDiscardReasons,
+  importReactivationPeople,
   parseKind,
   selectReactivation,
 } from "./services/reactivation.js";
@@ -602,6 +603,28 @@ export function createApp(deps: AppDeps): Express {
       released,
     });
     res.json({ ok: true, released });
+  });
+
+  /** Load the oldest-100 Losses pool. Does not webhook, claim, or send. */
+  app.post("/api/reactivation/import", (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const rows = Array.isArray(req.body?.people)
+      ? req.body.people
+      : Array.isArray(req.body)
+        ? req.body
+        : [];
+    if (!rows.length) {
+      res.status(400).json({ ok: false, error: "people[] is required" });
+      return;
+    }
+    const result = importReactivationPeople(store, rows);
+    store.logEvent(
+      "reactivation.imported",
+      `Imported ${result.created} new reactivation lead(s), ${result.updated} updated, ${result.skipped} skipped`,
+      null,
+      result,
+    );
+    res.json({ ok: true, ...result });
   });
 
   /** Fill discard_reason from a DA export. Does not send or claim. */

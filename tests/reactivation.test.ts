@@ -25,6 +25,7 @@ const {
   firstMessage,
   followupMessage,
   importDiscardReasons,
+  importReactivationPeople,
   selectReactivation,
 } = await import("../src/services/reactivation.js");
 const { config } = await import("../src/config.js");
@@ -217,6 +218,42 @@ describe("reactivation candidate selection", () => {
       replied.skipped.find((s) => s.patientId === "ready")?.reason,
       "patient already replied",
     );
+  });
+
+  it("imports a Losses row without touching an existing live lead", () => {
+    store.upsertScrapedLead(
+      lead({
+        patientId: "already-working",
+        stage: "working",
+        phone: "+447700900099",
+        enquiredAt: "2026-01-01T10:00:00.000Z",
+      }),
+    );
+    const result = importReactivationPeople(store, [
+      {
+        patientId: "import-new",
+        name: "Samaira Aslam",
+        phone: "+447950202525",
+        enquiredAt: "2025-09-26T03:13:05.000+00:00",
+      },
+      {
+        patientId: "already-working",
+        name: "Should Not Overwrite",
+        phone: "+447700900098",
+        enquiredAt: "2025-09-26T03:13:05.000+00:00",
+      },
+      { name: "no id" },
+    ]);
+    assert.equal(result.created, 1);
+    assert.equal(result.updated, 0);
+    assert.equal(result.skipped, 2);
+    const created = store.getLead("import-new");
+    assert.equal(created?.stage, "maybeFuture");
+    assert.equal(created?.treatment_type, "Implant");
+    assert.equal(created?.first_name, "Samaira");
+    assert.ok(created?.enquired_at);
+    assert.equal(store.getLead("already-working")?.stage, "working");
+    assert.equal(store.getLead("already-working")?.full_name, "Sam already-working");
   });
 
   it("imports the reason onto a known lead", () => {

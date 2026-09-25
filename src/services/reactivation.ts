@@ -353,6 +353,72 @@ export function parseKind(value: unknown): ReactivationKind {
   return String(value ?? "first") === "followup" ? "followup" : "first";
 }
 
+function splitName(name: string): { firstName: string; lastName: string; fullName: string } {
+  const fullName = String(name ?? "").trim();
+  const parts = fullName.split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] ?? "",
+    lastName: parts.slice(1).join(" "),
+    fullName,
+  };
+}
+
+/**
+ * Upsert a Losses-export pool into SQLite. No webhook, no claim, no send.
+ * Existing rows keep their stage and outbound history; only a missing
+ * enquiry date is filled in.
+ */
+export function importReactivationPeople(
+  store: Store,
+  rows: Array<{
+    patientId?: string;
+    name?: string;
+    phone?: string;
+    enquiredAt?: string;
+  }>,
+): { created: number; updated: number; skipped: number } {
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+  for (const row of rows) {
+    const patientId = String(row.patientId ?? "").trim();
+    if (!patientId) {
+      skipped += 1;
+      continue;
+    }
+    const existing = store.getLead(patientId);
+    const enquiredAt = String(row.enquiredAt ?? "").trim() || null;
+    if (existing) {
+      if (!existing.enquired_at && enquiredAt) {
+        store.setEnquiryDate(patientId, enquiredAt);
+        updated += 1;
+      } else {
+        skipped += 1;
+      }
+      continue;
+    }
+    const names = splitName(row.name ?? "");
+    store.upsertScrapedLead({
+      patientId,
+      firstName: names.firstName,
+      lastName: names.lastName,
+      fullName: names.fullName || patientId,
+      phone: String(row.phone ?? ""),
+      email: "",
+      treatmentType: "Implant",
+      source: "reactivation-import",
+      stage: config.reactivation.requiredStage,
+      dueDate: null,
+      labels: [],
+      isTestName: false,
+      scrapedAt: new Date().toISOString(),
+      enquiredAt,
+    });
+    created += 1;
+  }
+  return { created, updated, skipped };
+}
+
 export function importDiscardReasons(
   store: Store,
   rows: Array<{ patientId?: string; phone?: string; reason?: string }>,
