@@ -103,10 +103,13 @@ http://USER:PASSWORD@HOST:PORT
 
 | Field | Value |
 |-------|--------|
-| Host | `195.40.128.249` |
-| Port | `6969` |
+| Host | `212.212.19.47` |
+| Port | `6198` |
 | User | `rktwwipc` |
 | Pass | `baq3spf64bhx` |
+| Exit | London, GB (Code 200) |
+
+Also working (same user/pass) if this one dies: `212.212.19.110:6261`, `87.86.25.92:5243`. The `195.40.*` Glide exits in the Webshare list were returning **407** as of 22 Oct 2026.
 
 ### How to swap the proxy
 

@@ -9,11 +9,11 @@ on:
       host:
         description: "Proxy host"
         required: true
-        default: "195.40.128.249"
+        default: "212.212.19.47"
       port:
         description: "Proxy port"
         required: true
-        default: "6969"
+        default: "6198"
       user:
         description: "Proxy username"
         required: true
@@ -43,8 +43,8 @@ env:
   AZURE_WEBAPP_NAME: dental-asthetica
   AZURE_RESOURCE_GROUP: rapidspec-rg
   # Defaults used on path-push trigger (swap here when rotating proxies).
-  PROXY_HOST: "195.40.128.249"
-  PROXY_PORT: "6969"
+  PROXY_HOST: "212.212.19.47"
+  PROXY_PORT: "6198"
   PROXY_USER: "rktwwipc"
   PROXY_PASS: "baq3spf64bhx"
 
@@ -61,8 +61,8 @@ jobs:
 
       - name: Write proxy + probe + restart
         env:
-          IN_HOST: ${{ inputs.host || '195.40.128.249' }}
-          IN_PORT: ${{ inputs.port || '6969' }}
+          IN_HOST: ${{ inputs.host || '212.212.19.47' }}
+          IN_PORT: ${{ inputs.port || '6198' }}
           IN_USER: ${{ inputs.user || 'rktwwipc' }}
           IN_PASS: ${{ inputs.password || 'baq3spf64bhx' }}
         run: |
