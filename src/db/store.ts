@@ -88,7 +88,7 @@ export interface TrackedLeadRow {
  * "did we hand this lead to a webhook". A lead can be webhook_sent and still
  * never have been messaged.
  */
-export type OutboundStatus = "locked" | "sent" | "failed" | "opted_out";
+export type OutboundStatus = "locked" | "sent" | "failed" | "skipped" | "opted_out";
 export type ReactivationStatus = "locked" | "sent" | "failed" | "opted_out";
 export type ReactivationKind = "first" | "followup";
 
@@ -864,7 +864,7 @@ export class Store {
     patientId: string,
     result: {
       batchId: string;
-      status: Extract<OutboundStatus, "sent" | "failed">;
+      status: Extract<OutboundStatus, "sent" | "failed" | "skipped">;
       msisdn?: string;
       message?: string | null;
       providerMessageId?: string | null;
@@ -972,7 +972,10 @@ export class Store {
    */
   listContactedPatientIds(): Set<string> {
     const rows = this.db
-      .prepare(`SELECT DISTINCT patient_id FROM outbound_dispatches WHERE status = 'sent'`)
+      .prepare(
+        `SELECT DISTINCT patient_id FROM outbound_dispatches
+          WHERE status IN ('sent', 'skipped')`,
+      )
       .all() as Array<{ patient_id: string }>;
     return new Set(rows.map((row) => row.patient_id));
   }
@@ -1011,10 +1014,10 @@ export class Store {
 
       dispatches = this.db
         .prepare(
-          // 'reset' rather than deleted: listContactedPatientIds only counts
-          // 'sent', so this stops blocking without losing the history.
+          // 'reset' rather than deleted: listContactedPatientIds counts
+          // 'sent' and 'skipped', so this stops blocking without losing the history.
           `UPDATE outbound_dispatches SET status = 'reset'
-           WHERE patient_id = ? AND status = 'sent'`,
+           WHERE patient_id = ? AND status IN ('sent', 'skipped')`,
         )
         .run(patientId).changes;
     })();

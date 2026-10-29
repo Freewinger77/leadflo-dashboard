@@ -480,8 +480,8 @@ export function createApp(deps: AppDeps): Express {
       res.status(400).json({ ok: false, error: "batchId and patientId are required" });
       return;
     }
-    if (status !== "sent" && status !== "failed") {
-      res.status(400).json({ ok: false, error: 'status must be "sent" or "failed"' });
+    if (status !== "sent" && status !== "failed" && status !== "skipped") {
+      res.status(400).json({ ok: false, error: 'status must be "sent", "failed", or "skipped"' });
       return;
     }
     if (!store.getLead(patientId)) {
@@ -500,7 +500,7 @@ export function createApp(deps: AppDeps): Express {
       error: req.body?.error ? String(req.body.error) : null,
     });
     store.logEvent(
-      status === "sent" ? "outbound.sent" : "outbound.failed",
+      status === "sent" ? "outbound.sent" : status === "skipped" ? "outbound.skipped" : "outbound.failed",
       `WF-1 ${status} for ${patientId} (batch ${batchId})`,
       patientId,
       { batchId, providerMessageId: req.body?.providerMessageId ?? null },
