@@ -156,6 +156,9 @@ function ineligibleReason(
     return `stage "${row.stage}" is past the contact stages`;
   }
   if (!phone.ok) return phone.reason ?? "unusable phone number";
+  if (row.outbound_status === "skipped") {
+    return "skipped, number already handled";
+  }
   if (row.outbound_status === "sent" || contacted.has(row.patient_id)) {
     return "already contacted";
   }

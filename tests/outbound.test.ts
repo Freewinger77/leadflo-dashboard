@@ -213,6 +213,32 @@ describe("outbound candidate selection", () => {
     assert.equal(next.caps.sentToday, 1);
   });
 
+  it("a skipped result does not use a daily send and is not claimed again", () => {
+    store.upsertScrapedLead(lead({ patientId: "skipped-one", phone: "+447700900111" }));
+    const claim = claimBatch(store, 1);
+    const target = claim.selection.selected[0]!;
+    assert.equal(target.patientId, "skipped-one");
+    store.recordOutboundResult(target.patientId, {
+      batchId: claim.batchId!,
+      status: "skipped",
+      msisdn: target.msisdn,
+      message: "Hi, it's Poppy…",
+      error: "Hard-blocked number — already contacted, skip Wasup",
+    });
+
+    const row = store.getLead(target.patientId)!;
+    assert.equal(row.outbound_status, "skipped");
+    assert.equal(row.outbound_sent_at, null);
+
+    const next = selectCandidates(store, 10);
+    assert.ok(!next.selected.some((c) => c.patientId === target.patientId));
+    assert.equal(
+      next.skipped.find((s) => s.patientId === target.patientId)?.reason,
+      "skipped, number already handled",
+    );
+    assert.equal(next.caps.sentToday, 1);
+  });
+
   it("frees leads whose run crashed without reporting back", () => {
     const claim = claimBatch(store, 1);
     const target = claim.selection.selected[0]!;
