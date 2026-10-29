@@ -113,6 +113,7 @@ jobs:
             --settings \
               NOTES_ONLY_TEST_NAMES=false \
               OUTBOUND_ALLOWLIST_ONLY=false \
+              OUTBOUND_MAX_PER_DAY=10 \
               TRACKED_TREATMENT_TYPES="Implant,Ortho" \
             --output none
           az webapp restart \
