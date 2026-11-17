@@ -13,6 +13,7 @@ import {
 } from "./runtime-settings.js";
 import { applyAiNote } from "./services/notes.js";
 import { ArchiveScraper } from "./services/archive.js";
+import { pullLeadsReceived } from "./services/leads-received.js";
 import {
   claimBatch,
   normalizePhone,
@@ -188,6 +189,25 @@ export function createApp(deps: AppDeps): Express {
       facets: store.leadFacets(),
       stages: ALL_LEADFLO_STAGES,
     });
+  });
+
+  /**
+   * Leads received, for the practice dashboard. Not stored here.
+   * Key-gated: the answer is the whole book, names and numbers included.
+   */
+  app.get("/api/report/leads-received", async (req, res) => {
+    if (!requireOutboundKey(req, res)) return;
+    const from = typeof req.query.from === "string" ? req.query.from : "";
+    const to = typeof req.query.to === "string" ? req.query.to : "";
+    try {
+      const result = await pullLeadsReceived(client, from, to);
+      res.status(result.ok ? 200 : 422).json(result);
+    } catch (err) {
+      res.status(502).json({
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   });
 
   app.get("/api/archive/status", (_req, res) => {
